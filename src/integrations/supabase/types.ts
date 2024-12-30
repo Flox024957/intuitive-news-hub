@@ -9,7 +9,113 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      podcasters: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          profile_picture_url: string | null
+          social_links: Json | null
+          youtube_channel_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          profile_picture_url?: string | null
+          social_links?: Json | null
+          youtube_channel_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          profile_picture_url?: string | null
+          social_links?: Json | null
+          youtube_channel_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          favorite_podcasters: string[] | null
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          favorite_podcasters?: string[] | null
+          id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          favorite_podcasters?: string[] | null
+          id?: string
+        }
+        Relationships: []
+      }
+      videos: {
+        Row: {
+          categories: string[] | null
+          created_at: string
+          custom_title: string | null
+          full_transcript: string | null
+          id: string
+          podcaster_id: string | null
+          published_date: string
+          speakers_list: string[] | null
+          summary: string | null
+          thumbnail_url: string | null
+          title: string
+          video_url: string
+          youtube_video_id: string
+        }
+        Insert: {
+          categories?: string[] | null
+          created_at?: string
+          custom_title?: string | null
+          full_transcript?: string | null
+          id?: string
+          podcaster_id?: string | null
+          published_date: string
+          speakers_list?: string[] | null
+          summary?: string | null
+          thumbnail_url?: string | null
+          title: string
+          video_url: string
+          youtube_video_id: string
+        }
+        Update: {
+          categories?: string[] | null
+          created_at?: string
+          custom_title?: string | null
+          full_transcript?: string | null
+          id?: string
+          podcaster_id?: string | null
+          published_date?: string
+          speakers_list?: string[] | null
+          summary?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          video_url?: string
+          youtube_video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "videos_podcaster_id_fkey"
+            columns: ["podcaster_id"]
+            isOneToOne: false
+            referencedRelation: "podcasters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
