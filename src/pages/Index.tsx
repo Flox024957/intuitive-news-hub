@@ -1,51 +1,77 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { FeaturedVideo } from "@/components/FeaturedVideo";
-import { VideoCard } from "@/components/VideoCard";
+import { VideoGrid } from "@/components/VideoGrid";
 import { CategoryFilter } from "@/components/CategoryFilter";
 import { Navigation } from "@/components/Navigation";
-
-// Temporary mock data
-const featuredVideo = {
-  title: "L'avenir de l'IA : Nouvelles frontières",
-  summary: "Une exploration approfondie de l'impact de l'intelligence artificielle sur la société et de ce que l'avenir réserve à l'humanité.",
-  thumbnail: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop",
-  category: "Technologie",
-};
-
-const videos = Array(8).fill({
-  title: "Comprendre les tendances économiques mondiales",
-  summary: "Une analyse complète des modèles économiques actuels et leurs implications pour l'avenir.",
-  thumbnail: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=2070&auto=format&fit=crop",
-  category: "Économie",
-  date: "2024-02-20",
-});
+import { SearchBar } from "@/components/SearchBar";
+import { SortOptions, type SortOption } from "@/components/SortOptions";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortOption, setSortOption] = useState<SortOption>("recent");
+
+  // Fetch videos with their podcaster information
+  const { data: videos, isLoading } = useQuery({
+    queryKey: ["videos"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("videos")
+        .select(`
+          *,
+          podcaster:podcasters(*)
+        `)
+        .order("published_date", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Get the most recent video for the featured section
+  const featuredVideo = videos?.[0];
 
   return (
     <>
       <Navigation />
       <div className="min-h-screen container py-8 space-y-8 animate-fade-up mt-16">
-        <FeaturedVideo {...featuredVideo} />
+        {featuredVideo && (
+          <FeaturedVideo
+            title={featuredVideo.custom_title || featuredVideo.title}
+            summary={featuredVideo.summary || ""}
+            thumbnail={featuredVideo.thumbnail_url || ""}
+            category={featuredVideo.categories?.[0] || "Actualités"}
+          />
+        )}
         
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between">
             <h2 className="text-2xl font-bold">Dernières vidéos</h2>
-            <CategoryFilter
-              selected={selectedCategory}
-              onSelect={setSelectedCategory}
-            />
-          </div>
-          
-          <div className="content-grid">
-            {videos.map((video, index) => (
-              <VideoCard
-                key={index}
-                {...video}
+            <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+              <div className="flex-1 md:w-64">
+                <SearchBar
+                  searchTerm={searchTerm}
+                  onSearchChange={setSearchTerm}
+                />
+              </div>
+              <CategoryFilter
+                selected={selectedCategory}
+                onSelect={setSelectedCategory}
               />
-            ))}
+            </div>
           </div>
+
+          <SortOptions selected={sortOption} onSelect={setSortOption} />
+          
+          <VideoGrid
+            videos={videos}
+            isLoading={isLoading}
+            searchTerm={searchTerm}
+            selectedCategory={selectedCategory}
+            sortOption={sortOption}
+          />
         </div>
       </div>
     </>

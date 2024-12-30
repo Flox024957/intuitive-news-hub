@@ -15,6 +15,26 @@ interface VideoGridProps {
 }
 
 export function VideoGrid({ videos, isLoading, searchTerm, selectedCategory, sortOption }: VideoGridProps) {
+  if (isLoading) {
+    return (
+      <div className="content-grid">
+        {Array.from({ length: 8 }).map((_, index) => (
+          <div
+            key={index}
+            className="glass-card animate-pulse rounded-lg overflow-hidden"
+          >
+            <div className="aspect-video bg-secondary/50" />
+            <div className="p-4 space-y-3">
+              <div className="h-4 bg-secondary/50 rounded w-1/4" />
+              <div className="h-6 bg-secondary/50 rounded w-3/4" />
+              <div className="h-4 bg-secondary/50 rounded w-2/3" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   const filteredVideos = videos?.filter(video => {
     const matchesSearch = searchTerm === '' || 
       video.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -39,14 +59,6 @@ export function VideoGrid({ videos, isLoading, searchTerm, selectedCategory, sor
         return 0;
     }
   });
-
-  if (isLoading) {
-    return (
-      <div className="text-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-      </div>
-    );
-  }
 
   if (!sortedVideos?.length) {
     return (
