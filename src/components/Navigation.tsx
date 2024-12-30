@@ -17,6 +17,7 @@ export function Navigation() {
             <Button
               variant={location.pathname === "/" ? "default" : "ghost"}
               asChild
+              className="relative group"
             >
               <Link to="/" className="flex items-center space-x-2">
                 <Home className="w-4 h-4" />
@@ -27,6 +28,7 @@ export function Navigation() {
             <Button
               variant={location.pathname === "/personal" ? "default" : "ghost"}
               asChild
+              className="relative group"
             >
               <Link to="/personal" className="flex items-center space-x-2">
                 <User className="w-4 h-4" />
