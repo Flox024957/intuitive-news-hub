@@ -10,12 +10,16 @@ import { PodcasterGrid } from "@/components/PodcasterGrid";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Play, Users, TrendingUp, Sparkles } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 
 const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("recent");
+  const { scrollY } = useScroll();
+  
+  const headerOpacity = useTransform(scrollY, [0, 200], [1, 0]);
+  const headerScale = useTransform(scrollY, [0, 200], [1, 0.95]);
 
   const { data: videos, isLoading } = useQuery({
     queryKey: ["videos"],
@@ -57,114 +61,133 @@ const Index = () => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
-          className="min-h-screen container py-8 space-y-8 mt-16"
+          className="min-h-screen"
         >
           {featuredVideo && (
             <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="relative"
+              style={{ opacity: headerOpacity, scale: headerScale }}
+              className="relative w-full h-[80vh] overflow-hidden"
             >
-              <FeaturedVideo
-                title={featuredVideo.custom_title || featuredVideo.title}
-                summary={featuredVideo.summary || ""}
-                thumbnail={featuredVideo.thumbnail_url || ""}
-                category={featuredVideo.categories?.[0] || "Actualités"}
+              <div className="absolute inset-0 bg-gradient-to-b from-background/0 via-background/60 to-background" />
+              <motion.img
+                src={featuredVideo.thumbnail_url}
+                alt={featuredVideo.title}
+                className="absolute inset-0 w-full h-full object-cover"
+                initial={{ scale: 1.1 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.8 }}
               />
+              <div className="container relative z-10 h-full flex items-end pb-20">
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
+                  className="max-w-3xl space-y-6"
+                >
+                  <FeaturedVideo
+                    title={featuredVideo.custom_title || featuredVideo.title}
+                    summary={featuredVideo.summary || ""}
+                    thumbnail={featuredVideo.thumbnail_url || ""}
+                    category={featuredVideo.categories?.[0] || "Actualités"}
+                  />
+                </motion.div>
+              </div>
             </motion.div>
           )}
           
-          <Tabs defaultValue="videos" className="space-y-6">
-            <TabsList className="w-full max-w-md mx-auto glass-card">
-              <TabsTrigger value="videos" className="flex items-center gap-2 flex-1">
-                <Play className="w-4 h-4" />
-                <span>Vidéos</span>
-              </TabsTrigger>
-              <TabsTrigger value="trending" className="flex items-center gap-2 flex-1">
-                <TrendingUp className="w-4 h-4" />
-                <span>Tendances</span>
-              </TabsTrigger>
-              <TabsTrigger value="podcasters" className="flex items-center gap-2 flex-1">
-                <Users className="w-4 h-4" />
-                <span>Podcasters</span>
-              </TabsTrigger>
-            </TabsList>
+          <div className="container py-8 space-y-8">
+            <Tabs defaultValue="videos" className="space-y-6">
+              <TabsList className="w-full max-w-md mx-auto glass-card">
+                <TabsTrigger value="videos" className="flex items-center gap-2 flex-1">
+                  <Play className="w-4 h-4" />
+                  <span>Vidéos</span>
+                </TabsTrigger>
+                <TabsTrigger value="trending" className="flex items-center gap-2 flex-1">
+                  <TrendingUp className="w-4 h-4" />
+                  <span>Tendances</span>
+                </TabsTrigger>
+                <TabsTrigger value="podcasters" className="flex items-center gap-2 flex-1">
+                  <Users className="w-4 h-4" />
+                  <span>Podcasters</span>
+                </TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="videos" className="space-y-6">
-              <motion.div 
-                className="flex flex-col md:flex-row gap-4 md:items-center justify-between"
-                initial={{ x: -20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-              >
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-6 h-6 text-primary" />
-                  <h2 className="text-2xl font-bold">Dernières vidéos</h2>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-                  <div className="flex-1 md:w-64">
-                    <SearchBar
-                      searchTerm={searchTerm}
-                      onSearchChange={setSearchTerm}
+              <TabsContent value="videos" className="space-y-6">
+                <motion.div 
+                  className="flex flex-col md:flex-row gap-4 md:items-center justify-between glass-card p-6 rounded-lg"
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-6 h-6 text-primary animate-pulse" />
+                    <h2 className="text-2xl font-bold">Dernières vidéos</h2>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+                    <div className="flex-1 md:w-64">
+                      <SearchBar
+                        searchTerm={searchTerm}
+                        onSearchChange={setSearchTerm}
+                      />
+                    </div>
+                    <CategoryFilter
+                      selected={selectedCategory}
+                      onSelect={setSelectedCategory}
                     />
                   </div>
-                  <CategoryFilter
-                    selected={selectedCategory}
-                    onSelect={setSelectedCategory}
-                  />
-                </div>
-              </motion.div>
+                </motion.div>
 
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.4 }}
-              >
-                <SortOptions selected={sortOption} onSelect={setSortOption} />
-              </motion.div>
-              
-              <VideoGrid
-                videos={videos}
-                isLoading={isLoading}
-                searchTerm={searchTerm}
-                selectedCategory={selectedCategory}
-                sortOption={sortOption}
-              />
-            </TabsContent>
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="glass-card p-4 rounded-lg"
+                >
+                  <SortOptions selected={sortOption} onSelect={setSortOption} />
+                </motion.div>
+                
+                <VideoGrid
+                  videos={videos}
+                  isLoading={isLoading}
+                  searchTerm={searchTerm}
+                  selectedCategory={selectedCategory}
+                  sortOption={sortOption}
+                />
+              </TabsContent>
 
-            <TabsContent value="trending" className="space-y-6">
-              <motion.div 
-                initial={{ x: -20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                className="flex items-center gap-2"
-              >
-                <TrendingUp className="w-6 h-6 text-primary" />
-                <h2 className="text-2xl font-bold">Vidéos tendances</h2>
-              </motion.div>
-              <VideoGrid
-                videos={trendingVideos}
-                isLoading={isLoading}
-                searchTerm=""
-                selectedCategory="All"
-                sortOption="popular"
-              />
-            </TabsContent>
+              <TabsContent value="trending" className="space-y-6">
+                <motion.div 
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  className="flex items-center gap-2 glass-card p-6 rounded-lg"
+                >
+                  <TrendingUp className="w-6 h-6 text-primary animate-pulse" />
+                  <h2 className="text-2xl font-bold">Vidéos tendances</h2>
+                </motion.div>
+                <VideoGrid
+                  videos={trendingVideos}
+                  isLoading={isLoading}
+                  searchTerm=""
+                  selectedCategory="All"
+                  sortOption="popular"
+                />
+              </TabsContent>
 
-            <TabsContent value="podcasters">
-              <motion.div 
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                className="space-y-6"
-              >
-                <div className="flex items-center gap-2">
-                  <Users className="w-6 h-6 text-primary" />
-                  <h2 className="text-2xl font-bold">Nos podcasters</h2>
-                </div>
-                <PodcasterGrid />
-              </motion.div>
-            </TabsContent>
-          </Tabs>
+              <TabsContent value="podcasters" className="space-y-6">
+                <motion.div 
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  className="space-y-6"
+                >
+                  <div className="flex items-center gap-2 glass-card p-6 rounded-lg">
+                    <Users className="w-6 h-6 text-primary animate-pulse" />
+                    <h2 className="text-2xl font-bold">Nos podcasters</h2>
+                  </div>
+                  <PodcasterGrid />
+                </motion.div>
+              </TabsContent>
+            </Tabs>
+          </div>
         </motion.div>
       </AnimatePresence>
     </div>
