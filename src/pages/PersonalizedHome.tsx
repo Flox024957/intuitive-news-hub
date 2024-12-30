@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { Navigation } from "@/components/Navigation";
 import { FeaturedVideo } from "@/components/FeaturedVideo";
 import { VideoCard } from "@/components/VideoCard";
 import { CategoryFilter } from "@/components/CategoryFilter";
+import { Bookmark, Clock, TrendingUp } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const PersonalizedHome = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -23,28 +26,96 @@ const PersonalizedHome = () => {
   });
 
   return (
-    <div className="min-h-screen container py-8 space-y-8 animate-fade-up">
-      <h1 className="text-3xl font-bold mb-6">Ma page personnalisée</h1>
-      <FeaturedVideo {...featuredVideo} />
+    <div className="min-h-screen bg-background">
+      <Navigation />
       
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Mes vidéos favorites</h2>
-          <CategoryFilter
-            selected={selectedCategory}
-            onSelect={setSelectedCategory}
-          />
+      <main className="container py-20 space-y-8 animate-fade-up">
+        <div className="space-y-4">
+          <h1 className="text-4xl font-bold text-gradient">Ma page personnalisée</h1>
+          <p className="text-muted-foreground">
+            Retrouvez ici vos contenus favoris et personnalisés
+          </p>
         </div>
+
+        <FeaturedVideo {...featuredVideo} />
         
-        <div className="content-grid">
-          {favoriteVideos.map((video, index) => (
-            <VideoCard
-              key={index}
-              {...video}
-            />
-          ))}
-        </div>
-      </div>
+        <Tabs defaultValue="favorites" className="space-y-6">
+          <TabsList className="grid w-full max-w-md grid-cols-3 mb-8">
+            <TabsTrigger value="favorites" className="space-x-2">
+              <Bookmark className="w-4 h-4" />
+              <span>Favoris</span>
+            </TabsTrigger>
+            <TabsTrigger value="recent" className="space-x-2">
+              <Clock className="w-4 h-4" />
+              <span>Récents</span>
+            </TabsTrigger>
+            <TabsTrigger value="trending" className="space-x-2">
+              <TrendingUp className="w-4 h-4" />
+              <span>Tendances</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="favorites" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold">Mes vidéos favorites</h2>
+              <CategoryFilter
+                selected={selectedCategory}
+                onSelect={setSelectedCategory}
+              />
+            </div>
+            
+            <div className="content-grid">
+              {favoriteVideos.map((video, index) => (
+                <VideoCard
+                  key={index}
+                  {...video}
+                  className="hover-card glass-card"
+                />
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="recent" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold">Vidéos récentes</h2>
+              <CategoryFilter
+                selected={selectedCategory}
+                onSelect={setSelectedCategory}
+              />
+            </div>
+            
+            <div className="content-grid">
+              {favoriteVideos.map((video, index) => (
+                <VideoCard
+                  key={index}
+                  {...video}
+                  className="hover-card glass-card"
+                />
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="trending" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold">Tendances</h2>
+              <CategoryFilter
+                selected={selectedCategory}
+                onSelect={setSelectedCategory}
+              />
+            </div>
+            
+            <div className="content-grid">
+              {favoriteVideos.map((video, index) => (
+                <VideoCard
+                  key={index}
+                  {...video}
+                  className="hover-card glass-card"
+                />
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </main>
     </div>
   );
 };
