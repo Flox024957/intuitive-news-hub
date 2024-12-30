@@ -60,6 +60,44 @@ export type Database = {
         }
         Relationships: []
       }
+      video_stats: {
+        Row: {
+          created_at: string | null
+          id: string
+          like_count: number | null
+          share_count: number | null
+          updated_at: string | null
+          video_id: string
+          view_count: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          like_count?: number | null
+          share_count?: number | null
+          updated_at?: string | null
+          video_id: string
+          view_count?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          like_count?: number | null
+          share_count?: number | null
+          updated_at?: string | null
+          video_id?: string
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_stats_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       videos: {
         Row: {
           categories: string[] | null
@@ -121,7 +159,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_view_count: {
+        Args: {
+          video_id_param: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

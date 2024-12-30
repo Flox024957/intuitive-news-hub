@@ -4,6 +4,7 @@ import { type SortOption } from "@/components/SortOptions";
 
 type Video = Database['public']['Tables']['videos']['Row'] & {
   podcaster: Database['public']['Tables']['podcasters']['Row'];
+  stats?: Database['public']['Tables']['video_stats']['Row'];
 };
 
 interface VideoGridProps {
@@ -53,8 +54,9 @@ export function VideoGrid({ videos, isLoading, searchTerm, selectedCategory, sor
       case "oldest":
         return new Date(a.published_date).getTime() - new Date(b.published_date).getTime();
       case "popular":
-        // Pour l'instant, on trie par date en attendant d'avoir une métrique de popularité
-        return new Date(b.published_date).getTime() - new Date(a.published_date).getTime();
+        const aViews = a.stats?.view_count || 0;
+        const bViews = b.stats?.view_count || 0;
+        return bViews - aViews;
       default:
         return 0;
     }
@@ -79,6 +81,7 @@ export function VideoGrid({ videos, isLoading, searchTerm, selectedCategory, sor
           thumbnail={video.thumbnail_url || ""}
           category={video.categories?.[0] || "Actualités"}
           date={new Date(video.published_date).toLocaleDateString()}
+          viewCount={video.stats?.view_count}
         />
       ))}
     </div>

@@ -5,9 +5,12 @@ import { CategoryFilter } from "@/components/CategoryFilter";
 import { SortOptions, type SortOption } from "@/components/SortOptions";
 import { VideoGrid } from "@/components/VideoGrid";
 import { type Database } from "@/integrations/supabase/types";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 type Video = Database['public']['Tables']['videos']['Row'] & {
   podcaster: Database['public']['Tables']['podcasters']['Row'];
+  stats?: Database['public']['Tables']['video_stats']['Row'];
 };
 
 interface PersonalizedTabsProps {
@@ -31,6 +34,35 @@ export function PersonalizedTabs({
   sortOption,
   setSortOption,
 }: PersonalizedTabsProps) {
+  const { data: trendingVideos, isLoading: isTrendingLoading } = useQuery({
+    queryKey: ['trendingVideos'],
+    queryFn: async () => {
+      const { data: videoStats } = await supabase
+        .from('video_stats')
+        .select('*')
+        .order('view_count', { ascending: false })
+        .limit(20);
+
+      if (!videoStats?.length) return [];
+
+      const videoIds = videoStats.map(stat => stat.video_id);
+      
+      const { data: videos } = await supabase
+        .from('videos')
+        .select(`
+          *,
+          podcaster:podcasters(*)
+        `)
+        .in('id', videoIds);
+
+      return videos?.map(video => ({
+        ...video,
+        stats: videoStats.find(stat => stat.video_id === video.id),
+      })) || [];
+    },
+    enabled: true,
+  });
+
   return (
     <Tabs defaultValue="recent" className="space-y-6">
       <TabsList className="grid w-full max-w-md grid-cols-3 mb-8">
@@ -72,8 +104,8 @@ export function PersonalizedTabs({
           </div>
           
           <VideoGrid
-            videos={videos}
-            isLoading={isLoading}
+            videos={tab === 'trending' ? trendingVideos : videos}
+            isLoading={tab === 'trending' ? isTrendingLoading : isLoading}
             searchTerm={searchTerm}
             selectedCategory={selectedCategory}
             sortOption={sortOption}

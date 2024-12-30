@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Play } from "lucide-react";
+import { Play, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ShareButtons } from "@/components/ShareButtons";
 
@@ -11,9 +11,18 @@ interface VideoCardProps {
   thumbnail: string;
   category: string;
   date: string;
+  viewCount?: number;
 }
 
-export function VideoCard({ id, title, summary, thumbnail, category, date }: VideoCardProps) {
+export function VideoCard({ 
+  id, 
+  title, 
+  summary, 
+  thumbnail, 
+  category, 
+  date,
+  viewCount 
+}: VideoCardProps) {
   const videoUrl = `${window.location.origin}/video/${id}`;
   
   return (
@@ -37,6 +46,12 @@ export function VideoCard({ id, title, summary, thumbnail, category, date }: Vid
             {category}
           </Badge>
           <span className="text-xs text-muted-foreground">{date}</span>
+          {viewCount !== undefined && (
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <Eye className="w-3 h-3" />
+              {viewCount}
+            </span>
+          )}
           <ShareButtons title={title} url={videoUrl} />
         </div>
         <Link to={`/video/${id}`}>
