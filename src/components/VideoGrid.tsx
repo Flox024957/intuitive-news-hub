@@ -1,6 +1,7 @@
 import { VideoCard } from "@/components/VideoCard";
 import { type Database } from "@/integrations/supabase/types";
 import { type SortOption } from "@/components/SortOptions";
+import { motion } from "framer-motion";
 
 type Video = Database['public']['Tables']['videos']['Row'] & {
   podcaster: Database['public']['Tables']['podcasters']['Row'];
@@ -20,8 +21,11 @@ export function VideoGrid({ videos, isLoading, searchTerm, selectedCategory, sor
     return (
       <div className="content-grid">
         {Array.from({ length: 8 }).map((_, index) => (
-          <div
+          <motion.div
             key={index}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: index * 0.1 }}
             className="glass-card animate-pulse rounded-lg overflow-hidden"
           >
             <div className="aspect-video bg-secondary/50" />
@@ -30,7 +34,7 @@ export function VideoGrid({ videos, isLoading, searchTerm, selectedCategory, sor
               <div className="h-6 bg-secondary/50 rounded w-3/4" />
               <div className="h-4 bg-secondary/50 rounded w-2/3" />
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     );
@@ -64,25 +68,35 @@ export function VideoGrid({ videos, isLoading, searchTerm, selectedCategory, sor
 
   if (!sortedVideos?.length) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center py-8 text-muted-foreground"
+      >
         Aucune vidéo ne correspond à votre recherche
-      </div>
+      </motion.div>
     );
   }
 
   return (
     <div className="content-grid">
-      {sortedVideos.map((video) => (
-        <VideoCard
+      {sortedVideos.map((video, index) => (
+        <motion.div
           key={video.id}
-          id={video.id}
-          title={video.custom_title || video.title}
-          summary={video.summary || ""}
-          thumbnail={video.thumbnail_url || ""}
-          category={video.categories?.[0] || "Actualités"}
-          date={new Date(video.published_date).toLocaleDateString()}
-          viewCount={video.stats?.view_count}
-        />
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: index * 0.1 }}
+        >
+          <VideoCard
+            id={video.id}
+            title={video.custom_title || video.title}
+            summary={video.summary || ""}
+            thumbnail={video.thumbnail_url || ""}
+            category={video.categories?.[0] || "Actualités"}
+            date={new Date(video.published_date).toLocaleDateString()}
+            viewCount={video.stats?.view_count}
+          />
+        </motion.div>
       ))}
     </div>
   );
