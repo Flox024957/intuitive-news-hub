@@ -1,5 +1,6 @@
 import { VideoCard } from "@/components/VideoCard";
 import { type Database } from "@/integrations/supabase/types";
+import { type SortOption } from "@/components/SortOptions";
 
 type Video = Database['public']['Tables']['videos']['Row'] & {
   podcaster: Database['public']['Tables']['podcasters']['Row'];
@@ -10,9 +11,10 @@ interface VideoGridProps {
   isLoading: boolean;
   searchTerm: string;
   selectedCategory: string;
+  sortOption: SortOption;
 }
 
-export function VideoGrid({ videos, isLoading, searchTerm, selectedCategory }: VideoGridProps) {
+export function VideoGrid({ videos, isLoading, searchTerm, selectedCategory, sortOption }: VideoGridProps) {
   const filteredVideos = videos?.filter(video => {
     const matchesSearch = searchTerm === '' || 
       video.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -24,6 +26,20 @@ export function VideoGrid({ videos, isLoading, searchTerm, selectedCategory }: V
     return matchesSearch && matchesCategory;
   });
 
+  const sortedVideos = [...(filteredVideos || [])].sort((a, b) => {
+    switch (sortOption) {
+      case "recent":
+        return new Date(b.published_date).getTime() - new Date(a.published_date).getTime();
+      case "oldest":
+        return new Date(a.published_date).getTime() - new Date(b.published_date).getTime();
+      case "popular":
+        // Pour l'instant, on trie par date en attendant d'avoir une métrique de popularité
+        return new Date(b.published_date).getTime() - new Date(a.published_date).getTime();
+      default:
+        return 0;
+    }
+  });
+
   if (isLoading) {
     return (
       <div className="text-center py-8">
@@ -32,7 +48,7 @@ export function VideoGrid({ videos, isLoading, searchTerm, selectedCategory }: V
     );
   }
 
-  if (!filteredVideos?.length) {
+  if (!sortedVideos?.length) {
     return (
       <div className="text-center py-8 text-muted-foreground">
         Aucune vidéo ne correspond à votre recherche
@@ -42,7 +58,7 @@ export function VideoGrid({ videos, isLoading, searchTerm, selectedCategory }: V
 
   return (
     <div className="content-grid">
-      {filteredVideos.map((video) => (
+      {sortedVideos.map((video) => (
         <VideoCard
           key={video.id}
           title={video.custom_title || video.title}

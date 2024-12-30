@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { FeaturedVideo } from "@/components/FeaturedVideo";
 import { CategoryFilter } from "@/components/CategoryFilter";
+import { SortOptions, type SortOption } from "@/components/SortOptions";
 import { Bookmark, Clock, TrendingUp } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -15,6 +16,7 @@ import { VideoGrid } from "@/components/VideoGrid";
 const PersonalizedHomePage = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
+  const [sortOption, setSortOption] = useState<SortOption>("recent");
   const queryClient = useQueryClient();
 
   const { data: profile, isLoading: isProfileLoading } = useQuery({
@@ -167,6 +169,10 @@ const PersonalizedHomePage = () => {
                       selected={selectedCategory}
                       onSelect={setSelectedCategory}
                     />
+                    <SortOptions
+                      selected={sortOption}
+                      onSelect={setSortOption}
+                    />
                   </div>
                 </div>
                 
@@ -175,6 +181,7 @@ const PersonalizedHomePage = () => {
                   isLoading={isLoading}
                   searchTerm={searchTerm}
                   selectedCategory={selectedCategory}
+                  sortOption={sortOption}
                 />
               </TabsContent>
             ))}
