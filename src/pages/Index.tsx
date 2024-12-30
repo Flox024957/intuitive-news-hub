@@ -9,7 +9,8 @@ import { SortOptions, type SortOption } from "@/components/SortOptions";
 import { PodcasterGrid } from "@/components/PodcasterGrid";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Play, Users } from "lucide-react";
+import { Play, Users, TrendingUp, Clock } from "lucide-react";
+import { motion } from "framer-motion";
 
 const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -19,6 +20,14 @@ const Index = () => {
   const { data: videos, isLoading } = useQuery({
     queryKey: ["videos"],
     queryFn: async () => {
+      const { data: videoStats } = await supabase
+        .from("video_stats")
+        .select("*")
+        .order("view_count", { ascending: false })
+        .limit(20);
+
+      if (!videoStats?.length) return [];
+
       const { data, error } = await supabase
         .from("videos")
         .select(`
@@ -28,32 +37,52 @@ const Index = () => {
         .order("published_date", { ascending: false });
 
       if (error) throw error;
-      return data;
+
+      return data?.map(video => ({
+        ...video,
+        stats: videoStats.find(stat => stat.video_id === video.id)
+      }));
     },
   });
 
   const featuredVideo = videos?.[0];
+  const trendingVideos = videos?.slice(0, 4) || [];
 
   return (
     <>
       <Navigation />
-      <div className="min-h-screen container py-8 space-y-8 animate-fade-up mt-16">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="min-h-screen container py-8 space-y-8 mt-16"
+      >
         {featuredVideo && (
-          <FeaturedVideo
-            title={featuredVideo.custom_title || featuredVideo.title}
-            summary={featuredVideo.summary || ""}
-            thumbnail={featuredVideo.thumbnail_url || ""}
-            category={featuredVideo.categories?.[0] || "Actualités"}
-          />
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+          >
+            <FeaturedVideo
+              title={featuredVideo.custom_title || featuredVideo.title}
+              summary={featuredVideo.summary || ""}
+              thumbnail={featuredVideo.thumbnail_url || ""}
+              category={featuredVideo.categories?.[0] || "Actualités"}
+            />
+          </motion.div>
         )}
         
         <Tabs defaultValue="videos" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="videos" className="flex items-center gap-2">
+          <TabsList className="w-full max-w-md mx-auto">
+            <TabsTrigger value="videos" className="flex items-center gap-2 flex-1">
               <Play className="w-4 h-4" />
               <span>Vidéos</span>
             </TabsTrigger>
-            <TabsTrigger value="podcasters" className="flex items-center gap-2">
+            <TabsTrigger value="trending" className="flex items-center gap-2 flex-1">
+              <TrendingUp className="w-4 h-4" />
+              <span>Tendances</span>
+            </TabsTrigger>
+            <TabsTrigger value="podcasters" className="flex items-center gap-2 flex-1">
               <Users className="w-4 h-4" />
               <span>Podcasters</span>
             </TabsTrigger>
@@ -61,7 +90,14 @@ const Index = () => {
 
           <TabsContent value="videos" className="space-y-6">
             <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between">
-              <h2 className="text-2xl font-bold">Dernières vidéos</h2>
+              <motion.h2 
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="text-2xl font-bold"
+              >
+                Dernières vidéos
+              </motion.h2>
               <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
                 <div className="flex-1 md:w-64">
                   <SearchBar
@@ -87,14 +123,39 @@ const Index = () => {
             />
           </TabsContent>
 
+          <TabsContent value="trending" className="space-y-6">
+            <motion.h2 
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              className="text-2xl font-bold flex items-center gap-2"
+            >
+              <TrendingUp className="w-6 h-6" />
+              Vidéos tendances
+            </motion.h2>
+            <VideoGrid
+              videos={trendingVideos}
+              isLoading={isLoading}
+              searchTerm=""
+              selectedCategory="All"
+              sortOption="popular"
+            />
+          </TabsContent>
+
           <TabsContent value="podcasters">
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold">Nos podcasters</h2>
+              <motion.h2 
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                className="text-2xl font-bold flex items-center gap-2"
+              >
+                <Users className="w-6 h-6" />
+                Nos podcasters
+              </motion.h2>
               <PodcasterGrid />
             </div>
           </TabsContent>
         </Tabs>
-      </div>
+      </motion.div>
     </>
   );
 };
