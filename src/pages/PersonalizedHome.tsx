@@ -8,8 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
-const PersonalizedHome = () => {
+const PersonalizedHomePage = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
 
   // Fetch user's profile and favorite podcasters
@@ -70,10 +71,11 @@ const PersonalizedHome = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      
-      <main className="container py-20 space-y-8 animate-fade-up">
+    <ProtectedRoute>
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        
+        <main className="container py-20 space-y-8 animate-fade-up">
         <div className="space-y-4">
           <h1 className="text-4xl font-bold text-gradient">Ma page personnalisée</h1>
           <p className="text-muted-foreground">
@@ -137,9 +139,10 @@ const PersonalizedHome = () => {
             </TabsContent>
           ))}
         </Tabs>
-      </main>
-    </div>
+        </main>
+      </div>
+    </ProtectedRoute>
   );
 };
 
-export default PersonalizedHome;
+export default PersonalizedHomePage;
