@@ -1,21 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { FeaturedVideo } from "@/components/FeaturedVideo";
-import { VideoCard } from "@/components/VideoCard";
 import { CategoryFilter } from "@/components/CategoryFilter";
-import { Bookmark, Clock, TrendingUp, Heart, HeartOff } from "lucide-react";
+import { Bookmark, Clock, TrendingUp } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { Button } from "@/components/ui/button";
+import { PodcasterFavorites } from "@/components/PodcasterFavorites";
+import { SearchBar } from "@/components/SearchBar";
+import { VideoGrid } from "@/components/VideoGrid";
 
 const PersonalizedHomePage = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
   const queryClient = useQueryClient();
 
-  // Fetch user's profile and favorite podcasters
   const { data: profile, isLoading: isProfileLoading } = useQuery({
     queryKey: ['profile'],
     queryFn: async () => {
@@ -32,7 +33,6 @@ const PersonalizedHomePage = () => {
     },
   });
 
-  // Fetch all available podcasters
   const { data: allPodcasters } = useQuery({
     queryKey: ['podcasters'],
     queryFn: async () => {
@@ -43,7 +43,6 @@ const PersonalizedHomePage = () => {
     },
   });
 
-  // Mutation to update favorite podcasters
   const updateFavoritesMutation = useMutation({
     mutationFn: async (newFavorites: string[]) => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -65,7 +64,6 @@ const PersonalizedHomePage = () => {
     },
   });
 
-  // Toggle favorite status for a podcaster
   const toggleFavorite = (podcasterId: string) => {
     if (!profile) return;
 
@@ -77,7 +75,6 @@ const PersonalizedHomePage = () => {
     updateFavoritesMutation.mutate(newFavorites);
   };
 
-  // Fetch videos from favorite podcasters
   const { data: videos, isLoading: isVideosLoading } = useQuery({
     queryKey: ['personalizedVideos', profile?.favorite_podcasters],
     queryFn: async () => {
@@ -105,17 +102,12 @@ const PersonalizedHomePage = () => {
     enabled: !!profile?.favorite_podcasters?.length,
   });
 
-  // Featured video is the most recent video
   const featuredVideo = videos?.[0] ? {
     title: videos[0].custom_title || videos[0].title,
     summary: videos[0].summary || "",
     thumbnail: videos[0].thumbnail_url || "",
     category: videos[0].categories?.[0] || "Actualités",
   } : null;
-
-  const filteredVideos = videos?.filter(video => 
-    selectedCategory === "All" || video.categories?.includes(selectedCategory)
-  );
 
   const isLoading = isProfileLoading || isVideosLoading;
 
@@ -134,38 +126,12 @@ const PersonalizedHomePage = () => {
             </p>
           </div>
 
-          {/* Podcasters Management Section */}
-          <div className="glass-card p-6 space-y-4">
-            <h2 className="text-xl font-semibold">Gérer mes podcasters favoris</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {allPodcasters?.map((podcaster) => (
-                <div key={podcaster.id} className="flex items-center justify-between p-3 glass-card rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    {podcaster.profile_picture_url && (
-                      <img 
-                        src={podcaster.profile_picture_url} 
-                        alt={podcaster.name}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                    )}
-                    <span className="font-medium">{podcaster.name}</span>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => toggleFavorite(podcaster.id)}
-                    disabled={updateFavoritesMutation.isPending}
-                  >
-                    {profile?.favorite_podcasters?.includes(podcaster.id) ? (
-                      <Heart className="w-5 h-5 text-primary fill-primary" />
-                    ) : (
-                      <HeartOff className="w-5 h-5" />
-                    )}
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </div>
+          <PodcasterFavorites
+            allPodcasters={allPodcasters}
+            favoritePodcasters={profile?.favorite_podcasters}
+            onToggleFavorite={toggleFavorite}
+            isUpdating={updateFavoritesMutation.isPending}
+          />
 
           {featuredVideo && <FeaturedVideo {...featuredVideo} />}
           
@@ -187,41 +153,29 @@ const PersonalizedHomePage = () => {
 
             {['recent', 'favorites', 'trending'].map((tab) => (
               <TabsContent key={tab} value={tab} className="space-y-6">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <h2 className="text-2xl font-bold">
                     {tab === 'recent' ? 'Vidéos récentes' : 
                      tab === 'favorites' ? 'Mes favoris' : 'Tendances'}
                   </h2>
-                  <CategoryFilter
-                    selected={selectedCategory}
-                    onSelect={setSelectedCategory}
-                  />
+                  <div className="flex flex-col md:flex-row gap-4 md:items-center">
+                    <SearchBar
+                      searchTerm={searchTerm}
+                      onSearchChange={setSearchTerm}
+                    />
+                    <CategoryFilter
+                      selected={selectedCategory}
+                      onSelect={setSelectedCategory}
+                    />
+                  </div>
                 </div>
                 
-                {isLoading ? (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                  </div>
-                ) : filteredVideos?.length ? (
-                  <div className="content-grid">
-                    {filteredVideos.map((video) => (
-                      <VideoCard
-                        key={video.id}
-                        title={video.custom_title || video.title}
-                        summary={video.summary || ""}
-                        thumbnail={video.thumbnail_url || ""}
-                        category={video.categories?.[0] || "Actualités"}
-                        date={new Date(video.published_date).toLocaleDateString()}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    {profile?.favorite_podcasters?.length 
-                      ? "Aucune vidéo disponible pour le moment"
-                      : "Ajoutez des podcasters en favoris pour voir leurs vidéos ici"}
-                  </div>
-                )}
+                <VideoGrid
+                  videos={videos}
+                  isLoading={isLoading}
+                  searchTerm={searchTerm}
+                  selectedCategory={selectedCategory}
+                />
               </TabsContent>
             ))}
           </Tabs>
