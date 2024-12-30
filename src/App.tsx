@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import PersonalizedHome from "./pages/PersonalizedHome";
 import AuthPage from "./pages/Auth";
+import VideoDetailPage from "./pages/VideoDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +20,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/personal" element={<PersonalizedHome />} />
           <Route path="/auth" element={<AuthPage />} />
+          <Route path="/video/:id" element={<VideoDetailPage />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

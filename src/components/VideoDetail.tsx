@@ -1,8 +1,7 @@
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Share2, Calendar, User } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar, User, Users } from "lucide-react";
 import { type Database } from "@/integrations/supabase/types";
 
 type Video = Database['public']['Tables']['videos']['Row'] & {
@@ -14,17 +13,9 @@ interface VideoDetailProps {
 }
 
 export function VideoDetail({ video }: VideoDetailProps) {
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('fr-FR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
   return (
-    <div className="container max-w-6xl mx-auto py-8 space-y-8 animate-fade-up">
-      <div className="aspect-video w-full rounded-lg overflow-hidden">
+    <div className="space-y-8 animate-fade-up">
+      <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
         <iframe
           src={`https://www.youtube.com/embed/${video.youtube_video_id}`}
           title={video.title}
@@ -34,70 +25,62 @@ export function VideoDetail({ video }: VideoDetailProps) {
         />
       </div>
 
-      <div className="space-y-6">
-        <div className="flex flex-wrap gap-4 items-start justify-between">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold">{video.custom_title || video.title}</h1>
-            <div className="flex gap-4 text-muted-foreground">
-              <span className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                {formatDate(video.published_date)}
-              </span>
-              {video.podcaster && (
-                <span className="flex items-center gap-2">
-                  <User className="w-4 h-4" />
-                  {video.podcaster.name}
-                </span>
-              )}
-            </div>
+      <div className="space-y-4">
+        <h1 className="text-3xl font-bold leading-tight">
+          {video.custom_title || video.title}
+        </h1>
+
+        <div className="flex flex-wrap gap-4">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Calendar className="w-4 h-4" />
+            <span>{new Date(video.published_date).toLocaleDateString()}</span>
           </div>
-          <Button variant="secondary" className="gap-2">
-            <Share2 className="w-4 h-4" />
-            Partager
-          </Button>
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <User className="w-4 h-4" />
+            <span>{video.podcaster.name}</span>
+          </div>
+          {video.categories?.map((category) => (
+            <Badge key={category} variant="secondary">
+              {category}
+            </Badge>
+          ))}
         </div>
 
-        {video.categories && video.categories.length > 0 && (
-          <div className="flex gap-2 flex-wrap">
-            {video.categories.map((category) => (
-              <Badge key={category} variant="secondary">
-                {category}
-              </Badge>
-            ))}
-          </div>
-        )}
-
-        <Card className="p-6 space-y-4">
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Résumé</h2>
-            <p className="text-muted-foreground">{video.summary}</p>
-          </div>
-
-          {video.speakers_list && video.speakers_list.length > 0 && (
-            <div>
-              <h2 className="text-xl font-semibold mb-2">Intervenants</h2>
-              <div className="flex gap-2 flex-wrap">
-                {video.speakers_list.map((speaker) => (
-                  <Badge key={speaker} variant="outline">
-                    {speaker}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {video.full_transcript && (
-            <div>
-              <h2 className="text-xl font-semibold mb-2">Transcription complète</h2>
-              <ScrollArea className="h-[300px] rounded-md border p-4">
-                <p className="text-muted-foreground whitespace-pre-wrap">
-                  {video.full_transcript}
-                </p>
-              </ScrollArea>
-            </div>
-          )}
-        </Card>
+        <div className="prose prose-invert max-w-none">
+          <p className="text-lg leading-relaxed">{video.summary}</p>
+        </div>
       </div>
+
+      <Tabs defaultValue="transcript" className="w-full">
+        <TabsList>
+          <TabsTrigger value="transcript">Transcription</TabsTrigger>
+          <TabsTrigger value="speakers">
+            <Users className="w-4 h-4 mr-2" />
+            Intervenants
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="transcript">
+          <ScrollArea className="h-[400px] rounded-md border p-4">
+            <div className="prose prose-invert max-w-none">
+              {video.full_transcript?.split('\n').map((paragraph, index) => (
+                <p key={index}>{paragraph}</p>
+              ))}
+            </div>
+          </ScrollArea>
+        </TabsContent>
+        <TabsContent value="speakers">
+          <div className="rounded-md border p-4">
+            <ul className="space-y-2">
+              {video.speakers_list?.map((speaker, index) => (
+                <li key={index} className="flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  <span>{speaker}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
