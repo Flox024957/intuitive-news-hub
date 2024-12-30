@@ -3,26 +3,36 @@ import { type Database } from "@/integrations/supabase/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 type Podcaster = Database['public']['Tables']['podcasters']['Row'];
 
 export function PodcasterGrid() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  const { data: session } = useQuery({
+    queryKey: ['session'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      return session;
+    },
+  });
 
   const { data: profile } = useQuery({
     queryKey: ['profile'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Non authentifié');
+      if (!session?.user) return null;
       
       const { data: profile } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.id)
+        .eq('id', session.user.id)
         .single();
       
       return profile;
     },
+    enabled: !!session?.user,
   });
 
   const { data: podcasters, isLoading } = useQuery({
@@ -40,8 +50,10 @@ export function PodcasterGrid() {
 
   const updateFavoritesMutation = useMutation({
     mutationFn: async (podcasterId: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Non authentifié');
+      if (!session?.user) {
+        navigate('/auth');
+        throw new Error('Vous devez être connecté pour ajouter des favoris');
+      }
 
       const currentFavorites = profile?.favorite_podcasters || [];
       const newFavorites = currentFavorites.includes(podcasterId)
@@ -51,7 +63,7 @@ export function PodcasterGrid() {
       const { error } = await supabase
         .from('profiles')
         .update({ favorite_podcasters: newFavorites })
-        .eq('id', user.id);
+        .eq('id', session.user.id);
 
       if (error) throw error;
       return newFavorites;
@@ -60,8 +72,12 @@ export function PodcasterGrid() {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
       toast.success('Favoris mis à jour avec succès');
     },
-    onError: () => {
-      toast.error('Erreur lors de la mise à jour des favoris');
+    onError: (error) => {
+      if (error.message === 'Vous devez être connecté pour ajouter des favoris') {
+        toast.error(error.message);
+      } else {
+        toast.error('Erreur lors de la mise à jour des favoris');
+      }
     },
   });
 

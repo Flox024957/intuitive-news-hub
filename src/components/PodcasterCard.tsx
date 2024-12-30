@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Heart, HeartOff } from "lucide-react";
 import { type Database } from "@/integrations/supabase/types";
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 type Podcaster = Database['public']['Tables']['podcasters']['Row'];
@@ -19,7 +18,7 @@ export function PodcasterCard({ podcaster, isFavorite, onToggleFavorite }: Podca
   const handleToggleFavorite = async () => {
     try {
       setIsUpdating(true);
-      onToggleFavorite(podcaster.id);
+      await onToggleFavorite(podcaster.id);
     } catch (error) {
       console.error("Erreur lors de la mise à jour des favoris:", error);
       toast.error("Une erreur est survenue lors de la mise à jour des favoris");
