@@ -5,7 +5,7 @@ import { CategoryFilter } from "@/components/CategoryFilter";
 import { SortOptions, type SortOption } from "@/components/SortOptions";
 import { Bookmark, Clock, TrendingUp } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -17,7 +17,6 @@ const PersonalizedHomePage = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("recent");
-  const queryClient = useQueryClient();
 
   const { data: profile, isLoading: isProfileLoading } = useQuery({
     queryKey: ['profile'],
@@ -45,38 +44,6 @@ const PersonalizedHomePage = () => {
     },
   });
 
-  const updateFavoritesMutation = useMutation({
-    mutationFn: async (newFavorites: string[]) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Non authentifié');
-
-      const { error } = await supabase
-        .from('profiles')
-        .update({ favorite_podcasters: newFavorites })
-        .eq('id', user.id);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['profile'] });
-      toast.success('Favoris mis à jour');
-    },
-    onError: () => {
-      toast.error('Erreur lors de la mise à jour des favoris');
-    },
-  });
-
-  const toggleFavorite = (podcasterId: string) => {
-    if (!profile) return;
-
-    const currentFavorites = profile.favorite_podcasters || [];
-    const newFavorites = currentFavorites.includes(podcasterId)
-      ? currentFavorites.filter(id => id !== podcasterId)
-      : [...currentFavorites, podcasterId];
-
-    updateFavoritesMutation.mutate(newFavorites);
-  };
-
   const { data: videos, isLoading: isVideosLoading } = useQuery({
     queryKey: ['personalizedVideos', profile?.favorite_podcasters],
     queryFn: async () => {
@@ -91,8 +58,7 @@ const PersonalizedHomePage = () => {
           podcaster:podcasters(*)
         `)
         .in('podcaster_id', profile.favorite_podcasters)
-        .order('published_date', { ascending: false })
-        .limit(20);
+        .order('published_date', { ascending: false });
 
       if (error) {
         toast.error("Erreur lors du chargement des vidéos");
@@ -104,38 +70,54 @@ const PersonalizedHomePage = () => {
     enabled: !!profile?.favorite_podcasters?.length,
   });
 
-  const featuredVideo = videos?.[0] ? {
-    title: videos[0].custom_title || videos[0].title,
-    summary: videos[0].summary || "",
-    thumbnail: videos[0].thumbnail_url || "",
-    category: videos[0].categories?.[0] || "Actualités",
-  } : null;
+  const featuredVideo = videos?.[0];
 
   const isLoading = isProfileLoading || isVideosLoading;
+
+  if (!profile?.favorite_podcasters?.length) {
+    return (
+      <ProtectedRoute>
+        <div className="min-h-screen bg-background">
+          <Navigation />
+          <main className="container py-20 space-y-8 animate-fade-up">
+            <div className="space-y-4">
+              <h1 className="text-4xl font-bold text-gradient">Ma page personnalisée</h1>
+              <p className="text-muted-foreground">
+                Commencez par ajouter des podcasters en favoris pour personnaliser votre flux
+              </p>
+            </div>
+            <PodcasterFavorites
+              allPodcasters={allPodcasters}
+              favoritePodcasters={profile?.favorite_podcasters}
+              onToggleFavorite={() => {}}
+              isUpdating={false}
+            />
+          </main>
+        </div>
+      </ProtectedRoute>
+    );
+  }
 
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-background">
         <Navigation />
-        
         <main className="container py-20 space-y-8 animate-fade-up">
           <div className="space-y-4">
             <h1 className="text-4xl font-bold text-gradient">Ma page personnalisée</h1>
             <p className="text-muted-foreground">
-              {profile?.favorite_podcasters?.length 
-                ? "Retrouvez ici les dernières vidéos de vos podcasters favoris"
-                : "Ajoutez des podcasters en favoris pour personnaliser votre flux"}
+              Retrouvez ici les dernières vidéos de vos podcasters favoris
             </p>
           </div>
 
-          <PodcasterFavorites
-            allPodcasters={allPodcasters}
-            favoritePodcasters={profile?.favorite_podcasters}
-            onToggleFavorite={toggleFavorite}
-            isUpdating={updateFavoritesMutation.isPending}
-          />
-
-          {featuredVideo && <FeaturedVideo {...featuredVideo} />}
+          {featuredVideo && (
+            <FeaturedVideo
+              title={featuredVideo.custom_title || featuredVideo.title}
+              summary={featuredVideo.summary || ""}
+              thumbnail={featuredVideo.thumbnail_url || ""}
+              category={featuredVideo.categories?.[0] || "Actualités"}
+            />
+          )}
           
           <Tabs defaultValue="recent" className="space-y-6">
             <TabsList className="grid w-full max-w-md grid-cols-3 mb-8">
