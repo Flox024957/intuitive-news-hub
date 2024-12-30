@@ -29,11 +29,11 @@ export function FeaturedVideo({ title, summary, thumbnail, category }: FeaturedV
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.5 }}
-          className="absolute bottom-0 left-0 right-0 p-6 space-y-4"
+          className="absolute bottom-0 left-0 right-0 p-8 space-y-6"
         >
           <Badge 
             variant="secondary" 
-            className="backdrop-blur-sm bg-secondary/30"
+            className="backdrop-blur-sm bg-secondary/30 text-lg px-4 py-2"
           >
             {category}
           </Badge>
@@ -41,7 +41,7 @@ export function FeaturedVideo({ title, summary, thumbnail, category }: FeaturedV
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="text-2xl sm:text-3xl md:text-4xl font-bold text-gradient"
+            className="text-4xl sm:text-5xl md:text-6xl font-bold text-gradient leading-tight"
           >
             {title}
           </motion.h2>
@@ -49,7 +49,7 @@ export function FeaturedVideo({ title, summary, thumbnail, category }: FeaturedV
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="text-lg text-muted-foreground max-w-2xl line-clamp-2"
+            className="text-xl text-muted-foreground max-w-2xl line-clamp-3"
           >
             {summary}
           </motion.p>
@@ -57,14 +57,14 @@ export function FeaturedVideo({ title, summary, thumbnail, category }: FeaturedV
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.6 }}
-            className="flex gap-4 pt-2"
+            className="flex gap-4 pt-4"
           >
-            <Button size="lg" className="gap-2 hover-card group">
-              <Play className="w-5 h-5 transition-transform group-hover:scale-110" />
+            <Button size="lg" className="gap-2 hover-card group text-lg h-14 px-8">
+              <Play className="w-6 h-6 transition-transform group-hover:scale-110" />
               <span>Regarder</span>
             </Button>
-            <Button size="lg" variant="secondary" className="gap-2 hover-card group">
-              <Info className="w-5 h-5 transition-transform group-hover:scale-110" />
+            <Button size="lg" variant="secondary" className="gap-2 hover-card group text-lg h-14 px-8">
+              <Info className="w-6 h-6 transition-transform group-hover:scale-110" />
               <span>Plus d'infos</span>
             </Button>
           </motion.div>

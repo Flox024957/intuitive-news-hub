@@ -9,8 +9,9 @@ import { SortOptions, type SortOption } from "@/components/SortOptions";
 import { PodcasterGrid } from "@/components/PodcasterGrid";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Play, Users, TrendingUp, Sparkles } from "lucide-react";
+import { Play, Users, TrendingUp, Sparkles, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -18,8 +19,9 @@ const Index = () => {
   const [sortOption, setSortOption] = useState<SortOption>("recent");
   const { scrollY } = useScroll();
   
-  const headerOpacity = useTransform(scrollY, [0, 200], [1, 0]);
-  const headerScale = useTransform(scrollY, [0, 200], [1, 0.95]);
+  const headerOpacity = useTransform(scrollY, [0, 300], [1, 0]);
+  const headerScale = useTransform(scrollY, [0, 300], [1, 0.95]);
+  const headerBlur = useTransform(scrollY, [0, 300], [0, 8]);
 
   const { data: videos, isLoading } = useQuery({
     queryKey: ["videos"],
@@ -65,8 +67,12 @@ const Index = () => {
         >
           {featuredVideo && (
             <motion.div
-              style={{ opacity: headerOpacity, scale: headerScale }}
-              className="relative w-full h-[80vh] overflow-hidden"
+              style={{ 
+                opacity: headerOpacity, 
+                scale: headerScale,
+                filter: `blur(${headerBlur}px)`
+              }}
+              className="relative w-full h-[90vh] overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-b from-background/0 via-background/60 to-background" />
               <motion.img
@@ -77,12 +83,12 @@ const Index = () => {
                 animate={{ scale: 1 }}
                 transition={{ duration: 0.8 }}
               />
-              <div className="container relative z-10 h-full flex items-end pb-20">
+              <div className="container relative z-10 h-full flex items-end pb-32">
                 <motion.div
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.2, duration: 0.5 }}
-                  className="max-w-3xl space-y-6"
+                  className="max-w-4xl space-y-6"
                 >
                   <FeaturedVideo
                     title={featuredVideo.custom_title || featuredVideo.title}
@@ -92,6 +98,21 @@ const Index = () => {
                   />
                 </motion.div>
               </div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="absolute bottom-12 left-1/2 transform -translate-x-1/2"
+              >
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  className="rounded-full bg-background/20 backdrop-blur-sm hover:bg-background/30"
+                  onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+                >
+                  <ChevronDown className="w-6 h-6 animate-bounce" />
+                </Button>
+              </motion.div>
             </motion.div>
           )}
           
