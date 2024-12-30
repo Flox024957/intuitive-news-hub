@@ -61,6 +61,7 @@ export function VideoGrid({ videos, isLoading, searchTerm, selectedCategory, sor
       {sortedVideos.map((video) => (
         <VideoCard
           key={video.id}
+          id={video.id}
           title={video.custom_title || video.title}
           summary={video.summary || ""}
           thumbnail={video.thumbnail_url || ""}
