@@ -6,14 +6,16 @@ import { CategoryFilter } from "@/components/CategoryFilter";
 import { Navigation } from "@/components/Navigation";
 import { SearchBar } from "@/components/SearchBar";
 import { SortOptions, type SortOption } from "@/components/SortOptions";
+import { PodcasterGrid } from "@/components/PodcasterGrid";
 import { supabase } from "@/integrations/supabase/client";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Play, Users } from "lucide-react";
 
 const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("recent");
 
-  // Fetch videos with their podcaster information
   const { data: videos, isLoading } = useQuery({
     queryKey: ["videos"],
     queryFn: async () => {
@@ -30,7 +32,6 @@ const Index = () => {
     },
   });
 
-  // Get the most recent video for the featured section
   const featuredVideo = videos?.[0];
 
   return (
@@ -46,33 +47,53 @@ const Index = () => {
           />
         )}
         
-        <div className="space-y-6">
-          <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between">
-            <h2 className="text-2xl font-bold">Dernières vidéos</h2>
-            <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-              <div className="flex-1 md:w-64">
-                <SearchBar
-                  searchTerm={searchTerm}
-                  onSearchChange={setSearchTerm}
+        <Tabs defaultValue="videos" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="videos" className="flex items-center gap-2">
+              <Play className="w-4 h-4" />
+              <span>Vidéos</span>
+            </TabsTrigger>
+            <TabsTrigger value="podcasters" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              <span>Podcasters</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="videos" className="space-y-6">
+            <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between">
+              <h2 className="text-2xl font-bold">Dernières vidéos</h2>
+              <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+                <div className="flex-1 md:w-64">
+                  <SearchBar
+                    searchTerm={searchTerm}
+                    onSearchChange={setSearchTerm}
+                  />
+                </div>
+                <CategoryFilter
+                  selected={selectedCategory}
+                  onSelect={setSelectedCategory}
                 />
               </div>
-              <CategoryFilter
-                selected={selectedCategory}
-                onSelect={setSelectedCategory}
-              />
             </div>
-          </div>
 
-          <SortOptions selected={sortOption} onSelect={setSortOption} />
-          
-          <VideoGrid
-            videos={videos}
-            isLoading={isLoading}
-            searchTerm={searchTerm}
-            selectedCategory={selectedCategory}
-            sortOption={sortOption}
-          />
-        </div>
+            <SortOptions selected={sortOption} onSelect={setSortOption} />
+            
+            <VideoGrid
+              videos={videos}
+              isLoading={isLoading}
+              searchTerm={searchTerm}
+              selectedCategory={selectedCategory}
+              sortOption={sortOption}
+            />
+          </TabsContent>
+
+          <TabsContent value="podcasters">
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold">Nos podcasters</h2>
+              <PodcasterGrid />
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </>
   );
