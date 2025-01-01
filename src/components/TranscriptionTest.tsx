@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { pipeline } from "@huggingface/transformers";
 
 export function TranscriptionTest() {
   const [videoId, setVideoId] = useState("");
@@ -16,20 +16,21 @@ export function TranscriptionTest() {
 
     try {
       setLoading(true);
-      const { data, error } = await supabase.functions.invoke('transcribe-youtube', {
-        body: { videoId }
-      });
+      
+      // Initialiser le pipeline de transcription
+      const transcriber = await pipeline(
+        "automatic-speech-recognition",
+        "openai/whisper-tiny",
+        { device: "cpu" } // Utiliser CPU par défaut, WebGPU si disponible
+      );
 
-      if (error) {
-        console.error('Erreur Supabase:', error);
-        throw error;
-      }
-
-      if (!data?.transcription) {
-        throw new Error('Aucune transcription générée');
-      }
-
-      console.log('Transcription:', data);
+      // Obtenir l'URL audio de la vidéo YouTube
+      const audioUrl = `https://www.youtube.com/watch?v=${videoId}`;
+      
+      // Transcrire l'audio
+      const result = await transcriber(audioUrl);
+      
+      console.log('Transcription:', result);
       toast.success('Transcription générée avec succès !');
     } catch (error: any) {
       console.error('Erreur:', error);
