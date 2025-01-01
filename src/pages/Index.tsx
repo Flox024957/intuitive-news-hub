@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Play, Users, TrendingUp, Sparkles, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { YouTubeTest } from "@/components/YouTubeTest"; // Ajout de l'import
 
 const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -65,6 +66,14 @@ const Index = () => {
           transition={{ duration: 0.5 }}
           className="min-h-screen"
         >
+          {/* Ajout du composant de test */}
+          <div className="container py-8">
+            <div className="glass-card p-6 rounded-lg">
+              <h2 className="text-xl font-bold mb-4">Test de l'API YouTube</h2>
+              <YouTubeTest />
+            </div>
+          </div>
+
           {featuredVideo && (
             <motion.div
               style={{ 
