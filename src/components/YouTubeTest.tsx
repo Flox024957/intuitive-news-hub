@@ -48,14 +48,19 @@ export function YouTubeTest() {
       });
 
       if (error) {
+        console.error('Erreur Supabase:', error);
         throw error;
+      }
+
+      if (!data?.videos) {
+        throw new Error('Aucune vidéo trouvée');
       }
 
       console.log('Vidéos récupérées:', data);
       toast.success(`${data.videos.length} vidéos récupérées avec succès !`);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur:', error);
-      toast.error("Erreur lors de la récupération des vidéos");
+      toast.error(error.message || "Erreur lors de la récupération des vidéos");
     } finally {
       setLoading(false);
     }
