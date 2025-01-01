@@ -8,20 +8,28 @@ export function YouTubeTest() {
   const [channelUrl, setChannelUrl] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const extractChannelId = (url: string) => {
+  const extractChannelInfo = (url: string) => {
     try {
       const urlObj = new URL(url);
       const pathname = urlObj.pathname;
       
       // Format: youtube.com/channel/UC...
       if (pathname.includes('/channel/')) {
-        return pathname.split('/channel/')[1].split('/')[0];
+        return {
+          channelId: pathname.split('/channel/')[1].split('/')[0],
+          username: null
+        };
       }
       
-      // Format: youtube.com/c/name or youtube.com/@name
-      // Ces formats nécessitent une étape supplémentaire via l'API YouTube
-      // pour obtenir l'ID réel de la chaîne
-      toast.error("Veuillez utiliser l'URL au format youtube.com/channel/ID");
+      // Format: youtube.com/@username
+      if (pathname.startsWith('/@')) {
+        return {
+          channelId: null,
+          username: pathname.substring(2)
+        };
+      }
+      
+      toast.error("Format d'URL non supporté. Utilisez youtube.com/channel/ID ou youtube.com/@username");
       return null;
     } catch (error) {
       toast.error("URL invalide");
@@ -30,13 +38,13 @@ export function YouTubeTest() {
   };
 
   const handleFetchVideos = async () => {
-    const channelId = extractChannelId(channelUrl);
-    if (!channelId) return;
+    const channelInfo = extractChannelInfo(channelUrl);
+    if (!channelInfo) return;
 
     try {
       setLoading(true);
       const { data, error } = await supabase.functions.invoke('youtube-data', {
-        body: { channelId }
+        body: channelInfo
       });
 
       if (error) {
@@ -57,7 +65,7 @@ export function YouTubeTest() {
     <div className="space-y-4">
       <div className="flex gap-4">
         <Input
-          placeholder="URL de la chaîne YouTube (ex: https://www.youtube.com/channel/UC...)"
+          placeholder="URL de la chaîne YouTube (ex: https://www.youtube.com/@username)"
           value={channelUrl}
           onChange={(e) => setChannelUrl(e.target.value)}
         />
@@ -69,8 +77,9 @@ export function YouTubeTest() {
         </Button>
       </div>
       <p className="text-sm text-muted-foreground">
-        Pour le moment, seules les URLs au format youtube.com/channel/ID sont supportées.
-        Vous pouvez trouver l'URL en allant sur la chaîne YouTube et en copiant l'URL depuis votre navigateur.
+        Formats d'URL supportés :
+        <br />- youtube.com/channel/ID
+        <br />- youtube.com/@username
       </p>
     </div>
   );
