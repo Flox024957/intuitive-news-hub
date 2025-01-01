@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { pipeline } from "@huggingface/transformers";
+import { pipeline, AutomaticSpeechRecognitionOutput } from "@huggingface/transformers";
 import { getYouTubeAudioUrl } from "@/utils/youtubeUtils";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -27,20 +27,18 @@ export function TranscriptionTest() {
         "automatic-speech-recognition",
         "openai/whisper-tiny",
         { 
-          device: "cpu", // Utiliser CPU par défaut, WebGPU si disponible
-          chunk_length_s: 30, // Découper en segments de 30 secondes
-          stride_length_s: 5, // Chevauchement de 5 secondes entre les segments
+          device: "cpu" // Utiliser CPU par défaut, WebGPU si disponible
         }
       );
       
       // Transcrire l'audio
-      const result = await transcriber(audioUrl);
+      const result = await transcriber(audioUrl) as AutomaticSpeechRecognitionOutput;
       
       // Sauvegarder la transcription dans Supabase
       const { error: updateError } = await supabase
         .from('videos')
         .update({ 
-          full_transcript: result.text,
+          full_transcript: result.text || '',
         })
         .eq('youtube_video_id', videoId);
 

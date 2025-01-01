@@ -1,13 +1,15 @@
-import ytdl from 'ytdl-core';
+import { supabase } from "@/integrations/supabase/client";
 
 export async function getYouTubeAudioUrl(videoId: string): Promise<string> {
   try {
-    const info = await ytdl.getInfo(videoId);
-    const audioFormat = ytdl.chooseFormat(info.formats, { 
-      quality: 'highestaudio',
-      filter: 'audioonly' 
+    const { data, error } = await supabase.functions.invoke('get-youtube-audio', {
+      body: { videoId }
     });
-    return audioFormat.url;
+
+    if (error) throw error;
+    if (!data?.audioUrl) throw new Error('No audio URL returned');
+
+    return data.audioUrl;
   } catch (error) {
     console.error('Error getting YouTube audio:', error);
     throw new Error('Failed to get YouTube audio URL');
