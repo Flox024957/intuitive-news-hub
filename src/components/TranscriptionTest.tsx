@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { pipeline } from "@huggingface/transformers";
+import { getYouTubeAudioUrl } from "@/utils/youtubeUtils";
+import { supabase } from "@/integrations/supabase/client";
 
 export function TranscriptionTest() {
   const [videoId, setVideoId] = useState("");
@@ -17,21 +19,37 @@ export function TranscriptionTest() {
     try {
       setLoading(true);
       
+      // Obtenir l'URL de l'audio
+      const audioUrl = await getYouTubeAudioUrl(videoId);
+      
       // Initialiser le pipeline de transcription
       const transcriber = await pipeline(
         "automatic-speech-recognition",
         "openai/whisper-tiny",
-        { device: "cpu" } // Utiliser CPU par défaut, WebGPU si disponible
+        { 
+          device: "cpu", // Utiliser CPU par défaut, WebGPU si disponible
+          chunk_length_s: 30, // Découper en segments de 30 secondes
+          stride_length_s: 5, // Chevauchement de 5 secondes entre les segments
+        }
       );
-
-      // Obtenir l'URL audio de la vidéo YouTube
-      const audioUrl = `https://www.youtube.com/watch?v=${videoId}`;
       
       // Transcrire l'audio
       const result = await transcriber(audioUrl);
       
+      // Sauvegarder la transcription dans Supabase
+      const { error: updateError } = await supabase
+        .from('videos')
+        .update({ 
+          full_transcript: result.text,
+        })
+        .eq('youtube_video_id', videoId);
+
+      if (updateError) {
+        throw updateError;
+      }
+      
       console.log('Transcription:', result);
-      toast.success('Transcription générée avec succès !');
+      toast.success('Transcription générée et sauvegardée avec succès !');
     } catch (error: any) {
       console.error('Erreur:', error);
       toast.error(error.message || "Erreur lors de la transcription");
