@@ -5,19 +5,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export function TranscriptionTest() {
-  const [audioUrl, setAudioUrl] = useState("");
+  const [videoId, setVideoId] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleTranscribe = async () => {
-    if (!audioUrl) {
-      toast.error("Veuillez fournir une URL audio");
+    if (!videoId) {
+      toast.error("Veuillez fournir un ID de vidéo YouTube");
       return;
     }
 
     try {
       setLoading(true);
-      const { data, error } = await supabase.functions.invoke('transcribe-video', {
-        body: { audioUrl }
+      const { data, error } = await supabase.functions.invoke('transcribe-youtube', {
+        body: { videoId }
       });
 
       if (error) {
@@ -43,19 +43,19 @@ export function TranscriptionTest() {
     <div className="space-y-4">
       <div className="flex gap-4">
         <Input
-          placeholder="URL du fichier audio (format WAV)"
-          value={audioUrl}
-          onChange={(e) => setAudioUrl(e.target.value)}
+          placeholder="ID de la vidéo YouTube"
+          value={videoId}
+          onChange={(e) => setVideoId(e.target.value)}
         />
         <Button 
           onClick={handleTranscribe}
-          disabled={!audioUrl || loading}
+          disabled={!videoId || loading}
         >
           {loading ? "Transcription..." : "Transcrire"}
         </Button>
       </div>
       <p className="text-sm text-muted-foreground">
-        Note: Le fichier audio doit être au format WAV et accessible publiquement.
+        Note: Entrez l'ID de la vidéo YouTube (ex: dQw4w9WgXcQ pour https://www.youtube.com/watch?v=dQw4w9WgXcQ)
       </p>
     </div>
   );
