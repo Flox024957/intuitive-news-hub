@@ -1,5 +1,7 @@
 project_id = "ilgweiztccnsmktspwzd"
 [functions.youtube-data]
 verify_jwt = false
+[functions.get-youtube-audio]
+verify_jwt = false
 [functions.transcribe-video]
 verify_jwt = false
