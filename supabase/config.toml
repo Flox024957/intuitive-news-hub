@@ -26,9 +26,4 @@ enabled = true
 enabled = true
 
 [[functions]]
-name = "generate-summary"
-verify_jwt = false
-
-[[functions]]
-name = "transcribe-with-whisper"
 verify_jwt = false

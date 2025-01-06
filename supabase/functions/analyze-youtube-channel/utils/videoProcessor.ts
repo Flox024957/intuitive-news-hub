@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 export async function processYouTubeVideos(channelId: string, excludeShorts: boolean = true) {
   const youtube = google.youtube('v3');
