@@ -9,7 +9,9 @@ import {
   Microscope, 
   Cpu, 
   Palette, 
-  Newspaper 
+  Newspaper,
+  Music,
+  Laugh
 } from "lucide-react";
 import { SearchBar } from "@/components/SearchBar";
 import { SortOptions, type SortOption } from "@/components/SortOptions";
@@ -55,6 +57,8 @@ export function VideosContent({
     { id: "divertissement", label: "Divertissement", icon: Film, color: "text-orange-500" },
     { id: "tutoriels", label: "Tutoriels", icon: BookOpen, color: "text-indigo-500" },
     { id: "reportages", label: "Reportages", icon: Film, color: "text-emerald-500" },
+    { id: "humour", label: "Humour", icon: Laugh, color: "text-amber-500" },
+    { id: "musique", label: "Musique", icon: Music, color: "text-rose-500" }
   ];
 
   return (
@@ -85,12 +89,12 @@ export function VideosContent({
         </div>
 
         <Tabs defaultValue="all" className="w-full space-y-36">
-          <TabsList className="w-full max-w-7xl mx-auto glass-morphism p-12 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-10 gap-4 place-items-center min-h-[240px] rounded-2xl">
+          <TabsList className="w-full max-w-7xl mx-auto glass-morphism p-12 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 place-items-center min-h-[240px] rounded-2xl">
             {categories.map(({ id, label, icon: Icon, color }) => (
               <TabsTrigger 
                 key={id}
                 value={id} 
-                className="group relative flex flex-col items-center justify-center gap-3 py-4 px-3 transition-all duration-500 hover:bg-white/5 rounded-xl"
+                className="group relative flex flex-col items-center justify-center gap-3 py-4 px-3 transition-all duration-500 hover:bg-white/5 rounded-xl w-full"
                 onClick={() => onCategorySelect(label)}
               >
                 <Icon className={`w-6 h-6 ${color} transition-transform group-hover:scale-110`} />

@@ -10,7 +10,9 @@ const categories = [
   "Culture",
   "Divertissement",
   "Tutoriels",
-  "Reportages"
+  "Reportages",
+  "Humour",
+  "Musique"
 ];
 
 interface CategoryFilterProps {
