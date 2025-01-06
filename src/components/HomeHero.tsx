@@ -31,7 +31,7 @@ export function HomeHero({ featuredVideo }: HomeHeroProps) {
           initial={{ y: 40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.8 }}
-          className="max-w-5xl w-full mx-auto"
+          className="max-w-5xl mx-auto"
         >
           <FeaturedVideo
             title={featuredVideo.custom_title || featuredVideo.title}

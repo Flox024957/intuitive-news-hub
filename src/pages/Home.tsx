@@ -59,8 +59,8 @@ const Home = () => {
       <Navigation />
       <AnimatePresence mode="wait">
         <SidebarProvider>
-          <div className="flex min-h-screen w-full">
-            <div className="fixed top-16 left-0 bottom-0 w-64 z-40">
+          <div className="flex min-h-screen w-full pt-16">
+            <div className="fixed top-16 left-0 bottom-0 w-64 z-30 bg-background/80 backdrop-blur-sm border-r border-border">
               <HomeSidebar />
             </div>
             <motion.main 
@@ -68,7 +68,7 @@ const Home = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
-              className="flex-1 ml-64 pt-16 relative"
+              className="flex-1 ml-64"
             >
               <HomeHero featuredVideo={featuredVideo} />
               <div className="relative z-10">
