@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useSessionContext } from "@/integrations/auth";
+import { useSessionContext } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/toast";
+import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
 export function Navigation() {
-  const { data: session } = useSessionContext();
+  const { session } = useSessionContext();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
