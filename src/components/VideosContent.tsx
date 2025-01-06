@@ -85,7 +85,7 @@ export function VideosContent({
         </div>
 
         <Tabs defaultValue="all" className="w-full space-y-36">
-          <TabsList className="w-full max-w-7xl mx-auto glass-card p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-10 gap-4">
+          <TabsList className="w-full max-w-7xl mx-auto glass-card p-12 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-10 gap-4">
             {categories.map(({ id, label, icon: Icon, color }) => (
               <TabsTrigger 
                 key={id}
