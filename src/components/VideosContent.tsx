@@ -4,6 +4,7 @@ import { SearchBar } from "@/components/SearchBar";
 import { CategoryFilter } from "@/components/CategoryFilter";
 import { SortOptions, type SortOption } from "@/components/SortOptions";
 import { VideoGrid } from "@/components/VideoGrid";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface VideosContentProps {
   videos: any[];
@@ -26,6 +27,13 @@ export function VideosContent({
   sortOption,
   onSortChange
 }: VideosContentProps) {
+  const filterVideosByCategory = (category: string) => {
+    return videos.filter(video => 
+      video.categories?.includes(category) || 
+      (category === "All" && video.categories)
+    );
+  };
+
   return (
     <div className="space-y-8">
       <motion.div 
@@ -49,30 +57,67 @@ export function VideosContent({
             />
           </div>
           <div className="flex-[2]">
-            <CategoryFilter
-              selected={selectedCategory}
-              onSelect={onCategorySelect}
-            />
+            <SortOptions selected={sortOption} onSelect={onSortChange} />
           </div>
         </div>
-      </motion.div>
 
-      <motion.div
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.4 }}
-        className="glass-card p-6 rounded-xl shadow-lg"
-      >
-        <SortOptions selected={sortOption} onSelect={onSortChange} />
+        <Tabs defaultValue="all" className="w-full space-y-6">
+          <TabsList className="w-full max-w-4xl mx-auto glass-card p-1">
+            <TabsTrigger value="all" className="flex-1 py-3">
+              Toutes les vidéos
+            </TabsTrigger>
+            <TabsTrigger value="divertissement" className="flex-1 py-3">
+              Divertissement
+            </TabsTrigger>
+            <TabsTrigger value="tutoriels" className="flex-1 py-3">
+              Tutoriels
+            </TabsTrigger>
+            <TabsTrigger value="reportages" className="flex-1 py-3">
+              Reportages
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="all" className="space-y-6">
+            <VideoGrid
+              videos={videos}
+              isLoading={isLoading}
+              searchTerm={searchTerm}
+              selectedCategory={selectedCategory}
+              sortOption={sortOption}
+            />
+          </TabsContent>
+
+          <TabsContent value="divertissement" className="space-y-6">
+            <VideoGrid
+              videos={filterVideosByCategory("Divertissement")}
+              isLoading={isLoading}
+              searchTerm={searchTerm}
+              selectedCategory="Divertissement"
+              sortOption={sortOption}
+            />
+          </TabsContent>
+
+          <TabsContent value="tutoriels" className="space-y-6">
+            <VideoGrid
+              videos={filterVideosByCategory("Tutoriels")}
+              isLoading={isLoading}
+              searchTerm={searchTerm}
+              selectedCategory="Tutoriels"
+              sortOption={sortOption}
+            />
+          </TabsContent>
+
+          <TabsContent value="reportages" className="space-y-6">
+            <VideoGrid
+              videos={filterVideosByCategory("Reportages")}
+              isLoading={isLoading}
+              searchTerm={searchTerm}
+              selectedCategory="Reportages"
+              sortOption={sortOption}
+            />
+          </TabsContent>
+        </Tabs>
       </motion.div>
-      
-      <VideoGrid
-        videos={videos}
-        isLoading={isLoading}
-        searchTerm={searchTerm}
-        selectedCategory={selectedCategory}
-        sortOption={sortOption}
-      />
     </div>
   );
 }
