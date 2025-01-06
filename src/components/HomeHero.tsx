@@ -11,7 +11,7 @@ export function HomeHero({ featuredVideo }: HomeHeroProps) {
   if (!featuredVideo) return null;
 
   return (
-    <div className="relative w-full min-h-[calc(90vh-64px)] flex items-center justify-center overflow-hidden">
+    <div className="relative w-full min-h-[calc(100vh-64px)] flex items-center justify-center overflow-hidden">
       <motion.div
         initial={{ scale: 1.1, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -46,7 +46,7 @@ export function HomeHero({ featuredVideo }: HomeHeroProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.2 }}
-        className="absolute bottom-24 left-1/2 transform -translate-x-1/2 z-20"
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20"
       >
         <Button
           variant="ghost"
