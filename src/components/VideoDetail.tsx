@@ -5,6 +5,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Play, User, Heart, Share2 } from "lucide-react";
 import { type Database } from "@/integrations/supabase/types";
+import { VideoProcessing } from "@/components/VideoProcessing";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 type Video = Database['public']['Tables']['videos']['Row'] & {
   podcaster: Database['public']['Tables']['podcasters']['Row'];
@@ -15,6 +18,21 @@ interface VideoDetailProps {
 }
 
 export function VideoDetail({ video }: VideoDetailProps) {
+  const [summary, setSummary] = useState<string | null>(video.summary);
+
+  const handleSummaryGenerated = async (newSummary: string) => {
+    setSummary(newSummary);
+    
+    try {
+      await supabase
+        .from('videos')
+        .update({ summary: newSummary })
+        .eq('id', video.id);
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du résumé:", error);
+    }
+  };
+
   return (
     <div className="space-y-8 animate-fade-up">
       <div className="aspect-video relative rounded-lg overflow-hidden">
@@ -86,7 +104,15 @@ export function VideoDetail({ video }: VideoDetailProps) {
           </TabsList>
           <TabsContent value="summary" className="mt-4">
             <Card className="p-4">
-              <p className="text-lg leading-relaxed">{video.summary}</p>
+              {summary ? (
+                <p className="text-lg leading-relaxed">{summary}</p>
+              ) : (
+                <VideoProcessing
+                  videoId={video.id}
+                  transcript={video.full_transcript}
+                  onSummaryGenerated={handleSummaryGenerated}
+                />
+              )}
             </Card>
           </TabsContent>
           <TabsContent value="transcript" className="mt-4">
