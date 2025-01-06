@@ -6,7 +6,7 @@ import {
   Film, 
   Globe, 
   LineChart, 
-  Flask, 
+  Microscope, 
   Cpu, 
   Palette, 
   Newspaper 
@@ -49,7 +49,7 @@ export function VideosContent({
     { id: "news", label: "News", icon: Newspaper },
     { id: "politics", label: "Politique", icon: Globe },
     { id: "economy", label: "Économie", icon: LineChart },
-    { id: "science", label: "Science", icon: Flask },
+    { id: "science", label: "Science", icon: Microscope },
     { id: "technology", label: "Technologie", icon: Cpu },
     { id: "culture", label: "Culture", icon: Palette },
     { id: "divertissement", label: "Divertissement", icon: Film },
