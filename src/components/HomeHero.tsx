@@ -11,14 +11,14 @@ export function HomeHero({ featuredVideo }: HomeHeroProps) {
   if (!featuredVideo) return null;
 
   return (
-    <div className="relative w-full min-h-[85vh] flex items-center justify-center overflow-hidden">
+    <div className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden">
       <motion.div
         initial={{ scale: 1.1 }}
         animate={{ scale: 1 }}
         transition={{ duration: 1.5 }}
         className="absolute inset-0 z-0"
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-background/0 via-background/60 to-background z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/0 via-background/80 to-background z-10" />
         <img
           src={featuredVideo.thumbnail_url}
           alt={featuredVideo.title}
@@ -26,7 +26,7 @@ export function HomeHero({ featuredVideo }: HomeHeroProps) {
         />
       </motion.div>
       
-      <div className="container relative z-20 max-w-7xl mx-auto px-4">
+      <div className="container relative z-20 max-w-7xl mx-auto px-6 py-24">
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -46,7 +46,7 @@ export function HomeHero({ featuredVideo }: HomeHeroProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="absolute bottom-12 left-1/2 transform -translate-x-1/2 z-20"
+        className="absolute bottom-16 left-1/2 transform -translate-x-1/2 z-20"
       >
         <Button
           variant="ghost"

@@ -26,12 +26,12 @@ export function HomeContent({ videos, isLoading: isLoadingDb, trendingVideos }: 
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-8"
+      className="space-y-12 px-4"
     >
       <motion.div 
         initial={{ x: -20, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
-        className="flex items-center gap-3 glass-card p-6 rounded-xl mb-8"
+        className="flex items-center gap-3 glass-card p-8 rounded-xl"
       >
         <TrendingUp className="w-8 h-8 text-primary" />
         <h2 className="text-2xl font-bold text-gradient">
@@ -52,9 +52,9 @@ export function HomeContent({ videos, isLoading: isLoadingDb, trendingVideos }: 
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-8"
+      className="space-y-12 px-4"
     >
-      <div className="flex items-center gap-3 glass-card p-6 rounded-xl mb-8">
+      <div className="flex items-center gap-3 glass-card p-8 rounded-xl">
         <Users className="w-8 h-8 text-primary" />
         <h2 className="text-2xl font-bold text-gradient">
           Nos podcasters
@@ -65,12 +65,12 @@ export function HomeContent({ videos, isLoading: isLoadingDb, trendingVideos }: 
   );
 
   return (
-    <div className="min-h-screen pt-24 pb-16">
-      <div className="container max-w-7xl mx-auto space-y-16">
+    <div className="min-h-screen pt-32 pb-24">
+      <div className="container max-w-7xl mx-auto space-y-24">
         <HomeTabs>
           {{
             videos: (
-              <div className="space-y-12">
+              <div className="space-y-16 px-4">
                 <VideosContent
                   videos={allVideos}
                   isLoading={isLoadingDb || isLoadingYoutube}
