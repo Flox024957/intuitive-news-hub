@@ -58,7 +58,7 @@ export function VideosContent({
   ];
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-36">
       <motion.div 
         className="flex flex-col gap-6 glass-card p-8 rounded-xl shadow-lg"
         initial={{ x: -20, opacity: 0 }}
@@ -84,7 +84,7 @@ export function VideosContent({
           </div>
         </div>
 
-        <Tabs defaultValue="all" className="w-full space-y-12">
+        <Tabs defaultValue="all" className="w-full space-y-36">
           <TabsList className="w-full max-w-7xl mx-auto glass-card p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-10 gap-4">
             {categories.map(({ id, label, icon: Icon, color }) => (
               <TabsTrigger 
@@ -110,7 +110,7 @@ export function VideosContent({
             <TabsContent 
               key={id} 
               value={id} 
-              className="mt-12 space-y-8"
+              className="mt-36 space-y-24"
             >
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
