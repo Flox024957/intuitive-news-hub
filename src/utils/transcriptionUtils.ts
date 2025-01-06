@@ -4,7 +4,7 @@ export async function transcribeAudio(audioUrl: string): Promise<string> {
   try {
     console.log('Starting transcription for audio URL:', audioUrl);
     
-    const { data, error } = await supabase.functions.invoke('transcribe-audio', {
+    const { data, error } = await supabase.functions.invoke('transcribe-with-whisper', {
       body: { audioUrl }
     });
 
