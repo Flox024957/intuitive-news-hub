@@ -1,7 +1,23 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export async function getYouTubeAudioUrl(videoId: string): Promise<string> {
+function extractVideoId(url: string): string | null {
   try {
+    const urlObj = new URL(url);
+    const searchParams = new URLSearchParams(urlObj.search);
+    return searchParams.get('v');
+  } catch (error) {
+    console.error('Error extracting video ID:', error);
+    return null;
+  }
+}
+
+export async function getYouTubeAudioUrl(videoUrl: string): Promise<string> {
+  try {
+    const videoId = extractVideoId(videoUrl);
+    if (!videoId) {
+      throw new Error('Invalid YouTube URL');
+    }
+
     console.log('Calling get-youtube-audio function with videoId:', videoId);
     
     const { data, error } = await supabase.functions.invoke('get-youtube-audio', {

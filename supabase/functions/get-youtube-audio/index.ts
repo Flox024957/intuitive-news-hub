@@ -14,14 +14,21 @@ serve(async (req) => {
   }
 
   try {
-    const { videoId } = await req.json()
+    const body = await req.json()
+    const { videoId } = body
+    
     console.log('Received request for videoId:', videoId)
     
-    if (!videoId) {
-      console.error('No videoId provided in request')
+    if (!videoId || typeof videoId !== 'string') {
+      console.error('Invalid or missing videoId:', videoId)
       return new Response(
-        JSON.stringify({ error: 'Video ID is required' }),
-        { status: 400, headers: corsHeaders }
+        JSON.stringify({ 
+          error: 'Video ID is required and must be a string' 
+        }),
+        { 
+          status: 400, 
+          headers: corsHeaders 
+        }
       )
     }
 
@@ -33,6 +40,19 @@ serve(async (req) => {
       quality: 'highestaudio',
       filter: 'audioonly' 
     })
+
+    if (!audioFormat || !audioFormat.url) {
+      console.error('No suitable audio format found')
+      return new Response(
+        JSON.stringify({ 
+          error: 'No suitable audio format found' 
+        }),
+        { 
+          status: 404, 
+          headers: corsHeaders 
+        }
+      )
+    }
 
     console.log('Selected audio format:', {
       quality: audioFormat.quality,
@@ -49,10 +69,13 @@ serve(async (req) => {
     console.error('Error in get-youtube-audio:', error)
     return new Response(
       JSON.stringify({ 
-        error: error.message,
+        error: error.message || 'Internal server error',
         details: error.stack
       }),
-      { status: 500, headers: corsHeaders }
+      { 
+        status: 500, 
+        headers: corsHeaders 
+      }
     )
   }
 })
