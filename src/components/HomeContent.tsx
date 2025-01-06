@@ -20,7 +20,7 @@ export function HomeContent({ videos, isLoading, trendingVideos }: HomeContentPr
   const [sortOption, setSortOption] = useState<SortOption>("recent");
 
   return (
-    <div className="container py-8 space-y-8">
+    <div className="container py-8 mt-16 space-y-8"> {/* Added mt-16 for navbar spacing */}
       <Tabs defaultValue="videos" className="space-y-6">
         <TabsList className="w-full max-w-md mx-auto glass-card">
           <TabsTrigger value="videos" className="flex items-center gap-2 flex-1">

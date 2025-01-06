@@ -14,7 +14,7 @@ export function HomeHero({ featuredVideo }: HomeHeroProps) {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="relative w-full h-[90vh] overflow-hidden"
+      className="relative w-full h-[90vh] mt-16 overflow-hidden" // Added mt-16 for navbar spacing
     >
       <div className="absolute inset-0 bg-gradient-to-b from-background/0 via-background/60 to-background" />
       <motion.img
