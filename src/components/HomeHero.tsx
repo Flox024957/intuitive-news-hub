@@ -26,7 +26,7 @@ export function HomeHero({ featuredVideo }: HomeHeroProps) {
         />
       </motion.div>
       
-      <div className="container relative z-20 max-w-6xl mx-auto px-4 py-16">
+      <div className="container relative z-20 max-w-6xl mx-auto px-6 py-16">
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}

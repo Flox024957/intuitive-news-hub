@@ -12,7 +12,7 @@
     --card-foreground: 0 0% 98%;
     --popover: 220 13% 8%;
     --popover-foreground: 0 0% 98%;
-    --primary: 1 77% 55%;
+    --primary: 210 100% 50%;
     --primary-foreground: 0 0% 100%;
     --secondary: 220 13% 12%;
     --secondary-foreground: 0 0% 98%;
@@ -24,7 +24,7 @@
     --destructive-foreground: 0 0% 98%;
     --border: 220 13% 12%;
     --input: 220 13% 12%;
-    --ring: 1 77% 55%;
+    --ring: 210 100% 50%;
     --radius: 0.5rem;
   }
 }
@@ -52,7 +52,7 @@
 }
 
 .text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-primary/80 to-primary/60;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-blue-400 to-blue-300;
 }
 
 /* Smooth scrolling */
@@ -114,5 +114,5 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-primary/50 rounded-full hover:bg-primary/70 transition-colors;
+  @apply bg-blue-500/50 rounded-full hover:bg-blue-500/70 transition-colors;
 }
