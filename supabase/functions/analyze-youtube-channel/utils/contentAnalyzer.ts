@@ -28,6 +28,16 @@ export const categoryKeywords = {
     "actualité", "information", "news", "journal", "média", "reportage",
     "événement", "direct", "breaking", "dernière minute", "analyse",
     "débat", "interview", "chronique", "édito"
+  ],
+  Humour: [
+    "humour", "comédie", "blague", "rire", "sketch", "stand-up",
+    "parodie", "satire", "comique", "drôle", "gag", "amusant",
+    "divertissement", "humoriste"
+  ],
+  Musique: [
+    "musique", "chanson", "concert", "album", "artiste", "groupe",
+    "clip", "son", "mélodie", "rythme", "instrument", "musicien",
+    "compositeur", "production", "live", "performance"
   ]
 }
 

@@ -7,8 +7,13 @@ interface YouTubeChannel {
   categories: string[];
 }
 
-// Liste vide des chaînes YouTube
-const YOUTUBE_CHANNELS: YouTubeChannel[] = [];
+// Liste des chaînes YouTube
+const YOUTUBE_CHANNELS: YouTubeChannel[] = [
+  {
+    id: '@IdrissJAberkane',
+    categories: ['Science', 'Culture', 'Economy']
+  }
+];
 
 export async function addNewYouTubeChannel(channelId: string) {
   try {
