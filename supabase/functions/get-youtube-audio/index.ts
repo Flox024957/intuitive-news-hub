@@ -14,10 +14,21 @@ serve(async (req) => {
   }
 
   try {
+    // First check if the request has a body
+    const hasBody = req.headers.get('content-length') !== '0' && req.headers.get('content-type')?.includes('application/json')
+    if (!hasBody) {
+      console.error('No request body provided')
+      return new Response(
+        JSON.stringify({ error: 'Request body is required' }),
+        { status: 400, headers: corsHeaders }
+      )
+    }
+
     const body = await req.json()
-    const { videoId } = body
+    console.log('Received request body:', body)
     
-    console.log('Received request for videoId:', videoId)
+    const { videoId } = body
+    console.log('Extracted videoId:', videoId)
     
     if (!videoId || typeof videoId !== 'string') {
       console.error('Invalid or missing videoId:', videoId)
