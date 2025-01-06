@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { FeaturedVideo } from "@/components/FeaturedVideo";
-import { ChevronDown, Play } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface HomeHeroProps {
@@ -12,7 +12,8 @@ export function HomeHero({ featuredVideo }: HomeHeroProps) {
 
   return (
     <motion.div
-      style={{ opacity: 1, scale: 1 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       className="relative w-full h-[90vh] overflow-hidden"
     >
       <div className="absolute inset-0 bg-gradient-to-b from-background/0 via-background/60 to-background" />

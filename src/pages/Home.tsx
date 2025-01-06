@@ -4,6 +4,7 @@ import { Navigation } from "@/components/Navigation";
 import { HomeHero } from "@/components/HomeHero";
 import { HomeContent } from "@/components/HomeContent";
 import { motion, AnimatePresence } from "framer-motion";
+import { Loader2 } from "lucide-react";
 
 const Home = () => {
   const { data: videos, isLoading } = useQuery({
@@ -33,6 +34,14 @@ const Home = () => {
       }));
     },
   });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    );
+  }
 
   const featuredVideo = videos?.[0];
   const trendingVideos = videos?.slice(0, 4) || [];

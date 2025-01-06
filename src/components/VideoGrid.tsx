@@ -16,6 +16,21 @@ interface VideoGridProps {
   sortOption: SortOption;
 }
 
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+};
+
 export function VideoGrid({ videos, isLoading, searchTerm, selectedCategory, sortOption }: VideoGridProps) {
   if (isLoading) {
     return (
@@ -79,13 +94,17 @@ export function VideoGrid({ videos, isLoading, searchTerm, selectedCategory, sor
   }
 
   return (
-    <div className="content-grid">
-      {sortedVideos.map((video, index) => (
+    <motion.div 
+      className="content-grid"
+      variants={container}
+      initial="hidden"
+      animate="show"
+    >
+      {sortedVideos.map((video) => (
         <motion.div
           key={video.id}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: index * 0.1 }}
+          variants={item}
+          className="transform-gpu"
         >
           <VideoCard
             id={video.id}
@@ -98,6 +117,6 @@ export function VideoGrid({ videos, isLoading, searchTerm, selectedCategory, sor
           />
         </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }
