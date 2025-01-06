@@ -22,6 +22,13 @@ export function HomeContent({ videos, isLoading: isLoadingDb, trendingVideos }: 
   const { videos: youtubeVideos, isLoading: isLoadingYoutube } = useYouTubeVideos();
   const allVideos = [...(videos || []), ...youtubeVideos];
 
+  // Trier les vidéos par nombre de vues pour la section Tendances
+  const sortedTrendingVideos = [...trendingVideos].sort((a, b) => {
+    const aViews = a.stats?.view_count || 0;
+    const bViews = b.stats?.view_count || 0;
+    return bViews - aViews;
+  });
+
   const TrendingContent = (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -39,7 +46,7 @@ export function HomeContent({ videos, isLoading: isLoadingDb, trendingVideos }: 
         </h2>
       </motion.div>
       <VideoGrid
-        videos={trendingVideos}
+        videos={sortedTrendingVideos}
         isLoading={isLoadingDb}
         searchTerm=""
         selectedCategory="All"
