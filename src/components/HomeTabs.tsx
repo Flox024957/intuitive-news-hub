@@ -12,37 +12,46 @@ interface HomeTabsProps {
 
 export function HomeTabs({ children }: HomeTabsProps) {
   return (
-    <Tabs defaultValue="videos" className="space-y-12">
+    <Tabs defaultValue="videos" className="space-y-16">
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="sticky top-20 z-50 w-full bg-background/80 backdrop-blur-lg py-6"
+        className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-lg py-6 border-b border-border/50"
       >
         <TabsList className="w-full max-w-2xl mx-auto glass-card p-2">
-          <TabsTrigger value="videos" className="flex items-center gap-2 flex-1 py-4 transition-all duration-300">
+          <TabsTrigger 
+            value="videos" 
+            className="flex items-center gap-2 flex-1 py-4 transition-all duration-300 data-[state=active]:bg-primary/20"
+          >
             <Play className="w-5 h-5" />
             <span className="text-base font-medium">Vidéos</span>
           </TabsTrigger>
-          <TabsTrigger value="trending" className="flex items-center gap-2 flex-1 py-4 transition-all duration-300">
+          <TabsTrigger 
+            value="trending" 
+            className="flex items-center gap-2 flex-1 py-4 transition-all duration-300 data-[state=active]:bg-primary/20"
+          >
             <TrendingUp className="w-5 h-5" />
             <span className="text-base font-medium">Tendances</span>
           </TabsTrigger>
-          <TabsTrigger value="podcasters" className="flex items-center gap-2 flex-1 py-4 transition-all duration-300">
+          <TabsTrigger 
+            value="podcasters" 
+            className="flex items-center gap-2 flex-1 py-4 transition-all duration-300 data-[state=active]:bg-primary/20"
+          >
             <Users className="w-5 h-5" />
             <span className="text-base font-medium">Podcasters</span>
           </TabsTrigger>
         </TabsList>
       </motion.div>
 
-      <TabsContent value="videos" className="focus-visible:outline-none mt-8">
+      <TabsContent value="videos" className="focus-visible:outline-none space-y-8 mt-8">
         {children.videos}
       </TabsContent>
 
-      <TabsContent value="trending" className="focus-visible:outline-none mt-8">
+      <TabsContent value="trending" className="focus-visible:outline-none space-y-8 mt-8">
         {children.trending}
       </TabsContent>
 
-      <TabsContent value="podcasters" className="focus-visible:outline-none mt-8">
+      <TabsContent value="podcasters" className="focus-visible:outline-none space-y-8 mt-8">
         {children.podcasters}
       </TabsContent>
     </Tabs>
