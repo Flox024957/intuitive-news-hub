@@ -2,25 +2,34 @@ import { supabase } from "@/integrations/supabase/client";
 
 export async function generateSummary(text: string): Promise<string> {
   try {
-    console.log('Starting summary generation for text length:', text.length);
+    console.log('Démarrage de la génération du résumé pour un texte de', text.length, 'caractères');
+    
+    // Vérification de la longueur du texte
+    if (text.length < 50) {
+      throw new Error('Le texte est trop court pour générer un résumé');
+    }
     
     const { data, error } = await supabase.functions.invoke('generate-summary', {
       body: { text }
     });
 
     if (error) {
-      console.error('Summary function error:', error);
-      throw error;
+      console.error('Erreur de la fonction de résumé:', error);
+      throw new Error(`Erreur lors de la génération du résumé: ${error.message}`);
     }
 
     if (!data?.summary) {
-      throw new Error('No summary text returned');
+      throw new Error('Aucun résumé généré');
     }
 
-    console.log('Summary generated successfully');
+    console.log('Résumé généré avec succès:', {
+      inputLength: text.length,
+      summaryLength: data.summary.length
+    });
+    
     return data.summary;
   } catch (error) {
-    console.error('Error in generateSummary:', error);
-    throw new Error('Failed to generate summary');
+    console.error('Erreur dans generateSummary:', error);
+    throw error;
   }
 }
