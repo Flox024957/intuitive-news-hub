@@ -197,6 +197,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_new_youtube_videos: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       increment_view_count: {
         Args: {
           video_id_param: string
