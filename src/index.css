@@ -6,26 +6,26 @@
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
+    --background: 220 13% 8%;
     --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
+    --card: 220 13% 8%;
     --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
+    --popover: 220 13% 8%;
     --popover-foreground: 0 0% 98%;
-    --primary: 167 77% 51%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
+    --primary: 1 77% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 13% 12%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
+    --muted: 220 13% 12%;
+    --muted-foreground: 220 13% 60%;
+    --accent: 220 13% 12%;
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 167 77% 51%;
-    --radius: 0.75rem;
+    --border: 220 13% 12%;
+    --input: 220 13% 12%;
+    --ring: 1 77% 55%;
+    --radius: 0.5rem;
   }
 }
 
@@ -40,7 +40,7 @@
 }
 
 .glass-card {
-  @apply bg-secondary/30 backdrop-blur-sm border border-white/10 shadow-xl;
+  @apply bg-secondary/30 backdrop-blur-sm border border-white/5 shadow-xl;
 }
 
 .content-grid {
@@ -48,11 +48,11 @@
 }
 
 .hover-card {
-  @apply transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl;
+  @apply transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:bg-secondary/50;
 }
 
 .text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-teal-200;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-primary/80 to-primary/60;
 }
 
 /* Smooth scrolling */
@@ -90,12 +90,12 @@ html {
 
 /* Gradient overlay for images */
 .gradient-overlay {
-  @apply absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent;
+  @apply absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent;
 }
 
 /* Enhanced glass effect */
 .glass-morphism {
-  @apply backdrop-blur-md bg-white/10 border border-white/20;
+  @apply backdrop-blur-md bg-secondary/20 border border-white/10 hover:bg-secondary/30 transition-colors duration-300;
 }
 
 /* Improved hover effects */
@@ -105,8 +105,8 @@ html {
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
