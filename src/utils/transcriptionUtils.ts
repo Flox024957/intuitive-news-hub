@@ -1,22 +1,16 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getCachedContent, setCachedContent } from "./cacheUtils";
 
 export async function transcribeAudio(audioUrl: string, videoId: string): Promise<string | null> {
   try {
     console.log('Checking cache for video transcript:', videoId);
     
-    // Check cache first
-    const { data: cachedTranscript } = await supabase
-      .from('content_cache')
-      .select('content')
-      .eq('video_id', videoId)
-      .eq('content_type', 'transcript')
-      .single();
-
+    const cachedTranscript = await getCachedContent(videoId, 'transcript');
     if (cachedTranscript) {
       console.log('Transcript found in cache');
       toast.success("Transcription récupérée du cache");
-      return cachedTranscript.content;
+      return cachedTranscript;
     }
 
     console.log('Starting transcription for audio URL:', audioUrl);
@@ -40,17 +34,7 @@ export async function transcribeAudio(audioUrl: string, videoId: string): Promis
     }
 
     // Store in cache
-    const { error: cacheError } = await supabase
-      .from('content_cache')
-      .insert({
-        video_id: videoId,
-        content_type: 'transcript',
-        content: data.text
-      });
-
-    if (cacheError) {
-      console.error('Erreur lors de la mise en cache de la transcription:', cacheError);
-    }
+    await setCachedContent(videoId, 'transcript', data.text);
 
     toast.success("Transcription terminée avec succès");
     return data.text;
@@ -77,18 +61,7 @@ export async function updateVideoTranscript(videoId: string, transcript: string)
     }
 
     // Update cache
-    const { error: cacheError } = await supabase
-      .from('content_cache')
-      .upsert({
-        video_id: videoId,
-        content_type: 'transcript',
-        content: transcript,
-        updated_at: new Date().toISOString()
-      });
-
-    if (cacheError) {
-      console.error('Error updating transcript cache:', cacheError);
-    }
+    await setCachedContent(videoId, 'transcript', transcript);
 
     toast.success("Transcription sauvegardée");
     return true;
