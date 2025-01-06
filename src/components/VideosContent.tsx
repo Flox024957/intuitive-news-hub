@@ -45,16 +45,16 @@ export function VideosContent({
   };
 
   const categories = [
-    { id: "all", label: "Toutes les vidéos", icon: Grid },
-    { id: "news", label: "News", icon: Newspaper },
-    { id: "politics", label: "Politique", icon: Globe },
-    { id: "economy", label: "Économie", icon: LineChart },
-    { id: "science", label: "Science", icon: Microscope },
-    { id: "technology", label: "Technologie", icon: Cpu },
-    { id: "culture", label: "Culture", icon: Palette },
-    { id: "divertissement", label: "Divertissement", icon: Film },
-    { id: "tutoriels", label: "Tutoriels", icon: BookOpen },
-    { id: "reportages", label: "Reportages", icon: Film },
+    { id: "all", label: "Toutes les vidéos", icon: Grid, color: "text-blue-500" },
+    { id: "news", label: "News", icon: Newspaper, color: "text-red-500" },
+    { id: "politics", label: "Politique", icon: Globe, color: "text-green-500" },
+    { id: "economy", label: "Économie", icon: LineChart, color: "text-yellow-500" },
+    { id: "science", label: "Science", icon: Microscope, color: "text-purple-500" },
+    { id: "technology", label: "Technologie", icon: Cpu, color: "text-cyan-500" },
+    { id: "culture", label: "Culture", icon: Palette, color: "text-pink-500" },
+    { id: "divertissement", label: "Divertissement", icon: Film, color: "text-orange-500" },
+    { id: "tutoriels", label: "Tutoriels", icon: BookOpen, color: "text-indigo-500" },
+    { id: "reportages", label: "Reportages", icon: Film, color: "text-emerald-500" },
   ];
 
   return (
@@ -85,28 +85,46 @@ export function VideosContent({
         </div>
 
         <Tabs defaultValue="all" className="w-full space-y-6">
-          <TabsList className="w-full max-w-6xl mx-auto glass-card p-1 grid grid-cols-2 md:grid-cols-5 gap-1">
-            {categories.map(({ id, label, icon: Icon }) => (
+          <TabsList className="w-full max-w-6xl mx-auto glass-card p-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-10 gap-2">
+            {categories.map(({ id, label, icon: Icon, color }) => (
               <TabsTrigger 
                 key={id}
                 value={id} 
-                className="flex items-center justify-center gap-2 py-3"
+                className="group relative flex flex-col items-center justify-center gap-2 py-3 px-2 transition-all duration-300 hover:bg-white/5"
               >
-                <Icon className="w-4 h-4" />
-                <span className="hidden md:inline">{label}</span>
+                <Icon className={`w-5 h-5 ${color} transition-transform group-hover:scale-110`} />
+                <span className="text-xs font-medium opacity-80 group-hover:opacity-100 transition-opacity">
+                  {label}
+                </span>
+                <motion.div
+                  className="absolute bottom-0 left-0 h-0.5 bg-primary"
+                  initial={{ width: 0 }}
+                  animate={{ width: id === selectedCategory ? "100%" : 0 }}
+                  transition={{ duration: 0.3 }}
+                />
               </TabsTrigger>
             ))}
           </TabsList>
 
           {categories.map(({ id, label }) => (
-            <TabsContent key={id} value={id} className="space-y-6 animate-fade-up">
-              <VideoGrid
-                videos={id === "all" ? videos : filterVideosByCategory(label)}
-                isLoading={isLoading}
-                searchTerm={searchTerm}
-                selectedCategory={id === "all" ? selectedCategory : label}
-                sortOption={sortOption}
-              />
+            <TabsContent 
+              key={id} 
+              value={id} 
+              className="space-y-6"
+            >
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <VideoGrid
+                  videos={id === "all" ? videos : filterVideosByCategory(label)}
+                  isLoading={isLoading}
+                  searchTerm={searchTerm}
+                  selectedCategory={id === "all" ? selectedCategory : label}
+                  sortOption={sortOption}
+                />
+              </motion.div>
             </TabsContent>
           ))}
         </Tabs>
