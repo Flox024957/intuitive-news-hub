@@ -7,24 +7,15 @@ interface YouTubeChannel {
   categories: string[];
 }
 
-const YOUTUBE_CHANNELS: YouTubeChannel[] = [
-  {
-    id: 'IdrissJAberkane',
-    categories: ["News", "Politics", "Science", "Technology", "Economy", "Culture"]
-  },
-  {
-    id: 'sanspermissionpodcast',
-    categories: ["Economy", "Politics", "News"]
-  }
-];
+// Liste vide des chaînes YouTube
+const YOUTUBE_CHANNELS: YouTubeChannel[] = [];
 
 export async function addNewYouTubeChannel(channelId: string) {
   try {
-    // First, analyze the channel and filter out Shorts
     const { data, error } = await supabase.functions.invoke('analyze-youtube-channel', {
       body: { 
         channelId,
-        excludeShorts: true // New parameter to filter out Shorts
+        excludeShorts: true
       }
     });
 
@@ -34,16 +25,14 @@ export async function addNewYouTubeChannel(channelId: string) {
       return false;
     }
 
-    // For each video, process content (transcription, summary, article)
+    // Pour chaque vidéo, traiter le contenu (transcription, résumé, article)
     for (const video of data.videos) {
       try {
-        // Step 1: Transcribe video
         const { data: transcriptionData } = await supabase.functions.invoke('transcribe-video', {
           body: { videoId: video.id }
         });
 
         if (transcriptionData?.transcript) {
-          // Step 2: Generate summary
           const { data: summaryData } = await supabase.functions.invoke('generate-summary', {
             body: { 
               text: transcriptionData.transcript,
@@ -51,7 +40,6 @@ export async function addNewYouTubeChannel(channelId: string) {
             }
           });
 
-          // Step 3: Generate article
           const { data: articleData } = await supabase.functions.invoke('generate-article', {
             body: {
               transcript: transcriptionData.transcript,
@@ -137,7 +125,6 @@ function determineVideoCategories(title: string, description: string, defaultCat
 
   const detectedCategories = new Set<string>();
 
-  // Analyse du contenu pour chaque catégorie
   for (const [category, keywords] of Object.entries(categoryKeywords)) {
     for (const keyword of keywords) {
       if (content.includes(keyword)) {
@@ -147,7 +134,6 @@ function determineVideoCategories(title: string, description: string, defaultCat
     }
   }
 
-  // Si aucune catégorie n'est détectée, utiliser les catégories par défaut de la chaîne
   return detectedCategories.size > 0 
     ? Array.from(detectedCategories)
     : defaultCategories;
