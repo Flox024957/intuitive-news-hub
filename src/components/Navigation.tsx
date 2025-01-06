@@ -34,9 +34,9 @@ export function Navigation() {
   };
   
   return (
-    <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-sm border-b border-border z-50">
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center justify-between">
+    <nav className="fixed top-0 left-0 right-0 h-16 bg-background/80 backdrop-blur-sm border-b border-border z-50">
+      <div className="container h-full mx-auto px-4">
+        <div className="flex items-center justify-between h-full">
           <div className="flex items-center space-x-4">
             <Link to="/" className="text-xl font-bold text-gradient">Info-Direct-France</Link>
           </div>

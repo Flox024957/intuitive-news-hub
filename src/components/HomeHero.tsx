@@ -11,7 +11,7 @@ export function HomeHero({ featuredVideo }: HomeHeroProps) {
   if (!featuredVideo) return null;
 
   return (
-    <div className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden">
+    <div className="relative w-full min-h-[calc(90vh-64px)] flex items-center justify-center overflow-hidden">
       <motion.div
         initial={{ scale: 1.1, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -52,7 +52,7 @@ export function HomeHero({ featuredVideo }: HomeHeroProps) {
           variant="ghost"
           size="lg"
           className="rounded-full bg-white/5 backdrop-blur-lg hover:bg-white/10 transition-all duration-500"
-          onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+          onClick={() => window.scrollTo({ top: window.innerHeight - 64, behavior: 'smooth' })}
         >
           <ChevronDown className="w-8 h-8 animate-bounce" />
         </Button>

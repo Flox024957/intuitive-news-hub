@@ -59,14 +59,14 @@ const Home = () => {
       <Navigation />
       <AnimatePresence mode="wait">
         <SidebarProvider>
-          <div className="flex min-h-screen w-full">
+          <div className="flex min-h-[calc(100vh-64px)] w-full pt-16">
             <HomeSidebar />
             <motion.main 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
-              className="flex flex-col min-h-screen relative flex-1"
+              className="flex-1 relative"
             >
               <HomeHero featuredVideo={featuredVideo} />
               <div className="relative z-10 mt-[-150px]">
