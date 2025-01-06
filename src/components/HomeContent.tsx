@@ -7,6 +7,9 @@ import { CategoryFilter } from "@/components/CategoryFilter";
 import { SortOptions, type SortOption } from "@/components/SortOptions";
 import { VideoGrid } from "@/components/VideoGrid";
 import { PodcasterGrid } from "@/components/PodcasterGrid";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface HomeContentProps {
   videos: any[];
@@ -19,8 +22,46 @@ export function HomeContent({ videos, isLoading, trendingVideos }: HomeContentPr
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("recent");
 
+  // Fetch latest videos from YouTube for the podcaster
+  const { data: youtubeVideos, isLoading: isLoadingYoutube } = useQuery({
+    queryKey: ['youtube-videos'],
+    queryFn: async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('youtube-data', {
+          body: { username: 'IdrissJAberkane' }
+        });
+
+        if (error) {
+          console.error('Error fetching YouTube data:', error);
+          toast.error("Erreur lors de la récupération des vidéos YouTube");
+          return [];
+        }
+
+        // Transform YouTube data to match our video format
+        return data.videos.map((video: any) => ({
+          id: video.id,
+          title: video.title,
+          summary: video.description,
+          thumbnail_url: video.thumbnail,
+          published_date: video.publishedAt,
+          categories: ["News", "Science", "Technology", "Economy", "Culture"],
+          stats: {
+            view_count: video.statistics.viewCount || 0
+          }
+        }));
+      } catch (error) {
+        console.error('Error:', error);
+        toast.error("Erreur lors de la récupération des vidéos");
+        return [];
+      }
+    }
+  });
+
+  // Combine existing videos with YouTube videos
+  const allVideos = [...(videos || []), ...(youtubeVideos || [])];
+
   return (
-    <div className="container py-8 mt-16 space-y-8"> {/* Added mt-16 for navbar spacing */}
+    <div className="container py-8 mt-16 space-y-8">
       <Tabs defaultValue="videos" className="space-y-6">
         <TabsList className="w-full max-w-md mx-auto glass-card">
           <TabsTrigger value="videos" className="flex items-center gap-2 flex-1">
@@ -72,8 +113,8 @@ export function HomeContent({ videos, isLoading, trendingVideos }: HomeContentPr
           </motion.div>
           
           <VideoGrid
-            videos={videos}
-            isLoading={isLoading}
+            videos={allVideos}
+            isLoading={isLoading || isLoadingYoutube}
             searchTerm={searchTerm}
             selectedCategory={selectedCategory}
             sortOption={sortOption}
