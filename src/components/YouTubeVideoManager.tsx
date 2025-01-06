@@ -20,14 +20,56 @@ const YOUTUBE_CHANNELS: YouTubeChannel[] = [
 
 export async function addNewYouTubeChannel(channelId: string) {
   try {
+    // First, analyze the channel and filter out Shorts
     const { data, error } = await supabase.functions.invoke('analyze-youtube-channel', {
-      body: { channelId }
+      body: { 
+        channelId,
+        excludeShorts: true // New parameter to filter out Shorts
+      }
     });
 
     if (error) {
       console.error('Error analyzing channel:', error);
       toast.error("Erreur lors de l'analyse de la chaîne YouTube");
       return false;
+    }
+
+    // For each video, process content (transcription, summary, article)
+    for (const video of data.videos) {
+      try {
+        // Step 1: Transcribe video
+        const { data: transcriptionData } = await supabase.functions.invoke('transcribe-video', {
+          body: { videoId: video.id }
+        });
+
+        if (transcriptionData?.transcript) {
+          // Step 2: Generate summary
+          const { data: summaryData } = await supabase.functions.invoke('generate-summary', {
+            body: { 
+              text: transcriptionData.transcript,
+              videoId: video.id
+            }
+          });
+
+          // Step 3: Generate article
+          const { data: articleData } = await supabase.functions.invoke('generate-article', {
+            body: {
+              transcript: transcriptionData.transcript,
+              summary: summaryData?.summary,
+              videoId: video.id
+            }
+          });
+
+          console.log(`Content generated for video ${video.id}:`, {
+            transcription: !!transcriptionData?.transcript,
+            summary: !!summaryData?.summary,
+            article: !!articleData?.article
+          });
+        }
+      } catch (processError) {
+        console.error(`Error processing video ${video.id}:`, processError);
+        toast.error(`Erreur lors du traitement de la vidéo ${video.title}`);
+      }
     }
 
     toast.success("Chaîne YouTube ajoutée avec succès !");

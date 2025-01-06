@@ -135,6 +135,7 @@ export type Database = {
       }
       videos: {
         Row: {
+          article_content: string | null
           categories: string[] | null
           created_at: string
           custom_title: string | null
@@ -150,6 +151,7 @@ export type Database = {
           youtube_video_id: string
         }
         Insert: {
+          article_content?: string | null
           categories?: string[] | null
           created_at?: string
           custom_title?: string | null
@@ -165,6 +167,7 @@ export type Database = {
           youtube_video_id: string
         }
         Update: {
+          article_content?: string | null
           categories?: string[] | null
           created_at?: string
           custom_title?: string | null

@@ -1,81 +1,97 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { corsHeaders } from "../_shared/cors.ts"
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
+import { Configuration, OpenAIApi } from 'https://esm.sh/openai@3.1.0';
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    const { transcript, title, summary } = await req.json()
+    const { transcript, summary, videoId } = await req.json();
 
-    if (!transcript || !title) {
-      throw new Error('Transcript et titre sont requis')
+    if (!transcript || !videoId) {
+      throw new Error('Missing required parameters');
     }
 
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    const configuration = new Configuration({
+      apiKey: Deno.env.get('OPENAI_API_KEY'),
+    });
+    const openai = new OpenAIApi(configuration);
+
+    // Generate article using GPT-4
     const prompt = `
-    En tant que journaliste professionnel, écris un article de presse basé sur cette transcription vidéo.
-    
-    Titre de la vidéo: ${title}
-    
-    Résumé: ${summary}
-    
-    Transcription: ${transcript.substring(0, 3000)}...
-    
-    Écris un article journalistique structuré qui:
-    1. A un titre accrocheur
-    2. Commence par un chapô (résumé introductif)
-    3. Développe les points principaux
-    4. Inclut des citations pertinentes de la transcription
-    5. Conclut avec une mise en perspective
-    
-    Format: Article de presse professionnel
-    Style: Objectif et informatif
-    `
+      Based on the following video transcript and summary, write a professional article:
+      
+      Summary: ${summary}
+      
+      Transcript: ${transcript}
+      
+      Write a well-structured article that:
+      1. Has a compelling headline
+      2. Includes an introduction
+      3. Contains main points with subheadings
+      4. Provides a conclusion
+      5. Maintains a professional tone
+      6. Is engaging and informative
+    `;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        messages: [
-          { 
-            role: 'system', 
-            content: 'Tu es un journaliste professionnel qui écrit des articles de presse de haute qualité.'
-          },
-          { 
-            role: 'user', 
-            content: prompt 
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 2000,
-      }),
-    })
+    const completion = await openai.createChatCompletion({
+      model: "gpt-4",
+      messages: [
+        {
+          role: "system",
+          content: "You are a professional journalist writing an article based on video content."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 2000
+    });
 
-    if (!response.ok) {
-      throw new Error('Erreur lors de la génération de l\'article')
+    const article = completion.data.choices[0]?.message?.content;
+
+    if (!article) {
+      throw new Error('Failed to generate article');
     }
 
-    const result = await response.json()
-    const article = result.choices[0].message.content
+    // Store the article in Supabase
+    const { error: updateError } = await supabaseClient
+      .from('videos')
+      .update({ article_content: article })
+      .eq('id', videoId);
+
+    if (updateError) {
+      throw updateError;
+    }
 
     return new Response(
       JSON.stringify({ article }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
-
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      }
+    );
   } catch (error) {
-    console.error('Erreur:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
-      { 
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400,
       }
-    )
+    );
   }
-})
+});
