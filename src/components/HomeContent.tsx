@@ -27,10 +27,10 @@ export function HomeContent({ videos, isLoading: isLoadingDb, trendingVideos }: 
       <motion.div 
         initial={{ x: -20, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
-        className="flex items-center gap-3 glass-card p-8 rounded-xl shadow-lg"
+        className="flex items-center gap-3 glass-card p-6 rounded-xl"
       >
-        <TrendingUp className="w-8 h-8 text-primary animate-pulse" />
-        <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
+        <TrendingUp className="w-8 h-8 text-primary" />
+        <h2 className="text-2xl font-bold text-gradient">
           Vidéos tendances
         </h2>
       </motion.div>
@@ -50,9 +50,9 @@ export function HomeContent({ videos, isLoading: isLoadingDb, trendingVideos }: 
       animate={{ y: 0, opacity: 1 }}
       className="space-y-8"
     >
-      <div className="flex items-center gap-3 glass-card p-8 rounded-xl shadow-lg">
-        <Users className="w-8 h-8 text-primary animate-pulse" />
-        <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
+      <div className="flex items-center gap-3 glass-card p-6 rounded-xl">
+        <Users className="w-8 h-8 text-primary" />
+        <h2 className="text-2xl font-bold text-gradient">
           Nos podcasters
         </h2>
       </div>
@@ -61,7 +61,7 @@ export function HomeContent({ videos, isLoading: isLoadingDb, trendingVideos }: 
   );
 
   return (
-    <div className="container max-w-7xl py-12 mt-8 space-y-12">
+    <div className="container max-w-7xl py-8 space-y-8">
       <HomeTabs>
         {{
           videos: (
