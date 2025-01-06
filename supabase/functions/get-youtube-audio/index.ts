@@ -15,19 +15,19 @@ serve(async (req) => {
 
   try {
     const { videoId } = await req.json()
-    console.log('Received request for videoId:', videoId);
+    console.log('Received request for videoId:', videoId)
     
     if (!videoId) {
-      console.error('No videoId provided in request');
+      console.error('No videoId provided in request')
       return new Response(
         JSON.stringify({ error: 'Video ID is required' }),
         { status: 400, headers: corsHeaders }
       )
     }
 
-    console.log('Fetching video info for:', videoId);
+    console.log('Fetching video info for:', videoId)
     const info = await ytdl.getInfo(videoId)
-    console.log('Got video info, selecting audio format');
+    console.log('Got video info, selecting audio format')
     
     const audioFormat = ytdl.chooseFormat(info.formats, { 
       quality: 'highestaudio',
@@ -37,15 +37,16 @@ serve(async (req) => {
     console.log('Selected audio format:', {
       quality: audioFormat.quality,
       container: audioFormat.container,
-      hasAudio: audioFormat.hasAudio
-    });
+      hasAudio: audioFormat.hasAudio,
+      url: audioFormat.url.substring(0, 50) + '...' // Log truncated URL for safety
+    })
 
     return new Response(
       JSON.stringify({ audioUrl: audioFormat.url }),
       { headers: corsHeaders }
     )
   } catch (error) {
-    console.error('Error in get-youtube-audio:', error);
+    console.error('Error in get-youtube-audio:', error)
     return new Response(
       JSON.stringify({ 
         error: error.message,
