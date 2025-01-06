@@ -11,10 +11,15 @@ interface FeaturedVideoProps {
   category: string;
 }
 
-export function FeaturedVideo({ title, summary, thumbnail, category }: FeaturedVideoProps) {
+export function FeaturedVideo({ 
+  title, 
+  summary, 
+  thumbnail, 
+  category
+}: FeaturedVideoProps) {
   return (
-    <Card className="relative overflow-hidden rounded-lg glass-card group">
-      <div className="aspect-[21/9] relative">
+    <Card className="relative overflow-hidden rounded-2xl glass-card group">
+      <div className="aspect-video relative overflow-hidden rounded-t-2xl">
         <motion.img
           src={thumbnail}
           alt={title}
@@ -29,22 +34,22 @@ export function FeaturedVideo({ title, summary, thumbnail, category }: FeaturedV
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.5 }}
-          className="absolute bottom-0 left-0 right-0 p-8 space-y-6"
+          className="absolute bottom-0 left-0 right-0 p-12 space-y-8"
         >
           <Badge 
             variant="secondary" 
-            className="backdrop-blur-sm bg-secondary/30 text-lg px-4 py-2"
+            className="backdrop-blur-sm bg-secondary/30 text-lg px-6 py-2 rounded-full"
           >
             {category}
           </Badge>
-          <motion.h2 
+          <motion.h1 
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="text-4xl sm:text-5xl md:text-6xl font-bold text-gradient leading-tight"
+            className="text-5xl sm:text-6xl md:text-7xl font-bold text-gradient leading-tight"
           >
             {title}
-          </motion.h2>
+          </motion.h1>
           <motion.p 
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -57,14 +62,14 @@ export function FeaturedVideo({ title, summary, thumbnail, category }: FeaturedV
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.6 }}
-            className="flex gap-4 pt-4"
+            className="flex gap-6 pt-6"
           >
-            <Button size="lg" className="gap-2 hover-card group text-lg h-14 px-8">
-              <Play className="w-6 h-6 transition-transform group-hover:scale-110" />
+            <Button size="lg" className="gap-3 hover-card group text-xl h-16 px-10 rounded-full">
+              <Play className="w-8 h-8 transition-transform group-hover:scale-110" />
               <span>Regarder</span>
             </Button>
-            <Button size="lg" variant="secondary" className="gap-2 hover-card group text-lg h-14 px-8">
-              <Info className="w-6 h-6 transition-transform group-hover:scale-110" />
+            <Button size="lg" variant="secondary" className="gap-3 hover-card group text-xl h-16 px-10 rounded-full">
+              <Info className="w-8 h-8 transition-transform group-hover:scale-110" />
               <span>Plus d'infos</span>
             </Button>
           </motion.div>

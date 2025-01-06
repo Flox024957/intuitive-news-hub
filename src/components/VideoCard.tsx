@@ -28,7 +28,7 @@ export function VideoCard({
   
   return (
     <motion.div
-      whileHover={{ scale: 1.05 }}
+      whileHover={{ scale: 1.03 }}
       transition={{ duration: 0.2 }}
     >
       <Card className="group relative overflow-hidden hover-card glass-card">
@@ -46,14 +46,14 @@ export function VideoCard({
                 whileHover={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.2 }}
               >
-                <Play className="w-16 h-16 text-white" />
+                <Play className="w-20 h-20 text-white" />
               </motion.div>
             </div>
           </div>
         </Link>
-        <div className="p-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="text-xs">
+        <div className="p-6 space-y-4">
+          <div className="flex items-center gap-3">
+            <Badge variant="secondary" className="text-xs px-3 py-1 rounded-full">
               {category}
             </Badge>
             <span className="text-xs text-muted-foreground">{date}</span>
@@ -66,10 +66,10 @@ export function VideoCard({
             <ShareButtons title={title} url={videoUrl} />
           </div>
           <Link to={`/video/${id}`}>
-            <h3 className="font-semibold line-clamp-2 leading-tight group-hover:text-primary transition-colors">
+            <h3 className="text-xl font-semibold line-clamp-2 leading-tight group-hover:text-primary transition-colors">
               {title}
             </h3>
-            <p className="text-sm text-muted-foreground line-clamp-2">{summary}</p>
+            <p className="text-sm text-muted-foreground line-clamp-2 mt-2">{summary}</p>
           </Link>
         </div>
       </Card>

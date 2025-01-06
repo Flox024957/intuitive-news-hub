@@ -38,7 +38,13 @@ const Home = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Loader2 className="w-12 h-12 text-primary animate-spin" />
+        </motion.div>
       </div>
     );
   }
@@ -58,7 +64,7 @@ const Home = () => {
           className="flex flex-col min-h-screen relative"
         >
           <HomeHero featuredVideo={featuredVideo} />
-          <div className="relative z-10 mt-[-100px]">
+          <div className="relative z-10 mt-[-150px]">
             <HomeContent 
               videos={videos || []}
               isLoading={isLoading}
