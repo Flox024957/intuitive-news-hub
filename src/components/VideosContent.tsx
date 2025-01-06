@@ -60,19 +60,19 @@ export function VideosContent({
   return (
     <div className="space-y-36">
       <motion.div 
-        className="flex flex-col gap-6 glass-card p-8 rounded-xl shadow-lg"
+        className="flex flex-col gap-8 glass-morphism p-12 rounded-3xl shadow-2xl border-0"
         initial={{ x: -20, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ delay: 0.3 }}
       >
-        <div className="flex items-center gap-3 border-b border-white/10 pb-4">
-          <Sparkles className="w-8 h-8 text-primary animate-pulse" />
-          <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
+        <div className="flex items-center gap-4 border-b border-white/10 pb-6">
+          <Sparkles className="w-10 h-10 text-primary animate-pulse" />
+          <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
             Dernières vidéos
           </h2>
         </div>
         
-        <div className="flex flex-col lg:flex-row gap-6 w-full">
+        <div className="flex flex-col lg:flex-row gap-8 w-full">
           <div className="flex-1 min-w-[280px]">
             <SearchBar
               searchTerm={searchTerm}
@@ -85,12 +85,12 @@ export function VideosContent({
         </div>
 
         <Tabs defaultValue="all" className="w-full space-y-36">
-          <TabsList className="w-full max-w-7xl mx-auto glass-card p-12 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-10 gap-4 place-items-center min-h-[240px]">
+          <TabsList className="w-full max-w-7xl mx-auto glass-morphism p-12 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-10 gap-4 place-items-center min-h-[240px] rounded-2xl">
             {categories.map(({ id, label, icon: Icon, color }) => (
               <TabsTrigger 
                 key={id}
                 value={id} 
-                className="group relative flex flex-col items-center justify-center gap-3 py-4 px-3 transition-all duration-300 hover:bg-white/5"
+                className="group relative flex flex-col items-center justify-center gap-3 py-4 px-3 transition-all duration-500 hover:bg-white/5 rounded-xl"
                 onClick={() => onCategorySelect(label)}
               >
                 <Icon className={`w-6 h-6 ${color} transition-transform group-hover:scale-110`} />
