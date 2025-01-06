@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Sparkles, TrendingUp, Users } from "lucide-react";
-import { SearchBar } from "@/components/SearchBar";
-import { CategoryFilter } from "@/components/CategoryFilter";
-import { SortOptions, type SortOption } from "@/components/SortOptions";
+import { TrendingUp, Users } from "lucide-react";
+import { type SortOption } from "@/components/SortOptions";
 import { VideoGrid } from "@/components/VideoGrid";
 import { PodcasterGrid } from "@/components/PodcasterGrid";
 import { HomeTabs } from "@/components/HomeTabs";
-import { useYoutubeVideos } from "@/hooks/useYoutubeVideos";
+import { VideosContent } from "@/components/VideosContent";
+import { useYouTubeVideos } from "@/components/YouTubeVideoManager";
 
 interface HomeContentProps {
   videos: any[];
@@ -15,75 +14,13 @@ interface HomeContentProps {
   trendingVideos: any[];
 }
 
-export function HomeContent({ videos, isLoading, trendingVideos }: HomeContentProps) {
+export function HomeContent({ videos, isLoading: isLoadingDb, trendingVideos }: HomeContentProps) {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("recent");
 
-  const { data: idrissVideos, isLoading: isLoadingIdriss } = useYoutubeVideos('IdrissJAberkane');
-  const { data: sanspermissionVideos, isLoading: isLoadingSansPermission } = useYoutubeVideos('sanspermissionpodcast');
-
-  // Transform videos to add specific tags
-  const transformedIdrissVideos = idrissVideos?.map(video => ({
-    ...video,
-    categories: ["News", "Politics", "Science", "Technology", "Economy", "Culture"]
-  })) || [];
-
-  const transformedSanspermissionVideos = sanspermissionVideos?.map(video => ({
-    ...video,
-    categories: ["Economy"]
-  })) || [];
-
-  const allVideos = [
-    ...(videos || []), 
-    ...transformedIdrissVideos,
-    ...transformedSanspermissionVideos
-  ];
-
-  const VideosContent = (
-    <>
-      <motion.div 
-        className="flex flex-col md:flex-row gap-4 md:items-center justify-between glass-card p-6 rounded-lg"
-        initial={{ x: -20, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        transition={{ delay: 0.3 }}
-      >
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-6 h-6 text-primary animate-pulse" />
-          <h2 className="text-2xl font-bold">Dernières vidéos</h2>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-          <div className="flex-1 md:w-64">
-            <SearchBar
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-            />
-          </div>
-          <CategoryFilter
-            selected={selectedCategory}
-            onSelect={setSelectedCategory}
-          />
-        </div>
-      </motion.div>
-
-      <motion.div
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.4 }}
-        className="glass-card p-4 rounded-lg"
-      >
-        <SortOptions selected={sortOption} onSelect={setSortOption} />
-      </motion.div>
-      
-      <VideoGrid
-        videos={allVideos}
-        isLoading={isLoading || isLoadingIdriss || isLoadingSansPermission}
-        searchTerm={searchTerm}
-        selectedCategory={selectedCategory}
-        sortOption={sortOption}
-      />
-    </>
-  );
+  const { videos: youtubeVideos, isLoading: isLoadingYoutube } = useYouTubeVideos();
+  const allVideos = [...(videos || []), ...youtubeVideos];
 
   const TrendingContent = (
     <>
@@ -97,7 +34,7 @@ export function HomeContent({ videos, isLoading, trendingVideos }: HomeContentPr
       </motion.div>
       <VideoGrid
         videos={trendingVideos}
-        isLoading={isLoading}
+        isLoading={isLoadingDb}
         searchTerm=""
         selectedCategory="All"
         sortOption="popular"
@@ -123,7 +60,18 @@ export function HomeContent({ videos, isLoading, trendingVideos }: HomeContentPr
     <div className="container py-8 mt-16 space-y-8">
       <HomeTabs>
         {{
-          videos: VideosContent,
+          videos: (
+            <VideosContent
+              videos={allVideos}
+              isLoading={isLoadingDb || isLoadingYoutube}
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              selectedCategory={selectedCategory}
+              onCategorySelect={setSelectedCategory}
+              sortOption={sortOption}
+              onSortChange={setSortOption}
+            />
+          ),
           trending: TrendingContent,
           podcasters: PodcastersContent
         }}
