@@ -14,7 +14,7 @@ const YOUTUBE_CHANNELS: YouTubeChannel[] = [
   },
   {
     id: 'sanspermissionpodcast',
-    categories: ["Economy"]
+    categories: ["Economy", "Politics", "News"]
   }
 ];
 
@@ -45,7 +45,7 @@ export function useYouTubeVideos() {
     return {
       videos: data?.map(video => ({
         ...video,
-        categories: video.categories || channel.categories
+        categories: determineVideoCategories(video.title, video.summary || '', channel.categories)
       })) || [],
       isLoading
     };
@@ -55,4 +55,58 @@ export function useYouTubeVideos() {
   const isLoading = channelsData.some(channel => channel.isLoading);
 
   return { videos: allVideos, isLoading };
+}
+
+function determineVideoCategories(title: string, description: string, defaultCategories: string[]): string[] {
+  const content = (title + " " + description).toLowerCase();
+  
+  const categoryKeywords = {
+    Politics: [
+      "politique", "gouvernement", "élection", "président", "ministre", "assemblée",
+      "parlement", "démocratie", "loi", "réforme", "état", "constitution",
+      "député", "sénat", "vote", "électeur", "campagne", "parti"
+    ],
+    Economy: [
+      "économie", "finance", "marché", "entreprise", "croissance", "inflation",
+      "investissement", "bourse", "budget", "commerce", "emploi", "pib",
+      "dette", "banque", "monnaie", "euro", "dollar", "crise"
+    ],
+    Science: [
+      "science", "recherche", "découverte", "étude", "laboratoire", "expérience",
+      "scientifique", "biologie", "physique", "chimie", "théorie", "cerveau",
+      "neuroscience", "cognition", "intelligence", "évolution", "nature"
+    ],
+    Technology: [
+      "technologie", "innovation", "numérique", "intelligence artificielle", "ia",
+      "robot", "internet", "digital", "informatique", "tech", "application",
+      "algorithme", "données", "cybersécurité", "blockchain", "startup"
+    ],
+    Culture: [
+      "culture", "art", "musique", "cinéma", "littérature", "théâtre",
+      "exposition", "spectacle", "festival", "patrimoine", "histoire",
+      "philosophie", "société", "civilisation", "tradition"
+    ],
+    News: [
+      "actualité", "information", "news", "journal", "média", "reportage",
+      "événement", "direct", "breaking", "dernière minute", "analyse",
+      "débat", "interview", "chronique", "édito"
+    ]
+  };
+
+  const detectedCategories = new Set<string>();
+
+  // Analyse du contenu pour chaque catégorie
+  for (const [category, keywords] of Object.entries(categoryKeywords)) {
+    for (const keyword of keywords) {
+      if (content.includes(keyword)) {
+        detectedCategories.add(category);
+        break;
+      }
+    }
+  }
+
+  // Si aucune catégorie n'est détectée, utiliser les catégories par défaut de la chaîne
+  return detectedCategories.size > 0 
+    ? Array.from(detectedCategories)
+    : defaultCategories;
 }

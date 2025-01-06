@@ -20,47 +20,52 @@ interface VideoData {
 
 // Mots-clés pour la catégorisation
 const categoryKeywords = {
-  politics: [
+  Politics: [
     "politique", "gouvernement", "élection", "président", "ministre", "assemblée",
-    "parlement", "démocratie", "loi", "réforme", "état"
+    "parlement", "démocratie", "loi", "réforme", "état", "constitution",
+    "député", "sénat", "vote", "électeur", "campagne", "parti"
   ],
-  economy: [
+  Economy: [
     "économie", "finance", "marché", "entreprise", "croissance", "inflation",
-    "investissement", "bourse", "budget", "commerce", "emploi"
+    "investissement", "bourse", "budget", "commerce", "emploi", "pib",
+    "dette", "banque", "monnaie", "euro", "dollar", "crise"
   ],
-  science: [
+  Science: [
     "science", "recherche", "découverte", "étude", "laboratoire", "expérience",
-    "scientifique", "biologie", "physique", "chimie", "théorie"
+    "scientifique", "biologie", "physique", "chimie", "théorie", "cerveau",
+    "neuroscience", "cognition", "intelligence", "évolution", "nature"
   ],
-  technology: [
+  Technology: [
     "technologie", "innovation", "numérique", "intelligence artificielle", "ia",
-    "robot", "internet", "digital", "informatique", "tech", "application"
+    "robot", "internet", "digital", "informatique", "tech", "application",
+    "algorithme", "données", "cybersécurité", "blockchain", "startup"
   ],
-  culture: [
+  Culture: [
     "culture", "art", "musique", "cinéma", "littérature", "théâtre",
-    "exposition", "spectacle", "festival", "patrimoine", "histoire"
+    "exposition", "spectacle", "festival", "patrimoine", "histoire",
+    "philosophie", "société", "civilisation", "tradition"
   ],
-  news: [
+  News: [
     "actualité", "information", "news", "journal", "média", "reportage",
-    "événement", "direct", "breaking", "dernière minute"
+    "événement", "direct", "breaking", "dernière minute", "analyse",
+    "débat", "interview", "chronique", "édito"
   ]
 }
 
 function analyzeContent(title: string, description: string): string[] {
   const content = (title + " " + description).toLowerCase()
-  const categories: string[] = []
+  const categories = new Set<string>()
 
   for (const [category, keywords] of Object.entries(categoryKeywords)) {
     for (const keyword of keywords) {
       if (content.includes(keyword)) {
-        categories.push(category)
+        categories.add(category)
         break
       }
     }
   }
 
-  // Si aucune catégorie n'est trouvée, on met par défaut "news"
-  return categories.length > 0 ? categories : ["news"]
+  return categories.size > 0 ? Array.from(categories) : ["News"]
 }
 
 async function getChannelVideos(channelId: string): Promise<VideoData[]> {
