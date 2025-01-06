@@ -42,19 +42,19 @@ export function Navigation() {
           </div>
           
           <div className="flex items-center space-x-2">
-            <Button
-              variant={location.pathname === "/" ? "default" : "ghost"}
-              asChild
-              className="relative group"
-            >
-              <Link to="/" className="flex items-center space-x-2">
-                <Home className="w-4 h-4" />
-                <span>Accueil</span>
-              </Link>
-            </Button>
-            
             {session ? (
               <>
+                <Button
+                  variant={location.pathname === "/home" ? "default" : "ghost"}
+                  asChild
+                  className="relative group"
+                >
+                  <Link to="/home" className="flex items-center space-x-2">
+                    <Home className="w-4 h-4" />
+                    <span>Accueil</span>
+                  </Link>
+                </Button>
+                
                 <Button
                   variant={location.pathname === "/personal" ? "default" : "ghost"}
                   asChild
@@ -76,16 +76,18 @@ export function Navigation() {
                 </Button>
               </>
             ) : (
-              <Button
-                variant="default"
-                asChild
-                className="relative group"
-              >
-                <Link to="/auth" className="flex items-center space-x-2">
-                  <User className="w-4 h-4" />
-                  <span>Connexion</span>
-                </Link>
-              </Button>
+              location.pathname !== "/auth" && (
+                <Button
+                  variant="default"
+                  asChild
+                  className="relative group"
+                >
+                  <Link to="/auth" className="flex items-center space-x-2">
+                    <User className="w-4 h-4" />
+                    <span>Connexion</span>
+                  </Link>
+                </Button>
+              )
             )}
           </div>
         </div>

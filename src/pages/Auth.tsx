@@ -14,7 +14,7 @@ const AuthPage = () => {
     // Check if user is already authenticated
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate('/');
+        navigate('/home');
         toast.success("Déjà connecté !");
       }
     });
@@ -24,7 +24,7 @@ const AuthPage = () => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
-        navigate('/');
+        navigate('/home');
         toast.success("Connexion réussie !");
       }
     });
@@ -42,7 +42,7 @@ const AuthPage = () => {
       if (error) throw error;
       
       toast.success("Connexion avec le compte de démonstration réussie");
-      navigate("/");
+      navigate("/home");
     } catch (error) {
       console.error("Erreur de connexion:", error);
       toast.error("Erreur lors de la connexion avec le compte de démonstration");

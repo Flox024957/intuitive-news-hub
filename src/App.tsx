@@ -2,12 +2,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Home from "./pages/Home";
 import PersonalizedHome from "./pages/PersonalizedHome";
 import AuthPage from "./pages/Auth";
 import VideoDetailPage from "./pages/VideoDetailPage";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -18,11 +19,29 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/test" element={<Index />} />
-          <Route path="/personal" element={<PersonalizedHome />} />
+          {/* Pages publiques */}
+          <Route path="/" element={<Index />} />
           <Route path="/auth" element={<AuthPage />} />
-          <Route path="/video/:id" element={<VideoDetailPage />} />
+          
+          {/* Pages protégées (nécessitent une connexion) */}
+          <Route path="/home" element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          } />
+          <Route path="/personal" element={
+            <ProtectedRoute>
+              <PersonalizedHome />
+            </ProtectedRoute>
+          } />
+          <Route path="/video/:id" element={
+            <ProtectedRoute>
+              <VideoDetailPage />
+            </ProtectedRoute>
+          } />
+          
+          {/* Redirection par défaut */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
