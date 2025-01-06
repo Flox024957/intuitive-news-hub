@@ -1,5 +1,16 @@
 import { motion } from "framer-motion";
-import { Sparkles, Grid, BookOpen, Film } from "lucide-react";
+import { 
+  Sparkles, 
+  Grid, 
+  BookOpen, 
+  Film, 
+  Globe, 
+  LineChart, 
+  Flask, 
+  Cpu, 
+  Palette, 
+  Newspaper 
+} from "lucide-react";
 import { SearchBar } from "@/components/SearchBar";
 import { SortOptions, type SortOption } from "@/components/SortOptions";
 import { VideoGrid } from "@/components/VideoGrid";
@@ -33,6 +44,19 @@ export function VideosContent({
     );
   };
 
+  const categories = [
+    { id: "all", label: "Toutes les vidéos", icon: Grid },
+    { id: "news", label: "News", icon: Newspaper },
+    { id: "politics", label: "Politique", icon: Globe },
+    { id: "economy", label: "Économie", icon: LineChart },
+    { id: "science", label: "Science", icon: Flask },
+    { id: "technology", label: "Technologie", icon: Cpu },
+    { id: "culture", label: "Culture", icon: Palette },
+    { id: "divertissement", label: "Divertissement", icon: Film },
+    { id: "tutoriels", label: "Tutoriels", icon: BookOpen },
+    { id: "reportages", label: "Reportages", icon: Film },
+  ];
+
   return (
     <div className="space-y-8">
       <motion.div 
@@ -61,64 +85,30 @@ export function VideosContent({
         </div>
 
         <Tabs defaultValue="all" className="w-full space-y-6">
-          <TabsList className="w-full max-w-4xl mx-auto glass-card p-1">
-            <TabsTrigger value="all" className="flex-1 py-3 flex items-center justify-center gap-2">
-              <Grid className="w-4 h-4" />
-              Toutes les vidéos
-            </TabsTrigger>
-            <TabsTrigger value="divertissement" className="flex-1 py-3 flex items-center justify-center gap-2">
-              <Film className="w-4 h-4" />
-              Divertissement
-            </TabsTrigger>
-            <TabsTrigger value="tutoriels" className="flex-1 py-3 flex items-center justify-center gap-2">
-              <BookOpen className="w-4 h-4" />
-              Tutoriels
-            </TabsTrigger>
-            <TabsTrigger value="reportages" className="flex-1 py-3 flex items-center justify-center gap-2">
-              <Film className="w-4 h-4" />
-              Reportages
-            </TabsTrigger>
+          <TabsList className="w-full max-w-6xl mx-auto glass-card p-1 grid grid-cols-2 md:grid-cols-5 gap-1">
+            {categories.map(({ id, label, icon: Icon }) => (
+              <TabsTrigger 
+                key={id}
+                value={id} 
+                className="flex items-center justify-center gap-2 py-3"
+              >
+                <Icon className="w-4 h-4" />
+                <span className="hidden md:inline">{label}</span>
+              </TabsTrigger>
+            ))}
           </TabsList>
 
-          <TabsContent value="all" className="space-y-6 animate-fade-up">
-            <VideoGrid
-              videos={videos}
-              isLoading={isLoading}
-              searchTerm={searchTerm}
-              selectedCategory={selectedCategory}
-              sortOption={sortOption}
-            />
-          </TabsContent>
-
-          <TabsContent value="divertissement" className="space-y-6 animate-fade-up">
-            <VideoGrid
-              videos={filterVideosByCategory("Divertissement")}
-              isLoading={isLoading}
-              searchTerm={searchTerm}
-              selectedCategory="Divertissement"
-              sortOption={sortOption}
-            />
-          </TabsContent>
-
-          <TabsContent value="tutoriels" className="space-y-6 animate-fade-up">
-            <VideoGrid
-              videos={filterVideosByCategory("Tutoriels")}
-              isLoading={isLoading}
-              searchTerm={searchTerm}
-              selectedCategory="Tutoriels"
-              sortOption={sortOption}
-            />
-          </TabsContent>
-
-          <TabsContent value="reportages" className="space-y-6 animate-fade-up">
-            <VideoGrid
-              videos={filterVideosByCategory("Reportages")}
-              isLoading={isLoading}
-              searchTerm={searchTerm}
-              selectedCategory="Reportages"
-              sortOption={sortOption}
-            />
-          </TabsContent>
+          {categories.map(({ id, label }) => (
+            <TabsContent key={id} value={id} className="space-y-6 animate-fade-up">
+              <VideoGrid
+                videos={id === "all" ? videos : filterVideosByCategory(label)}
+                isLoading={isLoading}
+                searchTerm={searchTerm}
+                selectedCategory={id === "all" ? selectedCategory : label}
+                sortOption={sortOption}
+              />
+            </TabsContent>
+          ))}
         </Tabs>
       </motion.div>
     </div>
