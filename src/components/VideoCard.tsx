@@ -4,6 +4,11 @@ import { Play, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ShareButtons } from "@/components/ShareButtons";
 import { motion } from "framer-motion";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 interface VideoCardProps {
   id: string;
@@ -69,7 +74,25 @@ export function VideoCard({
             <h3 className="text-xl font-semibold line-clamp-2 leading-tight group-hover:text-primary transition-colors duration-300">
               {title}
             </h3>
-            <p className="text-sm text-muted-foreground line-clamp-2 mt-2">{summary}</p>
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <p className="text-sm text-muted-foreground line-clamp-3 mt-2 cursor-pointer">
+                  {summary}
+                </p>
+              </HoverCardTrigger>
+              <HoverCardContent 
+                className="w-[450px] glass-morphism border-0 backdrop-blur-xl bg-background/80"
+                align="start"
+                side="right"
+              >
+                <div className="space-y-4">
+                  <h4 className="text-lg font-semibold">{title}</h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {summary}
+                  </p>
+                </div>
+              </HoverCardContent>
+            </HoverCard>
           </Link>
         </div>
       </Card>
