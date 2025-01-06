@@ -19,7 +19,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          {/* Pages publiques */}
+          {/* Pages publiques - plus de redirection automatique */}
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<AuthPage />} />
           

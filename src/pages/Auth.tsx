@@ -11,19 +11,12 @@ const AuthPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is already authenticated
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        navigate('/home');
-        toast.success("Déjà connecté !");
-      }
-    });
-
-    // Listen for auth state changes
+    // On ne vérifie plus la session existante
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
+      // On redirige uniquement lors d'une nouvelle connexion
+      if (event === 'SIGNED_IN') {
         navigate('/home');
         toast.success("Connexion réussie !");
       }

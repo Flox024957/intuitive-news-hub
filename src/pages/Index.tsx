@@ -1,15 +1,13 @@
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useMemo } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Rocket, Award, Heart, CheckCircle } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
 
-  // Mémorisation des animations pour éviter des re-rendus inutiles
   const containerAnimation = useMemo(() => ({
     hidden: { opacity: 0 },
     show: {
@@ -24,27 +22,6 @@ const Index = () => {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0 }
   }), []);
-
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate('/home');
-      }
-    };
-
-    checkSession();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        navigate('/home');
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
 
   const features = useMemo(() => [
     {
@@ -68,7 +45,6 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       
-      {/* Hero Section - Optimisé avec Framer Motion */}
       <motion.section 
         className="container pt-32 pb-20"
         initial="hidden"
@@ -100,7 +76,6 @@ const Index = () => {
         </motion.div>
       </motion.section>
 
-      {/* Features Section - Optimisé avec grid et carte en verre */}
       <motion.section 
         className="container py-20"
         variants={containerAnimation}
@@ -122,7 +97,6 @@ const Index = () => {
         </div>
       </motion.section>
 
-      {/* CTA Section - Optimisé avec animation et style */}
       <motion.section 
         className="container py-20"
         variants={containerAnimation}
