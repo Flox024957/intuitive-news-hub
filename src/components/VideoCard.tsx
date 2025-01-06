@@ -4,11 +4,7 @@ import { Play, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ShareButtons } from "@/components/ShareButtons";
 import { motion } from "framer-motion";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
+import { useVideoStore } from "./HomeSidebar";
 
 interface VideoCardProps {
   id: string;
@@ -30,12 +26,15 @@ export function VideoCard({
   viewCount 
 }: VideoCardProps) {
   const videoUrl = `${window.location.origin}/video/${id}`;
+  const setHoveredVideo = useVideoStore((state) => state.setHoveredVideo);
   
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
       transition={{ duration: 0.3 }}
       className="relative"
+      onMouseEnter={() => setHoveredVideo({ title, description: summary })}
+      onMouseLeave={() => setHoveredVideo(null)}
     >
       <Card className="group relative overflow-hidden glass-morphism border-0 rounded-2xl">
         <Link to={`/video/${id}`}>
@@ -77,27 +76,9 @@ export function VideoCard({
                 {title}
               </h3>
             </Link>
-            <HoverCard openDelay={0} closeDelay={200}>
-              <HoverCardTrigger>
-                <p className="text-sm text-muted-foreground line-clamp-3 mt-2 cursor-pointer hover:text-primary/80 transition-colors">
-                  {summary}
-                </p>
-              </HoverCardTrigger>
-              <HoverCardContent 
-                className="w-[450px] glass-morphism border-0 backdrop-blur-xl bg-background/90 shadow-xl animate-fade-up"
-                align="start"
-                side="right"
-                sideOffset={5}
-                style={{ zIndex: 1000 }}
-              >
-                <div className="space-y-4">
-                  <h4 className="text-lg font-semibold text-primary">{title}</h4>
-                  <p className="text-sm text-foreground/90 leading-relaxed">
-                    {summary}
-                  </p>
-                </div>
-              </HoverCardContent>
-            </HoverCard>
+            <p className="text-sm text-muted-foreground line-clamp-3 mt-2">
+              {summary}
+            </p>
           </div>
         </div>
       </Card>

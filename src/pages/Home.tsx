@@ -5,6 +5,8 @@ import { HomeHero } from "@/components/HomeHero";
 import { HomeContent } from "@/components/HomeContent";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2 } from "lucide-react";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { HomeSidebar } from "@/components/HomeSidebar";
 
 const Home = () => {
   const { data: videos, isLoading } = useQuery({
@@ -56,22 +58,27 @@ const Home = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       <AnimatePresence mode="wait">
-        <motion.main 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
-          className="flex flex-col min-h-screen relative"
-        >
-          <HomeHero featuredVideo={featuredVideo} />
-          <div className="relative z-10 mt-[-150px]">
-            <HomeContent 
-              videos={videos || []}
-              isLoading={isLoading}
-              trendingVideos={trendingVideos}
-            />
+        <SidebarProvider>
+          <div className="flex min-h-screen w-full">
+            <HomeSidebar />
+            <motion.main 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              className="flex flex-col min-h-screen relative flex-1"
+            >
+              <HomeHero featuredVideo={featuredVideo} />
+              <div className="relative z-10 mt-[-150px]">
+                <HomeContent 
+                  videos={videos || []}
+                  isLoading={isLoading}
+                  trendingVideos={trendingVideos}
+                />
+              </div>
+            </motion.main>
           </div>
-        </motion.main>
+        </SidebarProvider>
       </AnimatePresence>
     </div>
   );
