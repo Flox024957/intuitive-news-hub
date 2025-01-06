@@ -3,15 +3,46 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { generateSummary } from "@/utils/summaryUtils";
+import { transcribeAudio, updateVideoTranscript } from "@/utils/transcriptionUtils";
 
 interface VideoProcessingProps {
   videoId: string;
+  audioUrl?: string;
   transcript: string | null;
+  onTranscriptionComplete?: (transcript: string) => void;
   onSummaryGenerated: (summary: string) => void;
 }
 
-export function VideoProcessing({ videoId, transcript, onSummaryGenerated }: VideoProcessingProps) {
+export function VideoProcessing({ 
+  videoId, 
+  audioUrl, 
+  transcript, 
+  onTranscriptionComplete,
+  onSummaryGenerated 
+}: VideoProcessingProps) {
+  const [isTranscribing, setIsTranscribing] = useState(false);
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+
+  const handleTranscribe = async () => {
+    if (!audioUrl) {
+      toast.error("URL audio non disponible");
+      return;
+    }
+
+    try {
+      setIsTranscribing(true);
+      const transcription = await transcribeAudio(audioUrl);
+      
+      if (transcription) {
+        const success = await updateVideoTranscript(videoId, transcription);
+        if (success && onTranscriptionComplete) {
+          onTranscriptionComplete(transcription);
+        }
+      }
+    } finally {
+      setIsTranscribing(false);
+    }
+  };
 
   const handleGenerateSummary = async () => {
     if (!transcript) {
@@ -34,6 +65,23 @@ export function VideoProcessing({ videoId, transcript, onSummaryGenerated }: Vid
 
   return (
     <div className="space-y-4">
+      {!transcript && audioUrl && (
+        <Button
+          onClick={handleTranscribe}
+          disabled={isTranscribing}
+          className="w-full"
+        >
+          {isTranscribing ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Transcription en cours...
+            </>
+          ) : (
+            "Transcrire la vidéo"
+          )}
+        </Button>
+      )}
+      
       {transcript && (
         <Button
           onClick={handleGenerateSummary}

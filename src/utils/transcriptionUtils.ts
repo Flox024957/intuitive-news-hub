@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
-export async function transcribeAudio(audioUrl: string): Promise<string> {
+export async function transcribeAudio(audioUrl: string): Promise<string | null> {
   try {
     console.log('Starting transcription for audio URL:', audioUrl);
     
@@ -8,19 +9,49 @@ export async function transcribeAudio(audioUrl: string): Promise<string> {
       body: { audioUrl }
     });
 
+    console.log('Transcription response:', { data, error });
+
     if (error) {
-      console.error('Transcription function error:', error);
-      throw error;
+      console.error('Transcription error:', error);
+      toast.error("Erreur lors de la transcription");
+      return null;
     }
 
     if (!data?.text) {
-      throw new Error('No transcription text returned');
+      console.error('No transcription text returned');
+      toast.error("Aucun texte transcrit reçu");
+      return null;
     }
 
-    console.log('Transcription completed successfully');
+    toast.success("Transcription terminée avec succès");
     return data.text;
   } catch (error) {
-    console.error('Error in transcribeAudio:', error);
-    throw new Error('Failed to transcribe audio');
+    console.error('Transcription error:', error);
+    toast.error("Erreur inattendue lors de la transcription");
+    return null;
+  }
+}
+
+export async function updateVideoTranscript(videoId: string, transcript: string) {
+  try {
+    console.log('Updating transcript for video:', videoId);
+    
+    const { error } = await supabase
+      .from('videos')
+      .update({ full_transcript: transcript })
+      .eq('id', videoId);
+
+    if (error) {
+      console.error('Error updating transcript:', error);
+      toast.error("Erreur lors de la sauvegarde de la transcription");
+      return false;
+    }
+
+    toast.success("Transcription sauvegardée");
+    return true;
+  } catch (error) {
+    console.error('Error updating transcript:', error);
+    toast.error("Erreur lors de la mise à jour de la transcription");
+    return false;
   }
 }
