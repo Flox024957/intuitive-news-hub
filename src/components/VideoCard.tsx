@@ -35,6 +35,7 @@ export function VideoCard({
     <motion.div
       whileHover={{ scale: 1.02 }}
       transition={{ duration: 0.3 }}
+      className="relative"
     >
       <Card className="group relative overflow-hidden glass-morphism border-0 rounded-2xl">
         <Link to={`/video/${id}`}>
@@ -87,6 +88,7 @@ export function VideoCard({
                 align="start"
                 side="right"
                 sideOffset={5}
+                style={{ zIndex: 1000 }}
               >
                 <div className="space-y-4">
                   <h4 className="text-lg font-semibold text-primary">{title}</h4>
