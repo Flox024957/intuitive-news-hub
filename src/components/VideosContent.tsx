@@ -85,12 +85,13 @@ export function VideosContent({
         </div>
 
         <Tabs defaultValue="all" className="w-full space-y-36">
-          <TabsList className="w-full max-w-7xl mx-auto glass-card p-12 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-10 gap-4 place-items-center">
+          <TabsList className="w-full max-w-7xl mx-auto glass-card p-12 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-10 gap-4 place-items-center min-h-[240px]">
             {categories.map(({ id, label, icon: Icon, color }) => (
               <TabsTrigger 
                 key={id}
                 value={id} 
                 className="group relative flex flex-col items-center justify-center gap-3 py-4 px-3 transition-all duration-300 hover:bg-white/5"
+                onClick={() => onCategorySelect(label)}
               >
                 <Icon className={`w-6 h-6 ${color} transition-transform group-hover:scale-110`} />
                 <span className="text-sm font-medium opacity-80 group-hover:opacity-100 transition-opacity">
