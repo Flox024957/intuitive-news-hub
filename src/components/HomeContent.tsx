@@ -23,7 +23,11 @@ export function HomeContent({ videos, isLoading: isLoadingDb, trendingVideos }: 
   const allVideos = [...(videos || []), ...youtubeVideos];
 
   const TrendingContent = (
-    <div className="space-y-8">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-8 px-4 py-8"
+    >
       <motion.div 
         initial={{ x: -20, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
@@ -34,21 +38,23 @@ export function HomeContent({ videos, isLoading: isLoadingDb, trendingVideos }: 
           Vidéos tendances
         </h2>
       </motion.div>
-      <VideoGrid
-        videos={trendingVideos}
-        isLoading={isLoadingDb}
-        searchTerm=""
-        selectedCategory="All"
-        sortOption="popular"
-      />
-    </div>
+      <div className="mt-8">
+        <VideoGrid
+          videos={trendingVideos}
+          isLoading={isLoadingDb}
+          searchTerm=""
+          selectedCategory="All"
+          sortOption="popular"
+        />
+      </div>
+    </motion.div>
   );
 
   const PodcastersContent = (
     <motion.div 
-      initial={{ y: 20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      className="space-y-8"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-8 px-4 py-8"
     >
       <div className="flex items-center gap-3 glass-card p-6 rounded-xl">
         <Users className="w-8 h-8 text-primary" />
@@ -56,25 +62,29 @@ export function HomeContent({ videos, isLoading: isLoadingDb, trendingVideos }: 
           Nos podcasters
         </h2>
       </div>
-      <PodcasterGrid />
+      <div className="mt-8">
+        <PodcasterGrid />
+      </div>
     </motion.div>
   );
 
   return (
-    <div className="container max-w-7xl py-8 space-y-8">
+    <div className="container max-w-7xl mx-auto py-12 space-y-12">
       <HomeTabs>
         {{
           videos: (
-            <VideosContent
-              videos={allVideos}
-              isLoading={isLoadingDb || isLoadingYoutube}
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              selectedCategory={selectedCategory}
-              onCategorySelect={setSelectedCategory}
-              sortOption={sortOption}
-              onSortChange={setSortOption}
-            />
+            <div className="px-4">
+              <VideosContent
+                videos={allVideos}
+                isLoading={isLoadingDb || isLoadingYoutube}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                selectedCategory={selectedCategory}
+                onCategorySelect={setSelectedCategory}
+                sortOption={sortOption}
+                onSortChange={setSortOption}
+              />
+            </div>
           ),
           trending: TrendingContent,
           podcasters: PodcastersContent

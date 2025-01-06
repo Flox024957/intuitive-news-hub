@@ -50,20 +50,22 @@ const Home = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       <AnimatePresence mode="wait">
-        <motion.div 
+        <motion.main 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
-          className="min-h-screen"
+          className="flex flex-col min-h-screen relative"
         >
           <HomeHero featuredVideo={featuredVideo} />
-          <HomeContent 
-            videos={videos || []}
-            isLoading={isLoading}
-            trendingVideos={trendingVideos}
-          />
-        </motion.div>
+          <div className="relative z-10 mt-[-100px]">
+            <HomeContent 
+              videos={videos || []}
+              isLoading={isLoading}
+              trendingVideos={trendingVideos}
+            />
+          </div>
+        </motion.main>
       </AnimatePresence>
     </div>
   );
