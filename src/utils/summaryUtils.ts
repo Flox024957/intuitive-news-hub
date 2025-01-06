@@ -1,8 +1,23 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export async function generateSummary(text: string): Promise<string> {
+export async function generateSummary(text: string, videoId: string): Promise<string> {
   try {
-    console.log('Démarrage de la génération du résumé pour un texte de', text.length, 'caractères');
+    console.log('Checking cache for video summary:', videoId);
+    
+    // Check cache first
+    const { data: cachedSummary } = await supabase
+      .from('content_cache')
+      .select('content')
+      .eq('video_id', videoId)
+      .eq('content_type', 'summary')
+      .single();
+
+    if (cachedSummary) {
+      console.log('Summary found in cache');
+      return cachedSummary.content;
+    }
+
+    console.log('No cached summary found, generating new summary');
     
     // Vérification de la longueur du texte
     if (text.length < 50) {
@@ -22,11 +37,20 @@ export async function generateSummary(text: string): Promise<string> {
       throw new Error('Aucun résumé généré');
     }
 
-    console.log('Résumé généré avec succès:', {
-      inputLength: text.length,
-      summaryLength: data.summary.length
-    });
-    
+    // Store in cache
+    const { error: cacheError } = await supabase
+      .from('content_cache')
+      .insert({
+        video_id: videoId,
+        content_type: 'summary',
+        content: data.summary
+      });
+
+    if (cacheError) {
+      console.error('Erreur lors de la mise en cache du résumé:', cacheError);
+    }
+
+    console.log('Summary generated and cached successfully');
     return data.summary;
   } catch (error) {
     console.error('Erreur dans generateSummary:', error);

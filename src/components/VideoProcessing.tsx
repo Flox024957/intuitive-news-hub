@@ -37,7 +37,7 @@ export function VideoProcessing({
       setIsTranscribing(true);
       console.log("Début de la transcription pour la vidéo:", videoId);
       
-      const transcription = await transcribeAudio(audioUrl);
+      const transcription = await transcribeAudio(audioUrl, videoId);
       
       if (transcription) {
         console.log("Transcription réussie, mise à jour de la base de données");
@@ -68,7 +68,7 @@ export function VideoProcessing({
       setIsGeneratingSummary(true);
       console.log("Début de la génération du résumé pour la vidéo:", videoId);
       
-      const summary = await generateSummary(transcript);
+      const summary = await generateSummary(transcript, videoId);
       console.log("Résumé généré avec succès");
       onSummaryGenerated(summary);
       toast.success("Résumé généré avec succès");
