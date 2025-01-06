@@ -23,7 +23,7 @@ export const useYoutubeVideos = (username: string) => {
           summary: video.description,
           thumbnail_url: video.thumbnail,
           published_date: video.publishedAt,
-          categories: ["News", "Politics", "Science", "Technology", "Economy", "Culture"],
+          categories: [],  // Will be set by the parent component
           stats: {
             view_count: video.statistics.viewCount || 0
           }
@@ -33,6 +33,8 @@ export const useYoutubeVideos = (username: string) => {
         toast.error("Erreur lors de la récupération des vidéos");
         return [];
       }
-    }
+    },
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchOnWindowFocus: false
   });
 };

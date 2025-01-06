@@ -20,8 +20,25 @@ export function HomeContent({ videos, isLoading, trendingVideos }: HomeContentPr
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("recent");
 
-  const { data: youtubeVideos, isLoading: isLoadingYoutube } = useYoutubeVideos('IdrissJAberkane');
-  const allVideos = [...(videos || []), ...(youtubeVideos || [])];
+  const { data: idrissVideos, isLoading: isLoadingIdriss } = useYoutubeVideos('IdrissJAberkane');
+  const { data: sanspermissionVideos, isLoading: isLoadingSansPermission } = useYoutubeVideos('sanspermissionpodcast');
+
+  // Transform videos to add specific tags
+  const transformedIdrissVideos = idrissVideos?.map(video => ({
+    ...video,
+    categories: ["News", "Politics", "Science", "Technology", "Economy", "Culture"]
+  })) || [];
+
+  const transformedSanspermissionVideos = sanspermissionVideos?.map(video => ({
+    ...video,
+    categories: ["Economy"]
+  })) || [];
+
+  const allVideos = [
+    ...(videos || []), 
+    ...transformedIdrissVideos,
+    ...transformedSanspermissionVideos
+  ];
 
   const VideosContent = (
     <>
@@ -60,7 +77,7 @@ export function HomeContent({ videos, isLoading, trendingVideos }: HomeContentPr
       
       <VideoGrid
         videos={allVideos}
-        isLoading={isLoading || isLoadingYoutube}
+        isLoading={isLoading || isLoadingIdriss || isLoadingSansPermission}
         searchTerm={searchTerm}
         selectedCategory={selectedCategory}
         sortOption={sortOption}
