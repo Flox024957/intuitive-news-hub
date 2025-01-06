@@ -11,12 +11,25 @@ const AuthPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    supabase.auth.onAuthStateChange((event, session) => {
+    // Check if user is already authenticated
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate("/personal");
+        navigate('/');
+        toast.success("Déjà connecté !");
+      }
+    });
+
+    // Listen for auth state changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        navigate('/');
         toast.success("Connexion réussie !");
       }
     });
+
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
   const handleDemoLogin = async () => {
@@ -29,7 +42,7 @@ const AuthPage = () => {
       if (error) throw error;
       
       toast.success("Connexion avec le compte de démonstration réussie");
-      navigate("/personal");
+      navigate("/");
     } catch (error) {
       console.error("Erreur de connexion:", error);
       toast.error("Erreur lors de la connexion avec le compte de démonstration");
@@ -94,7 +107,7 @@ const AuthPage = () => {
                   email_label: 'Adresse email',
                   password_label: 'Mot de passe',
                   button_label: "S'inscrire",
-                },
+                }
               }
             }}
           />
