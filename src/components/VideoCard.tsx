@@ -70,30 +70,33 @@ export function VideoCard({
             )}
             <ShareButtons title={title} url={videoUrl} />
           </div>
-          <Link to={`/video/${id}`}>
-            <h3 className="text-xl font-semibold line-clamp-2 leading-tight group-hover:text-primary transition-colors duration-300">
-              {title}
-            </h3>
-            <HoverCard>
-              <HoverCardTrigger asChild>
-                <p className="text-sm text-muted-foreground line-clamp-3 mt-2 cursor-pointer">
+          <div className="relative">
+            <Link to={`/video/${id}`}>
+              <h3 className="text-xl font-semibold line-clamp-2 leading-tight group-hover:text-primary transition-colors duration-300">
+                {title}
+              </h3>
+            </Link>
+            <HoverCard openDelay={0} closeDelay={200}>
+              <HoverCardTrigger>
+                <p className="text-sm text-muted-foreground line-clamp-3 mt-2 cursor-pointer hover:text-primary/80 transition-colors">
                   {summary}
                 </p>
               </HoverCardTrigger>
               <HoverCardContent 
-                className="w-[450px] glass-morphism border-0 backdrop-blur-xl bg-background/80"
+                className="w-[450px] glass-morphism border-0 backdrop-blur-xl bg-background/90 shadow-xl animate-fade-up"
                 align="start"
                 side="right"
+                sideOffset={5}
               >
                 <div className="space-y-4">
-                  <h4 className="text-lg font-semibold">{title}</h4>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
+                  <h4 className="text-lg font-semibold text-primary">{title}</h4>
+                  <p className="text-sm text-foreground/90 leading-relaxed">
                     {summary}
                   </p>
                 </div>
               </HoverCardContent>
             </HoverCard>
-          </Link>
+          </div>
         </div>
       </Card>
     </motion.div>
