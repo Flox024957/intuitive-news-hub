@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Grid, BookOpen, Film } from "lucide-react";
 import { SearchBar } from "@/components/SearchBar";
-import { CategoryFilter } from "@/components/CategoryFilter";
 import { SortOptions, type SortOption } from "@/components/SortOptions";
 import { VideoGrid } from "@/components/VideoGrid";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -42,7 +41,7 @@ export function VideosContent({
         animate={{ x: 0, opacity: 1 }}
         transition={{ delay: 0.3 }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 border-b border-white/10 pb-4">
           <Sparkles className="w-8 h-8 text-primary animate-pulse" />
           <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
             Dernières vidéos
@@ -63,21 +62,25 @@ export function VideosContent({
 
         <Tabs defaultValue="all" className="w-full space-y-6">
           <TabsList className="w-full max-w-4xl mx-auto glass-card p-1">
-            <TabsTrigger value="all" className="flex-1 py-3">
+            <TabsTrigger value="all" className="flex-1 py-3 flex items-center justify-center gap-2">
+              <Grid className="w-4 h-4" />
               Toutes les vidéos
             </TabsTrigger>
-            <TabsTrigger value="divertissement" className="flex-1 py-3">
+            <TabsTrigger value="divertissement" className="flex-1 py-3 flex items-center justify-center gap-2">
+              <Film className="w-4 h-4" />
               Divertissement
             </TabsTrigger>
-            <TabsTrigger value="tutoriels" className="flex-1 py-3">
+            <TabsTrigger value="tutoriels" className="flex-1 py-3 flex items-center justify-center gap-2">
+              <BookOpen className="w-4 h-4" />
               Tutoriels
             </TabsTrigger>
-            <TabsTrigger value="reportages" className="flex-1 py-3">
+            <TabsTrigger value="reportages" className="flex-1 py-3 flex items-center justify-center gap-2">
+              <Film className="w-4 h-4" />
               Reportages
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="all" className="space-y-6">
+          <TabsContent value="all" className="space-y-6 animate-fade-up">
             <VideoGrid
               videos={videos}
               isLoading={isLoading}
@@ -87,7 +90,7 @@ export function VideosContent({
             />
           </TabsContent>
 
-          <TabsContent value="divertissement" className="space-y-6">
+          <TabsContent value="divertissement" className="space-y-6 animate-fade-up">
             <VideoGrid
               videos={filterVideosByCategory("Divertissement")}
               isLoading={isLoading}
@@ -97,7 +100,7 @@ export function VideosContent({
             />
           </TabsContent>
 
-          <TabsContent value="tutoriels" className="space-y-6">
+          <TabsContent value="tutoriels" className="space-y-6 animate-fade-up">
             <VideoGrid
               videos={filterVideosByCategory("Tutoriels")}
               isLoading={isLoading}
@@ -107,7 +110,7 @@ export function VideosContent({
             />
           </TabsContent>
 
-          <TabsContent value="reportages" className="space-y-6">
+          <TabsContent value="reportages" className="space-y-6 animate-fade-up">
             <VideoGrid
               videos={filterVideosByCategory("Reportages")}
               isLoading={isLoading}

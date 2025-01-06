@@ -12,7 +12,7 @@ interface HomeTabsProps {
 export function HomeTabs({ children }: HomeTabsProps) {
   return (
     <Tabs defaultValue="videos" className="space-y-8">
-      <TabsList className="w-full max-w-2xl mx-auto glass-card p-1">
+      <TabsList className="w-full max-w-2xl mx-auto glass-card p-1 sticky top-4 z-10">
         <TabsTrigger value="videos" className="flex items-center gap-2 flex-1 py-3">
           <Play className="w-5 h-5" />
           <span className="text-lg">Vidéos</span>

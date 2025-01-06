@@ -61,7 +61,7 @@ export function HomeContent({ videos, isLoading: isLoadingDb, trendingVideos }: 
   );
 
   return (
-    <div className="container max-w-7xl py-12 mt-16 space-y-12">
+    <div className="container max-w-7xl py-12 mt-8 space-y-12">
       <HomeTabs>
         {{
           videos: (
