@@ -17,12 +17,13 @@ interface CategoryFilterProps {
 
 export function CategoryFilter({ selected, onSelect }: CategoryFilterProps) {
   return (
-    <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide">
+    <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
       {categories.map((category) => (
         <Button
           key={category}
           variant={selected === category ? "default" : "secondary"}
-          className="whitespace-nowrap"
+          size="lg"
+          className="whitespace-nowrap text-base px-6"
           onClick={() => onSelect(category)}
         >
           {category}
