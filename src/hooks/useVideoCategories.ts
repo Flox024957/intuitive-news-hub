@@ -3,7 +3,7 @@ import { type Video } from "@/types/video";
 
 export function useVideoCategories(videos: Video[], selectedCategory: string) {
   return useMemo(() => {
-    console.log("useVideoCategories - Processing videos:", {
+    console.log("useVideoCategories - Starting category filtering:", {
       totalVideos: videos?.length,
       selectedCategory,
       videosWithCategories: videos?.map(v => ({
@@ -31,6 +31,7 @@ export function useVideoCategories(videos: Video[], selectedCategory: string) {
           categories: video.categories
         });
         
+        // Une vidéo est considérée comme "news" si elle a moins de 48h OU si elle est explicitement catégorisée comme "news"
         return isRecent || (video.categories && video.categories.includes('news'));
       });
     }

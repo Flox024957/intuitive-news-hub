@@ -23,7 +23,8 @@ export function useVideoFiltering({
       sortOption,
       videosWithCategories: videos?.map(v => ({
         title: v.title,
-        categories: v.categories
+        categories: v.categories,
+        publishDate: v.published_date
       }))
     });
 
@@ -48,36 +49,13 @@ export function useVideoFiltering({
 
         // Vérifier si c'est une news (moins de 48h)
         if (selectedCategory.toLowerCase() === "news") {
-          matchesCategory = publishDate >= fortyEightHoursAgo;
+          matchesCategory = publishDate >= fortyEightHoursAgo || 
+                          (video.categories && video.categories.includes('news'));
         } else {
           // Normaliser les catégories
           const videoCategories = Array.isArray(video.categories) 
             ? video.categories.map(cat => typeof cat === 'string' ? cat.toLowerCase() : '')
             : [];
-
-          // Si pas de catégories, analyser le contenu
-          if (videoCategories.length === 0) {
-            const content = `${video.title} ${video.summary}`.toLowerCase();
-            const categoryKeywords: Record<string, string[]> = {
-              'politics': ['politique', 'gouvernement', 'élection', 'président'],
-              'economy': ['économie', 'finance', 'marché', 'entreprise'],
-              'science': ['science', 'recherche', 'découverte', 'étude'],
-              'technology': ['technologie', 'numérique', 'digital', 'tech'],
-              'culture': ['culture', 'art', 'musique', 'cinéma'],
-              'entertainment': ['divertissement', 'spectacle', 'film', 'série']
-            };
-
-            for (const [category, keywords] of Object.entries(categoryKeywords)) {
-              if (keywords.some(keyword => content.includes(keyword))) {
-                videoCategories.push(category);
-                break;
-              }
-            }
-
-            if (videoCategories.length === 0) {
-              videoCategories.push("news");
-            }
-          }
 
           matchesCategory = videoCategories.includes(selectedCategory.toLowerCase());
         }
@@ -110,7 +88,7 @@ export function useVideoFiltering({
       }
     });
 
-    console.log("Sorted videos:", sortedVideos);
+    console.log("Final sorted videos:", sortedVideos);
     return sortedVideos;
   }, [videos, searchTerm, selectedCategory, sortOption]);
 }
