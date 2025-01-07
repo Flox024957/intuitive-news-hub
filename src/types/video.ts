@@ -18,7 +18,7 @@ export interface Video {
   created_at: string;
   article_content: string | null;
   podcaster: Podcaster | null;
-  stats: VideoStats;
+  stats: VideoStats | null;
 }
 
 export interface YouTubeVideo {

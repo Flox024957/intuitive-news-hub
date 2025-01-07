@@ -27,9 +27,11 @@ export function useVideoCategories(videos: Video[], selectedCategory: VideoCateg
       const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
       
       return videos.filter(video => {
+        if (!video.categories) return false;
+        
         const publishDate = new Date(video.published_date);
         const isRecent = publishDate >= fortyEightHoursAgo;
-        const hasNewsTag = video.categories?.includes("news");
+        const hasNewsTag = video.categories.includes("news");
         
         console.log("Checking if video is news:", {
           title: video.title,

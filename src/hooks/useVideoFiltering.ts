@@ -14,25 +14,30 @@ function filterBySearch(video: Video, searchTerm: string): boolean {
   if (!searchTerm) return true;
   
   const searchTermLower = searchTerm.toLowerCase();
-  return [
+  const searchableContent = [
     video.title,
     video.summary,
     ...(video.categories || [])
-  ].some(text => text?.toLowerCase().includes(searchTermLower));
+  ].filter(Boolean);
+
+  return searchableContent.some(text => 
+    text?.toLowerCase().includes(searchTermLower)
+  );
 }
 
 function filterByCategory(video: Video, selectedCategory: VideoCategory): boolean {
   if (selectedCategory === "all") return true;
+  if (!video.categories) return false;
 
   const now = new Date();
   const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
   const publishDate = new Date(video.published_date);
 
   if (selectedCategory === "news") {
-    return publishDate >= fortyEightHoursAgo || video.categories?.includes("news");
+    return publishDate >= fortyEightHoursAgo || video.categories.includes("news");
   }
 
-  return video.categories?.includes(selectedCategory) || false;
+  return video.categories.includes(selectedCategory);
 }
 
 function sortVideos(videos: Video[], sortOption: SortOption): Video[] {
@@ -63,7 +68,11 @@ export function useVideoFiltering({
       totalVideos: videos?.length,
       searchTerm,
       selectedCategory,
-      sortOption
+      sortOption,
+      videosWithCategories: videos?.map(v => ({
+        title: v.title,
+        categories: v.categories
+      }))
     });
 
     if (!videos) return [];
