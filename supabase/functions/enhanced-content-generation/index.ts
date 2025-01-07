@@ -27,8 +27,9 @@ serve(async (req) => {
 
     // Générer le résumé avec un prompt plus sophistiqué
     console.log('Generating enhanced summary...');
-    const summaryPrompt = `En tant qu'expert en analyse de contenu, crée un résumé structuré et informatif de cette transcription.
+    const summaryPrompt = `En tant qu'expert en analyse de contenu, crée un résumé structuré et informatif de cette transcription en français.
     Concentre-toi sur les points clés, les arguments principaux et les conclusions.
+    
     Transcription: ${transcript.substring(0, 2000)}
     
     Format souhaité:
@@ -63,7 +64,7 @@ serve(async (req) => {
 
     // Générer l'article avec un prompt plus sophistiqué
     console.log('Generating enhanced article...');
-    const articlePrompt = `En tant qu'expert en rédaction journalistique, crée un article approfondi et structuré basé sur cette transcription.
+    const articlePrompt = `En tant qu'expert en rédaction journalistique, crée un article approfondi et structuré en français basé sur cette transcription.
     
     Titre: ${title}
     Transcription: ${transcript.substring(0, 4000)}
@@ -100,7 +101,7 @@ serve(async (req) => {
     const article = articleResult[0].generated_text;
     console.log('Enhanced article generated:', article);
 
-    // Mise à jour de la base de données
+    // Mise à jour de la base de données avec le client Supabase
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -109,7 +110,7 @@ serve(async (req) => {
     const { error: updateError } = await supabaseClient
       .from('videos')
       .update({
-        summary: summary,
+        summary,
         article_content: article
       })
       .eq('id', videoId);
@@ -141,8 +142,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        summary: summary,
-        article: article
+        summary,
+        article
       }),
       { 
         headers: { 
