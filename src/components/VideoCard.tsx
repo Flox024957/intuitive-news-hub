@@ -37,15 +37,38 @@ export function VideoCard({
         return;
       }
 
-      const { error } = await supabase
+      // First check if stats exist for this video
+      const { data: existingStats } = await supabase
         .from('video_stats')
-        .update({ 
-          like_count: viewCount + 1,
-          updated_at: new Date().toISOString()
-        })
-        .eq('video_id', id);
+        .select('*')
+        .eq('video_id', id)
+        .single();
 
-      if (error) throw error;
+      if (existingStats) {
+        // Update existing stats
+        const { error } = await supabase
+          .from('video_stats')
+          .update({ 
+            like_count: (existingStats.like_count || 0) + 1,
+            updated_at: new Date().toISOString()
+          })
+          .eq('video_id', id);
+
+        if (error) throw error;
+      } else {
+        // Insert new stats
+        const { error } = await supabase
+          .from('video_stats')
+          .insert({
+            video_id: id,
+            like_count: 1,
+            view_count: 0,
+            share_count: 0
+          });
+
+        if (error) throw error;
+      }
+
       toast.success("Vidéo ajoutée à vos favoris");
     } catch (error) {
       console.error('Error liking video:', error);
@@ -61,15 +84,37 @@ export function VideoCard({
         url: videoUrl
       });
       
-      const { error } = await supabase
+      // First check if stats exist for this video
+      const { data: existingStats } = await supabase
         .from('video_stats')
-        .update({ 
-          share_count: viewCount + 1,
-          updated_at: new Date().toISOString()
-        })
-        .eq('video_id', id);
+        .select('*')
+        .eq('video_id', id)
+        .single();
 
-      if (error) throw error;
+      if (existingStats) {
+        // Update existing stats
+        const { error } = await supabase
+          .from('video_stats')
+          .update({ 
+            share_count: (existingStats.share_count || 0) + 1,
+            updated_at: new Date().toISOString()
+          })
+          .eq('video_id', id);
+
+        if (error) throw error;
+      } else {
+        // Insert new stats
+        const { error } = await supabase
+          .from('video_stats')
+          .insert({
+            video_id: id,
+            share_count: 1,
+            view_count: 0,
+            like_count: 0
+          });
+
+        if (error) throw error;
+      }
     } catch (error) {
       console.error('Error sharing:', error);
       if (error instanceof Error && error.name !== 'AbortError') {
