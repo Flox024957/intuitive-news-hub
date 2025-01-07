@@ -42,23 +42,27 @@ export function useVideoFiltering({
       // Filtre de catégorie
       let matchesCategory = true;
       if (selectedCategory.toLowerCase() !== "all") {
-        const normalizedCategories = video.categories?.map((cat) =>
-          cat.toLowerCase()
-        ) || [];
-        
-        // Si pas de catégories, mettre par défaut dans "news"
-        if (normalizedCategories.length === 0) {
-          normalizedCategories.push("news");
+        const now = new Date();
+        const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
+        const publishDate = new Date(video.published_date);
+
+        // Vérifier si c'est une news (moins de 48h)
+        if (selectedCategory.toLowerCase() === "news") {
+          matchesCategory = publishDate >= fortyEightHoursAgo;
+        } else {
+          // S'assurer que video.categories est un tableau
+          const videoCategories = Array.isArray(video.categories) ? video.categories : [];
+          const normalizedCategories = videoCategories.map(cat => 
+            typeof cat === 'string' ? cat.toLowerCase() : ''
+          );
+
+          // Si pas de catégories, mettre dans "news" par défaut
+          if (normalizedCategories.length === 0) {
+            normalizedCategories.push("news");
+          }
+
+          matchesCategory = normalizedCategories.includes(selectedCategory.toLowerCase());
         }
-        
-        matchesCategory = normalizedCategories.includes(selectedCategory.toLowerCase());
-        
-        console.log("Category matching for video:", {
-          title: video.title,
-          videoCategories: normalizedCategories,
-          selectedCategory: selectedCategory.toLowerCase(),
-          matches: matchesCategory
-        });
       }
 
       return matchesSearch && matchesCategory;

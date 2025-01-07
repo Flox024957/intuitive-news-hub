@@ -30,11 +30,22 @@ export function useVideoCategories(videos: Video[], selectedCategory: string) {
         return isRecent;
       }
 
-      // Pour les autres catégories, vérifier si la vidéo a le tag correspondant
+      // Pour les autres catégories
       if (selectedCategory.toLowerCase() === "all") return true;
 
-      const videoCategories = video.categories || [];
-      const normalizedCategories = videoCategories.map(cat => cat.toLowerCase());
+      // S'assurer que video.categories est un tableau
+      const videoCategories = Array.isArray(video.categories) ? video.categories : [];
+      
+      // Normaliser les catégories pour la comparaison
+      const normalizedCategories = videoCategories.map(cat => 
+        typeof cat === 'string' ? cat.toLowerCase() : ''
+      );
+
+      // Si pas de catégories, mettre dans "news" par défaut
+      if (normalizedCategories.length === 0) {
+        normalizedCategories.push("news");
+      }
+
       const hasCategory = normalizedCategories.includes(selectedCategory.toLowerCase());
 
       console.log("Checking video categories:", {
