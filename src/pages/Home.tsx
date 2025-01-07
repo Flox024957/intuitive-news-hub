@@ -15,50 +15,62 @@ const Home = () => {
     queryFn: async () => {
       console.log("Fetching videos...");
       
-      const { data: videoStats } = await supabase
-        .from("video_stats")
-        .select("*")
-        .order("view_count", { ascending: false })
-        .limit(20);
+      try {
+        const { data: videoStats, error: statsError } = await supabase
+          .from("video_stats")
+          .select("*")
+          .order("view_count", { ascending: false })
+          .limit(20);
 
-      console.log("Video stats:", videoStats);
+        console.log("Video stats:", videoStats);
+        console.log("Stats error:", statsError);
 
-      if (!videoStats?.length) {
-        console.log("No video stats found");
-        return [];
-      }
+        if (statsError) {
+          console.error("Error fetching video stats:", statsError);
+          throw statsError;
+        }
 
-      const { data, error } = await supabase
-        .from("videos")
-        .select(`
-          *,
-          podcaster:podcasters(*)
-        `)
-        .order("published_date", { ascending: false });
+        const { data: videosData, error: videosError } = await supabase
+          .from("videos")
+          .select(`
+            *,
+            podcaster:podcasters(*)
+          `)
+          .order("published_date", { ascending: false });
 
-      console.log("Videos data:", data);
-      console.log("Videos error:", error);
+        console.log("Raw videos data:", videosData);
+        console.log("Videos error:", videosError);
 
-      if (error) {
-        toast.error("Erreur lors de la récupération des vidéos");
+        if (videosError) {
+          console.error("Error fetching videos:", videosError);
+          toast.error("Erreur lors de la récupération des vidéos");
+          throw videosError;
+        }
+
+        if (!videosData) {
+          console.log("No videos found");
+          return [];
+        }
+
+        const videosWithStats = videosData.map(video => ({
+          ...video,
+          stats: videoStats?.find(stat => stat.video_id === video.id)
+        }));
+
+        console.log("Final videos with stats:", videosWithStats);
+
+        return videosWithStats;
+      } catch (error) {
+        console.error("Unexpected error:", error);
         throw error;
       }
-
-      const videosWithStats = data?.map(video => ({
-        ...video,
-        stats: videoStats.find(stat => stat.video_id === video.id)
-      }));
-
-      console.log("Videos with stats:", videosWithStats);
-
-      return videosWithStats;
     },
     retry: 1,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   if (error) {
-    console.error("Error fetching videos:", error);
+    console.error("Error in videos query:", error);
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -90,6 +102,9 @@ const Home = () => {
 
   const featuredVideo = videos?.[0];
   const trendingVideos = videos?.slice(0, 4) || [];
+
+  console.log("Featured video:", featuredVideo);
+  console.log("Trending videos:", trendingVideos);
 
   return (
     <div className="min-h-screen bg-background">
