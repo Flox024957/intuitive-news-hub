@@ -32,8 +32,8 @@ export function ContentGenerationTest() {
         return;
       }
 
-      // Générer le contenu
-      const { data, error } = await supabase.functions.invoke('generate-content', {
+      // Générer le contenu en utilisant le nom correct de la fonction
+      const { data, error } = await supabase.functions.invoke('enhanced-content-generation', {
         body: {
           videoId: video.id,
           transcript: video.full_transcript,
