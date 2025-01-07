@@ -11,7 +11,8 @@ import {
   Palette, 
   Newspaper,
   Music,
-  Laugh
+  Laugh,
+  Brain
 } from "lucide-react";
 import { SearchBar } from "@/components/SearchBar";
 import { SortOptions, type SortOption } from "@/components/SortOptions";
@@ -58,7 +59,8 @@ export function VideosContent({
     { id: "tutoriels", label: "Tutoriels", icon: BookOpen, color: "text-indigo-500" },
     { id: "reportages", label: "Reportages", icon: Film, color: "text-emerald-500" },
     { id: "humour", label: "Humour", icon: Laugh, color: "text-amber-500" },
-    { id: "musique", label: "Musique", icon: Music, color: "text-rose-500" }
+    { id: "musique", label: "Musique", icon: Music, color: "text-rose-500" },
+    { id: "development", label: "Développement personnel", icon: Brain, color: "text-violet-500" }
   ];
 
   return (
