@@ -1,10 +1,14 @@
 import { useMemo } from "react";
 import { type Video, type YouTubeVideo } from "@/types/video";
+import { type VideoCategory } from "@/types/category";
 
 export function useNormalizedVideos(dbVideos: Video[], youtubeVideos: YouTubeVideo[]) {
   return useMemo(() => {
     console.log("Normalizing videos from DB:", dbVideos);
     console.log("Normalizing videos from YouTube:", youtubeVideos);
+
+    // Ensure we have a valid VideoCategory array
+    const defaultCategories: VideoCategory[] = ["news"];
 
     // Normaliser les vidéos YouTube
     const normalizedYoutubeVideos: Video[] = youtubeVideos.map((video) => ({
@@ -16,7 +20,7 @@ export function useNormalizedVideos(dbVideos: Video[], youtubeVideos: YouTubeVid
       thumbnail_url: video.thumbnail || null,
       published_date: video.publishedAt,
       video_url: `https://www.youtube.com/watch?v=${video.id}`,
-      categories: ['news'],  // Catégorie par défaut, sera mise à jour par le trigger
+      categories: defaultCategories,
       created_at: new Date().toISOString(),
       speakers_list: null,
       full_transcript: null,
@@ -37,16 +41,9 @@ export function useNormalizedVideos(dbVideos: Video[], youtubeVideos: YouTubeVid
     // Normaliser les vidéos de la base de données
     const normalizedDbVideos = dbVideos.map((video) => ({
       ...video,
-      categories: video.categories || ['news'],  // S'assurer que categories n'est jamais null
-      stats: video.stats || {
-        id: crypto.randomUUID(),
-        video_id: video.id,
-        view_count: 0,
-        like_count: 0,
-        share_count: 0,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
+      categories: video.categories?.length ? 
+        (video.categories as VideoCategory[]) : 
+        defaultCategories
     }));
 
     // Combiner les vidéos en évitant les doublons
