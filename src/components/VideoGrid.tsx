@@ -1,15 +1,10 @@
 import { VideoCard } from "@/components/VideoCard";
-import { type Database } from "@/integrations/supabase/types";
 import { type SortOption } from "@/components/SortOptions";
 import { motion } from "framer-motion";
-
-type Video = Database['public']['Tables']['videos']['Row'] & {
-  podcaster: Database['public']['Tables']['podcasters']['Row'];
-  stats?: Database['public']['Tables']['video_stats']['Row'];
-};
+import { useVideoFiltering } from "@/hooks/useVideoFiltering";
 
 interface VideoGridProps {
-  videos: Video[] | null;
+  videos: any[] | null;
   isLoading: boolean;
   searchTerm: string;
   selectedCategory: string;
@@ -21,17 +16,23 @@ const container = {
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1
-    }
-  }
+      staggerChildren: 0.1,
+    },
+  },
 };
 
 const item = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 }
+  show: { opacity: 1, y: 0 },
 };
 
-export function VideoGrid({ videos, isLoading, searchTerm, selectedCategory, sortOption }: VideoGridProps) {
+export function VideoGrid({
+  videos,
+  isLoading,
+  searchTerm,
+  selectedCategory,
+  sortOption,
+}: VideoGridProps) {
   if (isLoading) {
     return (
       <div className="content-grid">
@@ -55,54 +56,13 @@ export function VideoGrid({ videos, isLoading, searchTerm, selectedCategory, sor
     );
   }
 
-  // S'assurer que videos est un tableau
   const safeVideos = videos || [];
-  console.log("Safe videos before filtering:", safeVideos);
-
-  const filteredVideos = safeVideos.filter(video => {
-    if (!video) return false;
-
-    const matchesSearch = searchTerm === '' || 
-      video.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      video.summary?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    let matchesCategory = true;
-    if (selectedCategory !== "All") {
-      const normalizedCategories = video.categories?.map(cat => cat.toLowerCase()) || [];
-      const normalizedCategory = selectedCategory.toLowerCase();
-      
-      if (normalizedCategory === "politique") {
-        matchesCategory = normalizedCategories.some(cat => 
-          cat === "politique" || 
-          cat === "politics" || 
-          cat === "political"
-        );
-      } else {
-        matchesCategory = normalizedCategories.includes(normalizedCategory);
-      }
-    }
-
-    return matchesSearch && matchesCategory;
+  const sortedVideos = useVideoFiltering({
+    videos: safeVideos,
+    searchTerm,
+    selectedCategory,
+    sortOption,
   });
-
-  console.log("Filtered videos:", filteredVideos);
-
-  const sortedVideos = [...filteredVideos].sort((a, b) => {
-    switch (sortOption) {
-      case "recent":
-        return new Date(b.published_date).getTime() - new Date(a.published_date).getTime();
-      case "oldest":
-        return new Date(a.published_date).getTime() - new Date(b.published_date).getTime();
-      case "popular":
-        const aViews = a.stats?.view_count || 0;
-        const bViews = b.stats?.view_count || 0;
-        return bViews - aViews;
-      default:
-        return 0;
-    }
-  });
-
-  console.log("Sorted videos:", sortedVideos);
 
   if (!sortedVideos?.length) {
     return (
@@ -117,7 +77,7 @@ export function VideoGrid({ videos, isLoading, searchTerm, selectedCategory, sor
   }
 
   return (
-    <motion.div 
+    <motion.div
       className="content-grid"
       variants={container}
       initial="hidden"

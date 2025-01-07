@@ -14,26 +14,44 @@ interface HomeContentProps {
   trendingVideos: any[];
 }
 
-export function HomeContent({ videos, isLoading: isLoadingDb, trendingVideos }: HomeContentProps) {
+export function HomeContent({
+  videos,
+  isLoading: isLoadingDb,
+  trendingVideos,
+}: HomeContentProps) {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("recent");
 
-  const { videos: youtubeVideos, isLoading: isLoadingYoutube } = useYouTubeVideos();
+  const { videos: youtubeVideos, isLoading: isLoadingYoutube } =
+    useYouTubeVideos();
 
-  // Normaliser les vidéos YouTube pour correspondre au format de la base de données
-  const normalizedYoutubeVideos = youtubeVideos.map(video => ({
-    ...video,
-    categories: video.categories?.map(cat => cat.toLowerCase()) || [],
+  // Normaliser les vidéos YouTube
+  const normalizedYoutubeVideos = youtubeVideos.map((video) => ({
+    id: video.id,
+    youtube_video_id: video.id,
+    title: video.title,
+    summary: video.summary,
+    thumbnail_url: video.thumbnail_url,
+    published_date: video.published_date,
+    categories: video.categories?.map((cat: string) => cat.toLowerCase()) || [],
     stats: {
-      view_count: video.statistics?.viewCount || 0
-    }
+      view_count: parseInt(video.statistics?.viewCount || "0", 10),
+    },
   }));
 
   console.log("Videos from DB:", videos);
   console.log("Videos from YouTube:", normalizedYoutubeVideos);
 
-  const allVideos = [...(videos || []), ...normalizedYoutubeVideos];
+  // Combiner et normaliser toutes les vidéos
+  const allVideos = [
+    ...(videos?.map((video) => ({
+      ...video,
+      categories: video.categories?.map((cat: string) => cat.toLowerCase()) || [],
+    })) || []),
+    ...normalizedYoutubeVideos,
+  ];
+
   console.log("Combined videos:", allVideos);
 
   // Trier les vidéos par nombre de vues pour la section Tendances
@@ -44,20 +62,18 @@ export function HomeContent({ videos, isLoading: isLoadingDb, trendingVideos }: 
   });
 
   const TrendingContent = (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="space-y-8 px-6"
     >
-      <motion.div 
+      <motion.div
         initial={{ x: -20, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         className="flex items-center gap-3 glass-card p-6 rounded-xl"
       >
         <TrendingUp className="w-6 h-6 text-blue-500" />
-        <h2 className="text-xl font-bold text-gradient">
-          Vidéos tendances
-        </h2>
+        <h2 className="text-xl font-bold text-gradient">Vidéos tendances</h2>
       </motion.div>
       <VideoGrid
         videos={sortedTrendingVideos}
@@ -70,16 +86,14 @@ export function HomeContent({ videos, isLoading: isLoadingDb, trendingVideos }: 
   );
 
   const PodcastersContent = (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="space-y-8 px-6"
     >
       <div className="flex items-center gap-3 glass-card p-6 rounded-xl">
         <Users className="w-6 h-6 text-blue-500" />
-        <h2 className="text-xl font-bold text-gradient">
-          Nos podcasters
-        </h2>
+        <h2 className="text-xl font-bold text-gradient">Nos podcasters</h2>
       </div>
       <PodcasterGrid />
     </motion.div>
@@ -105,7 +119,7 @@ export function HomeContent({ videos, isLoading: isLoadingDb, trendingVideos }: 
               </div>
             ),
             trending: TrendingContent,
-            podcasters: PodcastersContent
+            podcasters: PodcastersContent,
           }}
         </HomeTabs>
       </div>
