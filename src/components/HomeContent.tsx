@@ -9,7 +9,6 @@ import { VideosContent } from "@/components/VideosContent";
 import { useYouTubeVideos } from "@/components/YouTubeVideoManager";
 import { useNormalizedVideos } from "@/hooks/useNormalizedVideos";
 import { type Video } from "@/types/video";
-import { ContentGenerationTest } from "@/components/ContentGenerationTest";
 
 interface HomeContentProps {
   videos: Video[];
@@ -67,16 +66,6 @@ export function HomeContent({
     </motion.div>
   );
 
-  const TestContent = (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-8 px-6"
-    >
-      <ContentGenerationTest />
-    </motion.div>
-  );
-
   return (
     <div className="min-h-screen pb-16">
       <div className="container max-w-6xl mx-auto space-y-16">
@@ -98,7 +87,6 @@ export function HomeContent({
             ),
             trending: TrendingContent,
             podcasters: PodcastersContent,
-            test: TestContent,
           }}
         </HomeTabs>
       </div>
