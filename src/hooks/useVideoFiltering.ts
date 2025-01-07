@@ -17,11 +17,13 @@ export function useVideoFiltering({
 }: VideoFilteringProps) {
   return useMemo(() => {
     console.log("Starting video filtering with:", {
-      totalVideos: videos.length,
+      totalVideos: videos?.length,
       searchTerm,
       selectedCategory,
       sortOption,
     });
+
+    if (!videos) return [];
 
     // Filtrage
     const filteredVideos = videos.filter((video) => {
