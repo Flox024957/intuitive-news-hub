@@ -46,10 +46,13 @@ export function useVideoFiltering({
         const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
         const publishDate = new Date(video.published_date);
 
-        // Vérifier si c'est une news (moins de 48h)
+        // Vérifier si c'est une news (moins de 48h ou tag news)
         if (selectedCategory.toLowerCase() === "news") {
           matchesCategory = publishDate >= fortyEightHoursAgo || 
-                          (video.categories && video.categories.includes('news'));
+                          (video.categories && video.categories.some(cat => 
+                            cat.toLowerCase() === 'news' || 
+                            cat.toLowerCase() === 'actualités'
+                          ));
         } else {
           // Normaliser les catégories
           const videoCategories = Array.isArray(video.categories) 

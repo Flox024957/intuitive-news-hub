@@ -34,37 +34,32 @@ serve(async (req) => {
       'Politique': [
         'politique', 'gouvernement', 'élection', 'président', 'ministre', 'loi',
         'réforme', 'assemblée', 'parlement', 'député', 'sénat', 'démocratie',
-        'état', 'constitution', 'vote', 'campagne', 'parti', 'opposition',
-        'majorité', 'droite', 'gauche', 'centre', 'extrême'
+        'état', 'constitution', 'vote', 'campagne', 'parti', 'opposition'
       ],
       'Économie': [
         'économie', 'finance', 'marché', 'entreprise', 'croissance', 'inflation',
         'investissement', 'bourse', 'commerce', 'business', 'startup', 'innovation',
-        'entrepreneur', 'management', 'stratégie', 'emploi', 'chômage', 'salaire',
-        'budget', 'dette', 'déficit', 'impôt', 'taxe'
+        'entrepreneur', 'management', 'stratégie', 'emploi', 'budget', 'dette'
       ],
       'Science': [
         'science', 'recherche', 'découverte', 'étude', 'expérience', 'théorie',
         'scientifique', 'laboratoire', 'cerveau', 'biologie', 'physique', 'chimie',
-        'neuroscience', 'cognition', 'intelligence', 'médecine', 'santé', 'maladie',
-        'traitement', 'vaccin', 'virus', 'bactérie'
+        'neuroscience', 'cognition', 'intelligence', 'médecine', 'santé'
       ],
       'Technologie': [
         'technologie', 'innovation', 'numérique', 'intelligence artificielle',
         'digital', 'tech', 'ia', 'algorithme', 'données', 'informatique',
-        'cybersécurité', 'blockchain', 'robot', 'internet', 'web', 'mobile',
-        'application', 'logiciel', 'programmation', 'code', 'développement'
+        'cybersécurité', 'blockchain', 'robot', 'internet', 'web', 'mobile'
       ],
       'Culture': [
         'culture', 'art', 'musique', 'cinéma', 'littérature', 'société',
         'philosophie', 'histoire', 'civilisation', 'tradition', 'patrimoine',
-        'identité', 'religion', 'spiritualité', 'livre', 'roman', 'poésie',
-        'théâtre', 'danse', 'peinture', 'sculpture'
+        'identité', 'religion', 'spiritualité', 'livre', 'roman', 'poésie'
       ],
       'Divertissement': [
         'divertissement', 'spectacle', 'film', 'série', 'show', 'jeu', 'loisir',
         'amusement', 'entertainment', 'fun', 'humour', 'comédie', 'festival',
-        'concert', 'exposition', 'événement', 'sortie', 'vacances', 'voyage'
+        'concert', 'exposition', 'événement', 'sortie', 'vacances'
       ],
       'Humour': [
         'humour', 'blague', 'rire', 'comédie', 'sketch', 'stand-up', 'gag',
@@ -83,32 +78,37 @@ serve(async (req) => {
 
     for (const [category, keywords] of Object.entries(categories)) {
       let score = 0;
+      let matches = 0;
+      
       for (const keyword of keywords) {
         const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
-        const matches = contentToAnalyze.match(regex);
-        if (matches) {
+        const keywordMatches = (contentToAnalyze.match(regex) || []).length;
+        
+        if (keywordMatches > 0) {
+          matches++;
           // Donner plus de poids aux mots trouvés dans le titre
-          const titleMatches = title?.toLowerCase().match(regex)?.length || 0;
-          score += matches.length + (titleMatches * 2);
+          const titleMatches = (title?.toLowerCase().match(regex) || []).length;
+          score += keywordMatches + (titleMatches * 2);
         }
       }
       
-      // Normaliser le score en fonction du nombre de mots-clés
-      const normalizedScore = score / keywords.length;
-      if (normalizedScore > 0.1) { // Seuil minimum de pertinence
-        scores.push({ category, score: normalizedScore });
+      // Calculer un score normalisé
+      if (matches > 0) {
+        const normalizedScore = (score / keywords.length) * (matches / keywords.length);
+        scores.push({ category: category.toLowerCase(), score: normalizedScore });
       }
     }
 
-    // Trier les scores et prendre jusqu'à 3 catégories les plus pertinentes
+    // Trier les scores et prendre les 3 catégories les plus pertinentes
     const topCategories = scores
       .sort((a, b) => b.score - a.score)
       .slice(0, 3)
-      .map(item => item.category.toLowerCase());
+      .filter(cat => cat.score > 0.1)
+      .map(item => item.category);
 
     console.log('Analysis results:', {
       topCategories,
-      scores: scores.sort((a, b) => b.score - a.score)
+      detailedScores: scores.sort((a, b) => b.score - a.score)
     });
 
     // S'assurer qu'il y a au moins une catégorie
