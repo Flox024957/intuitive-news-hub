@@ -1,5 +1,6 @@
 import { type VideoStats } from "./stats";
 import { type Podcaster } from "./podcaster";
+import { type VideoCategory } from "./category";
 
 export interface Video {
   id: string;
@@ -13,7 +14,7 @@ export interface Video {
   thumbnail_url: string | null;
   podcaster_id: string | null;
   video_url: string;
-  categories: string[];
+  categories: VideoCategory[];
   created_at: string;
   article_content: string | null;
   podcaster: Podcaster | null;

@@ -1,11 +1,12 @@
 import { useMemo } from "react";
-import { type SortOption } from "@/components/SortOptions";
 import { type Video } from "@/types/video";
+import { type VideoCategory } from "@/types/category";
+import { type SortOption } from "@/components/SortOptions";
 
 interface VideoFilteringProps {
   videos: Video[];
   searchTerm: string;
-  selectedCategory: string;
+  selectedCategory: VideoCategory;
   sortOption: SortOption;
 }
 
@@ -47,13 +48,11 @@ export function useVideoFiltering({
         const publishDate = new Date(video.published_date);
 
         // Vérifier si c'est une news (moins de 48h)
-        if (selectedCategory.toLowerCase() === "news") {
+        if (selectedCategory === "news") {
           matchesCategory = publishDate >= fortyEightHoursAgo;
         } else {
           // Vérifier la correspondance exacte de la catégorie
-          matchesCategory = video.categories?.some(cat => 
-            cat.toLowerCase() === selectedCategory.toLowerCase()
-          );
+          matchesCategory = video.categories?.some(cat => cat === selectedCategory);
         }
       }
 

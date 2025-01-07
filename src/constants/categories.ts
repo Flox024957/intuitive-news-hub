@@ -3,7 +3,6 @@ import {
   Newspaper, 
   Globe, 
   LineChart, 
-  Microscope, 
   Cpu, 
   Palette, 
   Film,
@@ -17,13 +16,7 @@ import {
   Baby,
   Clapperboard
 } from "lucide-react";
-
-export interface Category {
-  id: string;
-  label: string;
-  icon: typeof Grid;
-  color: string;
-}
+import { type Category, type VideoCategory } from "@/types/category";
 
 export const categories: Category[] = [
   { id: "all", label: "Toutes les vidéos", icon: Grid, color: "text-blue-500" },
