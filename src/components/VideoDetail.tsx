@@ -6,8 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Play, User, Heart, Share2 } from "lucide-react";
 import { type Database } from "@/integrations/supabase/types";
 import { VideoProcessing } from "@/components/VideoProcessing";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 type Video = Database['public']['Tables']['videos']['Row'] & {
   podcaster: Database['public']['Tables']['podcasters']['Row'];
@@ -19,6 +20,21 @@ interface VideoDetailProps {
 
 export function VideoDetail({ video }: VideoDetailProps) {
   const [summary, setSummary] = useState<string | null>(video.summary);
+
+  useEffect(() => {
+    // Increment view count when video is loaded
+    const incrementViewCount = async () => {
+      try {
+        const { error } = await supabase.rpc('increment_view_count', {
+          video_id_param: video.id
+        });
+        if (error) throw error;
+      } catch (error) {
+        console.error("Error incrementing view count:", error);
+      }
+    };
+    incrementViewCount();
+  }, [video.id]);
 
   const handleSummaryGenerated = async (newSummary: string) => {
     setSummary(newSummary);
@@ -33,13 +49,22 @@ export function VideoDetail({ video }: VideoDetailProps) {
     }
   };
 
+  const handleLike = () => {
+    toast.success("Vidéo ajoutée à vos favoris");
+  };
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success("Lien copié dans le presse-papier");
+  };
+
   return (
     <div className="space-y-8 animate-fade-up">
-      <div className="aspect-video relative rounded-lg overflow-hidden">
+      <div className="aspect-video relative rounded-lg overflow-hidden shadow-xl">
         <iframe
-          src={`https://www.youtube.com/embed/${video.youtube_video_id}`}
+          src={`https://www.youtube.com/embed/${video.youtube_video_id}?autoplay=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=${window.location.origin}`}
           title={video.title}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
           className="absolute inset-0 w-full h-full"
         />
@@ -63,10 +88,20 @@ export function VideoDetail({ video }: VideoDetailProps) {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button size="icon" variant="outline">
+            <Button 
+              size="icon" 
+              variant="outline"
+              onClick={handleLike}
+              className="hover:text-red-500 hover:border-red-500 transition-colors"
+            >
               <Heart className="w-4 h-4" />
             </Button>
-            <Button size="icon" variant="outline">
+            <Button 
+              size="icon" 
+              variant="outline"
+              onClick={handleShare}
+              className="hover:text-blue-500 hover:border-blue-500 transition-colors"
+            >
               <Share2 className="w-4 h-4" />
             </Button>
           </div>
@@ -74,12 +109,12 @@ export function VideoDetail({ video }: VideoDetailProps) {
 
         <Card className="p-4">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center overflow-hidden">
               {video.podcaster?.profile_picture_url ? (
                 <img
                   src={video.podcaster.profile_picture_url}
                   alt={video.podcaster.name}
-                  className="w-full h-full rounded-full object-cover"
+                  className="w-full h-full object-cover"
                 />
               ) : (
                 <User className="w-6 h-6 text-muted-foreground" />
