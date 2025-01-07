@@ -16,11 +16,11 @@ const Home = () => {
       console.log("Fetching videos...");
       
       try {
+        // Récupérer d'abord les statistiques des vidéos
         const { data: videoStats, error: statsError } = await supabase
           .from("video_stats")
           .select("*")
-          .order("view_count", { ascending: false })
-          .limit(20);
+          .order("view_count", { ascending: false });
 
         console.log("Video stats:", videoStats);
         console.log("Stats error:", statsError);
@@ -30,6 +30,7 @@ const Home = () => {
           throw statsError;
         }
 
+        // Récupérer ensuite les vidéos avec leurs podcasters
         const { data: videosData, error: videosError } = await supabase
           .from("videos")
           .select(`
@@ -52,6 +53,7 @@ const Home = () => {
           return [];
         }
 
+        // Combiner les vidéos avec leurs statistiques
         const videosWithStats = videosData.map(video => ({
           ...video,
           stats: videoStats?.find(stat => stat.video_id === video.id)
@@ -100,6 +102,7 @@ const Home = () => {
     );
   }
 
+  // Sélectionner la vidéo mise en avant et les vidéos tendances
   const featuredVideo = videos?.[0];
   const trendingVideos = videos?.slice(0, 4) || [];
 

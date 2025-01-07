@@ -36,16 +36,11 @@ export function useYouTubeVideos(username: string) {
           youtubeData.videos.map(async (video: any) => {
             try {
               // Vérifier si la vidéo existe déjà
-              const { data: existingVideo, error: checkError } = await supabase
+              const { data: existingVideo } = await supabase
                 .from('videos')
                 .select('*')
                 .eq('youtube_video_id', video.id)
                 .maybeSingle();
-
-              if (checkError) {
-                console.error('Error checking video existence:', checkError);
-                return null;
-              }
 
               if (existingVideo) {
                 console.log('Video already exists:', video.id);
@@ -62,7 +57,6 @@ export function useYouTubeVideos(username: string) {
                   published_date: video.publishedAt,
                   thumbnail_url: video.thumbnail,
                   video_url: `https://www.youtube.com/watch?v=${video.id}`,
-                  categories: ['news'] // Sera mis à jour par le trigger analyze_video_categories
                 })
                 .select()
                 .single();

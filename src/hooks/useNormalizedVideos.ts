@@ -26,8 +26,18 @@ export function useNormalizedVideos(dbVideos: Video[], youtubeVideos: any[]) {
       categories: video.categories?.map((cat) => cat.toLowerCase()) || [],
     }));
 
-    // Combiner les vidéos
-    const allVideos = [...normalizedDbVideos, ...normalizedYoutubeVideos];
+    // Combiner les vidéos en évitant les doublons
+    const allVideos = [...normalizedDbVideos];
+    
+    // Ajouter uniquement les vidéos YouTube qui n'existent pas déjà dans la DB
+    normalizedYoutubeVideos.forEach((ytVideo) => {
+      const exists = allVideos.some(
+        (dbVideo) => dbVideo.youtube_video_id === ytVideo.youtube_video_id
+      );
+      if (!exists) {
+        allVideos.push(ytVideo);
+      }
+    });
 
     console.log("Combined normalized videos:", allVideos);
     return allVideos;
