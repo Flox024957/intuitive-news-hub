@@ -25,16 +25,10 @@ export function HomeContent({
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("recent");
 
-  const { videos: youtubeVideos, isLoading: isLoadingYoutube } = useYouTubeVideos();
-  
-  const allVideos = useNormalizedVideos(videos, youtubeVideos);
-
-  // Trier les vidéos par nombre de vues pour la section Tendances
-  const sortedTrendingVideos = [...trendingVideos].sort((a, b) => {
-    const aViews = a.stats?.view_count || 0;
-    const bViews = b.stats?.view_count || 0;
-    return bViews - aViews;
-  });
+  // Désactiver temporairement la récupération des vidéos YouTube
+  // const { videos: youtubeVideos, isLoading: isLoadingYoutube } = useYouTubeVideos();
+  // const allVideos = useNormalizedVideos(videos, youtubeVideos);
+  const allVideos: Video[] = [];
 
   const TrendingContent = (
     <motion.div
@@ -51,8 +45,8 @@ export function HomeContent({
         <h2 className="text-xl font-bold text-gradient">Vidéos tendances</h2>
       </motion.div>
       <VideoGrid
-        videos={sortedTrendingVideos}
-        isLoading={isLoadingDb}
+        videos={[]}
+        isLoading={false}
         searchTerm=""
         selectedCategory="All"
         sortOption="popular"
@@ -83,7 +77,7 @@ export function HomeContent({
               <div className="space-y-12 px-6">
                 <VideosContent
                   videos={allVideos}
-                  isLoading={isLoadingDb || isLoadingYoutube}
+                  isLoading={false}
                   searchTerm={searchTerm}
                   onSearchChange={setSearchTerm}
                   selectedCategory={selectedCategory}
