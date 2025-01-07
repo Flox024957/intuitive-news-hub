@@ -41,16 +41,33 @@ export function VideosContent({
   onSortChange
 }: VideosContentProps) {
   const filterVideosByCategory = (category: string) => {
-    return videos.filter(video => 
-      video.categories?.includes(category) || 
-      (category === "All" && video.categories)
-    );
+    return videos.filter(video => {
+      if (category === "All") return true;
+      
+      // Vérifier si la vidéo a des catégories
+      if (!video.categories) return false;
+      
+      // Convertir les catégories en minuscules pour la comparaison
+      const normalizedCategories = video.categories.map((cat: string) => cat.toLowerCase());
+      const normalizedCategory = category.toLowerCase();
+      
+      // Vérifier les différentes variations possibles de "Politique"
+      if (normalizedCategory === "politique") {
+        return normalizedCategories.some((cat: string) => 
+          cat === "politique" || 
+          cat === "politics" || 
+          cat === "political"
+        );
+      }
+      
+      return normalizedCategories.includes(normalizedCategory);
+    });
   };
 
   const categories = [
     { id: "all", label: "Toutes les vidéos", icon: Grid, color: "text-blue-500" },
     { id: "news", label: "News", icon: Newspaper, color: "text-red-500" },
-    { id: "politics", label: "Politique", icon: Globe, color: "text-green-500" },
+    { id: "politique", label: "Politique", icon: Globe, color: "text-green-500" },
     { id: "economy", label: "Économie", icon: LineChart, color: "text-yellow-500" },
     { id: "science", label: "Science", icon: Microscope, color: "text-purple-500" },
     { id: "technology", label: "Technologie", icon: Cpu, color: "text-cyan-500" },

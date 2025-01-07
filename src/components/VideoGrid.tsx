@@ -60,8 +60,21 @@ export function VideoGrid({ videos, isLoading, searchTerm, selectedCategory, sor
       video.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       video.summary?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesCategory = selectedCategory === "All" || 
-      video.categories?.includes(selectedCategory);
+    let matchesCategory = true;
+    if (selectedCategory !== "All") {
+      const normalizedCategories = video.categories?.map(cat => cat.toLowerCase()) || [];
+      const normalizedCategory = selectedCategory.toLowerCase();
+      
+      if (normalizedCategory === "politique") {
+        matchesCategory = normalizedCategories.some(cat => 
+          cat === "politique" || 
+          cat === "politics" || 
+          cat === "political"
+        );
+      } else {
+        matchesCategory = normalizedCategories.includes(normalizedCategory);
+      }
+    }
 
     return matchesSearch && matchesCategory;
   });
