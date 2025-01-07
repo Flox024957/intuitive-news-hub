@@ -16,16 +16,42 @@ const YOUTUBE_CHANNELS: YouTubeChannel[] = [
 
 async function saveVideoToDatabase(video: any) {
   try {
+    console.log('Saving video to database:', video.id);
+    
     // Vérifier si la vidéo existe déjà
     const { data: existingVideo } = await supabase
       .from('videos')
-      .select('id')
+      .select('id, summary, article_content')
       .eq('youtube_video_id', video.id)
       .maybeSingle();
 
     if (existingVideo) {
-      console.log(`Video ${video.id} already exists, skipping`);
-      return;
+      console.log(`Video ${video.id} already exists`);
+      
+      // Si le contenu n'a pas été généré, on déclenche la génération
+      if (!existingVideo.summary || !existingVideo.article_content) {
+        console.log(`Triggering content generation for video ${video.id}`);
+        const { data: contentData, error: contentError } = await supabase.functions.invoke(
+          'generate-content',
+          {
+            body: { 
+              videoId: existingVideo.id,
+              title: video.title,
+              transcript: video.description
+            }
+          }
+        );
+
+        if (contentError) {
+          console.error('Error generating content:', contentError);
+          toast.error("Erreur lors de la génération du contenu");
+        } else {
+          console.log('Content generated successfully');
+          toast.success("Contenu généré avec succès");
+        }
+      }
+      
+      return existingVideo.id;
     }
 
     // Insérer la nouvelle vidéo
@@ -38,24 +64,54 @@ async function saveVideoToDatabase(video: any) {
         published_date: video.publishedAt,
         thumbnail_url: video.thumbnail,
         video_url: `https://www.youtube.com/watch?v=${video.id}`,
-        categories: ['news'] // Sera mis à jour par le trigger analyze_video_categories
+        categories: video.categories || ['news']
       })
       .select()
       .single();
 
-    if (videoError) throw videoError;
+    if (videoError) {
+      console.error('Error saving video:', videoError);
+      throw videoError;
+    }
+
+    console.log('Video saved successfully:', newVideo.id);
 
     // Initialiser les statistiques de la vidéo
-    await supabase
+    const { error: statsError } = await supabase
       .from('video_stats')
       .insert({
         video_id: newVideo.id,
         view_count: parseInt(video.statistics?.viewCount || '0', 10),
       });
 
-    console.log(`Video ${video.id} saved successfully`);
+    if (statsError) {
+      console.error('Error saving video stats:', statsError);
+    }
+
+    // Déclencher la génération de contenu
+    const { error: contentError } = await supabase.functions.invoke(
+      'generate-content',
+      {
+        body: { 
+          videoId: newVideo.id,
+          title: video.title,
+          transcript: video.description
+        }
+      }
+    );
+
+    if (contentError) {
+      console.error('Error triggering content generation:', contentError);
+      toast.error("Erreur lors de la génération du contenu");
+    } else {
+      console.log('Content generation triggered successfully');
+      toast.success("Génération du contenu démarrée");
+    }
+
+    return newVideo.id;
   } catch (error) {
-    console.error(`Error saving video ${video.id}:`, error);
+    console.error(`Error processing video ${video.id}:`, error);
+    toast.error("Erreur lors du traitement de la vidéo");
     throw error;
   }
 }
