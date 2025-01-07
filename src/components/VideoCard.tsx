@@ -2,11 +2,11 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Play, Eye, Share2, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
-import { ShareButtons } from "@/components/ShareButtons";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useVideoStats } from "@/hooks/useVideoStats";
 
 interface VideoCardProps {
   id: string;
@@ -28,6 +28,7 @@ export function VideoCard({
   viewCount = 0
 }: VideoCardProps) {
   const videoUrl = `${window.location.origin}/video/${id}`;
+  const { updateStats } = useVideoStats(id);
   
   const handleLike = async () => {
     try {
@@ -37,41 +38,15 @@ export function VideoCard({
         return;
       }
 
-      // First check if stats exist for this video
-      const { data: existingStats } = await supabase
+      const { data: currentStats } = await supabase
         .from('video_stats')
-        .select('*')
+        .select('like_count')
         .eq('video_id', id)
-        .single();
+        .maybeSingle();
 
-      if (existingStats) {
-        // Update existing stats
-        const { error } = await supabase
-          .from('video_stats')
-          .update({ 
-            like_count: (existingStats.like_count || 0) + 1,
-            updated_at: new Date().toISOString()
-          })
-          .eq('video_id', id);
-
-        if (error) throw error;
-      } else {
-        // Insert new stats
-        const { error } = await supabase
-          .from('video_stats')
-          .insert({
-            video_id: id,
-            like_count: 1,
-            view_count: 0,
-            share_count: 0
-          });
-
-        if (error) throw error;
-      }
-
-      toast.success("Vidéo ajoutée à vos favoris");
+      await updateStats('like', currentStats);
     } catch (error) {
-      console.error('Error liking video:', error);
+      console.error('Error in handleLike:', error);
       toast.error("Une erreur est survenue");
     }
   };
@@ -84,39 +59,15 @@ export function VideoCard({
         url: videoUrl
       });
       
-      // First check if stats exist for this video
-      const { data: existingStats } = await supabase
+      const { data: currentStats } = await supabase
         .from('video_stats')
-        .select('*')
+        .select('share_count')
         .eq('video_id', id)
-        .single();
+        .maybeSingle();
 
-      if (existingStats) {
-        // Update existing stats
-        const { error } = await supabase
-          .from('video_stats')
-          .update({ 
-            share_count: (existingStats.share_count || 0) + 1,
-            updated_at: new Date().toISOString()
-          })
-          .eq('video_id', id);
-
-        if (error) throw error;
-      } else {
-        // Insert new stats
-        const { error } = await supabase
-          .from('video_stats')
-          .insert({
-            video_id: id,
-            share_count: 1,
-            view_count: 0,
-            like_count: 0
-          });
-
-        if (error) throw error;
-      }
+      await updateStats('share', currentStats);
     } catch (error) {
-      console.error('Error sharing:', error);
+      console.error('Error in handleShare:', error);
       if (error instanceof Error && error.name !== 'AbortError') {
         toast.error("Une erreur est survenue lors du partage");
       }
