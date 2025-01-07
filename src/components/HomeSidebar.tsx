@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Home, TrendingUp, Users, User } from "lucide-react";
+import { Home, TrendingUp, Users, User, Brain, Landmark, CircuitBoard, LineChart } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -11,7 +11,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-const menuItems = [
+const navigationItems = [
   {
     title: "Accueil",
     url: "/home",
@@ -34,6 +34,29 @@ const menuItems = [
   },
 ];
 
+const sectionItems = [
+  {
+    title: "Politique",
+    url: "#politique",
+    icon: Landmark,
+  },
+  {
+    title: "Économie",
+    url: "#economie",
+    icon: LineChart,
+  },
+  {
+    title: "Technologie",
+    url: "#technologie",
+    icon: CircuitBoard,
+  },
+  {
+    title: "Développement personnel",
+    url: "#developpement-personnel",
+    icon: Brain,
+  },
+];
+
 export function HomeSidebar() {
   return (
     <Sidebar>
@@ -42,7 +65,7 @@ export function HomeSidebar() {
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     {item.url.startsWith("#") ? (
@@ -56,6 +79,24 @@ export function HomeSidebar() {
                         <span>{item.title}</span>
                       </Link>
                     )}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Sections</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {sectionItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <a href={item.url}>
+                      <item.icon className="w-4 h-4" />
+                      <span>{item.title}</span>
+                    </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
