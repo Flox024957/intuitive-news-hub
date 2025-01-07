@@ -1,11 +1,10 @@
-import { useYoutubeVideos } from "@/hooks/useYoutubeVideos";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-interface YouTubeChannel {
+type YouTubeChannel = {
   id: string;
   categories: string[];
-}
+};
 
 const YOUTUBE_CHANNELS: YouTubeChannel[] = [
   {
@@ -19,38 +18,19 @@ async function saveVideoToDatabase(video: any) {
     console.log('Saving video to database:', video.id);
     
     // Vérifier si la vidéo existe déjà
-    const { data: existingVideo } = await supabase
+    const { data: existingVideo, error: checkError } = await supabase
       .from('videos')
       .select('id, summary, article_content')
       .eq('youtube_video_id', video.id)
       .maybeSingle();
 
+    if (checkError) {
+      console.error('Error checking video existence:', checkError);
+      throw checkError;
+    }
+
     if (existingVideo) {
       console.log(`Video ${video.id} already exists`);
-      
-      // Si le contenu n'a pas été généré, on déclenche la génération
-      if (!existingVideo.summary || !existingVideo.article_content) {
-        console.log(`Triggering content generation for video ${video.id}`);
-        const { data: contentData, error: contentError } = await supabase.functions.invoke(
-          'generate-content',
-          {
-            body: { 
-              videoId: existingVideo.id,
-              title: video.title,
-              transcript: video.description
-            }
-          }
-        );
-
-        if (contentError) {
-          console.error('Error generating content:', contentError);
-          toast.error("Erreur lors de la génération du contenu");
-        } else {
-          console.log('Content generated successfully');
-          toast.success("Contenu généré avec succès");
-        }
-      }
-      
       return existingVideo.id;
     }
 
