@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useYouTubeVideos } from "@/hooks/useYouTubeVideos";
 
 type YouTubeChannel = {
   id: string;
@@ -68,26 +69,6 @@ async function saveVideoToDatabase(video: any) {
       console.error('Error saving video stats:', statsError);
     }
 
-    // Déclencher la génération de contenu
-    const { error: contentError } = await supabase.functions.invoke(
-      'generate-content',
-      {
-        body: { 
-          videoId: newVideo.id,
-          title: video.title,
-          transcript: video.description
-        }
-      }
-    );
-
-    if (contentError) {
-      console.error('Error triggering content generation:', contentError);
-      toast.error("Erreur lors de la génération du contenu");
-    } else {
-      console.log('Content generation triggered successfully');
-      toast.success("Génération du contenu démarrée");
-    }
-
     return newVideo.id;
   } catch (error) {
     console.error(`Error processing video ${video.id}:`, error);
@@ -132,24 +113,9 @@ export async function addNewYouTubeChannel(channelId: string) {
 
 export function useYouTubeVideos() {
   const channelsData = YOUTUBE_CHANNELS.map(channel => {
-    const { data, isLoading } = useYoutubeVideos(channel.id);
-    
-    // Sauvegarder automatiquement les nouvelles vidéos
-    if (data && !isLoading) {
-      data.forEach(async (video) => {
-        try {
-          await saveVideoToDatabase(video);
-        } catch (error) {
-          console.error(`Error auto-saving video ${video.id}:`, error);
-        }
-      });
-    }
-
+    const { data, isLoading } = useYouTubeVideos(channel.id);
     return {
-      videos: data?.map(video => ({
-        ...video,
-        categories: video.categories || ['Actualités']
-      })) || [],
+      videos: data || [],
       isLoading
     };
   });
