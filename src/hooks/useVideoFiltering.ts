@@ -17,7 +17,7 @@ function filterBySearch(video: Video, searchTerm: string): boolean {
   const searchableContent = [
     video.title,
     video.summary,
-    ...(video.categories || [])
+    ...(Array.isArray(video.categories) ? video.categories : [])
   ].filter(Boolean);
 
   return searchableContent.some(text => 
@@ -27,7 +27,10 @@ function filterBySearch(video: Video, searchTerm: string): boolean {
 
 function filterByCategory(video: Video, selectedCategory: VideoCategory): boolean {
   if (selectedCategory === "all") return true;
-  if (!video.categories) return false;
+  if (!Array.isArray(video.categories)) {
+    console.log(`Invalid categories for video ${video.title}:`, video.categories);
+    return false;
+  }
 
   const now = new Date();
   const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
@@ -64,18 +67,21 @@ export function useVideoFiltering({
   sortOption,
 }: VideoFilteringProps) {
   return useMemo(() => {
+    if (!videos?.length) {
+      console.log("No videos provided to useVideoFiltering");
+      return [];
+    }
+
     console.log("Starting video filtering with:", {
-      totalVideos: videos?.length,
+      totalVideos: videos.length,
       searchTerm,
       selectedCategory,
       sortOption,
-      videosWithCategories: videos?.map(v => ({
+      videosWithCategories: videos.map(v => ({
         title: v.title,
         categories: v.categories
       }))
     });
-
-    if (!videos) return [];
 
     const filteredVideos = videos.filter(video => 
       video && 

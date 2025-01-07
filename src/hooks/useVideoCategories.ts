@@ -4,17 +4,15 @@ import { type VideoCategory } from "@/types/category";
 
 export function useVideoCategories(videos: Video[], selectedCategory: VideoCategory) {
   return useMemo(() => {
-    console.log("useVideoCategories - Starting category filtering:", {
-      totalVideos: videos?.length,
-      selectedCategory,
-      videosWithCategories: videos?.map(v => ({
-        title: v.title,
-        categories: v.categories,
-        publishDate: v.published_date
-      }))
-    });
+    if (!videos?.length) {
+      console.log("No videos provided to useVideoCategories");
+      return [];
+    }
 
-    if (!videos) return [];
+    console.log("useVideoCategories - Starting category filtering:", {
+      totalVideos: videos.length,
+      selectedCategory
+    });
 
     // Pour la catégorie "All", retourner toutes les vidéos
     if (selectedCategory === "all") {
@@ -27,11 +25,9 @@ export function useVideoCategories(videos: Video[], selectedCategory: VideoCateg
       const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
       
       return videos.filter(video => {
-        if (!video.categories) return false;
-        
         const publishDate = new Date(video.published_date);
         const isRecent = publishDate >= fortyEightHoursAgo;
-        const hasNewsTag = video.categories.includes("news");
+        const hasNewsTag = Array.isArray(video.categories) && video.categories.includes("news");
         
         console.log("Checking if video is news:", {
           title: video.title,
@@ -47,7 +43,10 @@ export function useVideoCategories(videos: Video[], selectedCategory: VideoCateg
 
     // Pour les autres catégories
     return videos.filter(video => {
-      if (!video.categories) return false;
+      if (!Array.isArray(video.categories)) {
+        console.log(`Invalid categories for video ${video.title}:`, video.categories);
+        return false;
+      }
 
       const hasCategory = video.categories.includes(selectedCategory);
 
