@@ -35,12 +35,11 @@ export function useVideoFiltering({
 
       // Filtre de catégorie
       let matchesCategory = true;
-      if (selectedCategory !== "all") {
+      if (selectedCategory.toLowerCase() !== "all") {
         const normalizedCategories = video.categories?.map((cat) =>
           cat.toLowerCase()
         ) || [];
-        const normalizedCategory = selectedCategory.toLowerCase();
-        matchesCategory = normalizedCategories.includes(normalizedCategory);
+        matchesCategory = normalizedCategories.includes(selectedCategory.toLowerCase());
       }
 
       return matchesSearch && matchesCategory;

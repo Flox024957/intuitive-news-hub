@@ -7,11 +7,13 @@ import { PodcasterGrid } from "@/components/PodcasterGrid";
 import { HomeTabs } from "@/components/HomeTabs";
 import { VideosContent } from "@/components/VideosContent";
 import { useYouTubeVideos } from "@/components/YouTubeVideoManager";
+import { useNormalizedVideos } from "@/hooks/useNormalizedVideos";
+import { type Video } from "@/types/video";
 
 interface HomeContentProps {
-  videos: any[];
+  videos: Video[];
   isLoading: boolean;
-  trendingVideos: any[];
+  trendingVideos: Video[];
 }
 
 export function HomeContent({
@@ -23,36 +25,9 @@ export function HomeContent({
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("recent");
 
-  const { videos: youtubeVideos, isLoading: isLoadingYoutube } =
-    useYouTubeVideos();
-
-  // Normaliser les vidéos YouTube
-  const normalizedYoutubeVideos = youtubeVideos.map((video) => ({
-    id: video.id,
-    youtube_video_id: video.id,
-    title: video.title,
-    summary: video.summary,
-    thumbnail_url: video.thumbnail_url,
-    published_date: video.published_date,
-    categories: video.categories?.map((cat: string) => cat.toLowerCase()) || [],
-    stats: {
-      view_count: parseInt(video.statistics?.viewCount || "0", 10),
-    },
-  }));
-
-  console.log("Videos from DB:", videos);
-  console.log("Videos from YouTube:", normalizedYoutubeVideos);
-
-  // Combiner et normaliser toutes les vidéos
-  const allVideos = [
-    ...(videos?.map((video) => ({
-      ...video,
-      categories: video.categories?.map((cat: string) => cat.toLowerCase()) || [],
-    })) || []),
-    ...normalizedYoutubeVideos,
-  ];
-
-  console.log("Combined videos:", allVideos);
+  const { videos: youtubeVideos, isLoading: isLoadingYoutube } = useYouTubeVideos();
+  
+  const allVideos = useNormalizedVideos(videos, youtubeVideos);
 
   // Trier les vidéos par nombre de vues pour la section Tendances
   const sortedTrendingVideos = [...trendingVideos].sort((a, b) => {
