@@ -37,6 +37,20 @@ export function useYouTubeVideos(username: string) {
             .maybeSingle();
 
           if (!existingVideo) {
+            // Analyser le contenu pour déterminer les catégories
+            const { data: analysisData } = await supabase.functions.invoke(
+              'analyze-video-tags',
+              {
+                body: {
+                  title: video.title,
+                  description: video.description,
+                  summary: null
+                }
+              }
+            );
+
+            const categories = analysisData?.categories || ['news'];
+
             const { data: newVideo, error: insertError } = await supabase
               .from('videos')
               .insert({
@@ -46,7 +60,7 @@ export function useYouTubeVideos(username: string) {
                 published_date: video.publishedAt,
                 thumbnail_url: video.thumbnail,
                 video_url: `https://www.youtube.com/watch?v=${video.id}`,
-                categories: ['news']
+                categories: categories.slice(0, 3) // Maximum 3 catégories
               })
               .select()
               .single();

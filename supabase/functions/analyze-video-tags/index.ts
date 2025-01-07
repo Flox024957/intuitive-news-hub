@@ -58,6 +58,10 @@ serve(async (req) => {
       'Divertissement': [
         'divertissement', 'spectacle', 'film', 'série', 'show', 'jeu', 'loisir',
         'amusement', 'entertainment', 'fun', 'humour', 'comédie'
+      ],
+      'Humour': [
+        'humour', 'blague', 'rire', 'comédie', 'sketch', 'stand-up', 'gag',
+        'parodie', 'satire', 'comique', 'drôle', 'amusant', 'divertissant'
       ]
     };
 
