@@ -14,11 +14,10 @@ interface Video {
   stats?: {
     view_count?: number;
   };
-  youtube_video_id?: string;
 }
 
 interface VideoGridProps {
-  videos: Video[] | null;
+  videos: Video[];
   isLoading: boolean;
   searchTerm: string;
   selectedCategory: string;
@@ -70,9 +69,8 @@ export function VideoGrid({
     );
   }
 
-  const safeVideos = videos || [];
   const sortedVideos = useVideoFiltering({
-    videos: safeVideos,
+    videos,
     searchTerm,
     selectedCategory,
     sortOption,
