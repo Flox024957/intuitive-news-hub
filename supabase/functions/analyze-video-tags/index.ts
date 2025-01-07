@@ -1,4 +1,3 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -56,10 +55,9 @@ serve(async (req) => {
         'philosophie', 'histoire', 'civilisation', 'tradition', 'patrimoine',
         'identité', 'religion', 'spiritualité'
       ],
-      'Development': [
-        'développement personnel', 'croissance personnelle', 'motivation',
-        'productivité', 'apprentissage', 'formation', 'éducation', 'coaching',
-        'mentorat', 'leadership', 'succès', 'objectif', 'potentiel'
+      'Divertissement': [
+        'divertissement', 'spectacle', 'film', 'série', 'show', 'jeu', 'loisir',
+        'amusement', 'entertainment', 'fun', 'humour', 'comédie'
       ]
     };
 
@@ -83,8 +81,8 @@ serve(async (req) => {
         }
       }
       
-      // Normaliser le score en fonction du nombre de mots-clés et de la longueur du contenu
-      const normalizedScore = score / (keywords.length * Math.log(contentToAnalyze.length));
+      // Normaliser le score en fonction du nombre de mots-clés
+      const normalizedScore = score / keywords.length;
       if (normalizedScore > 0.1) { // Seuil minimum de pertinence
         scores.push({ category, score: normalizedScore });
       }
@@ -94,7 +92,7 @@ serve(async (req) => {
     const topCategories = scores
       .sort((a, b) => b.score - a.score)
       .slice(0, 3)
-      .map(item => item.category);
+      .map(item => item.category.toLowerCase());
 
     console.log('Analysis results:', {
       topCategories,
@@ -103,7 +101,14 @@ serve(async (req) => {
 
     // S'assurer qu'il y a au moins une catégorie
     if (topCategories.length === 0) {
-      topCategories.push('News');
+      topCategories.push('news');
+    }
+
+    // Ajouter "news" si la vidéo est récente (< 48h)
+    const publishDate = new Date();
+    const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
+    if (publishDate >= fortyEightHoursAgo && !topCategories.includes('news')) {
+      topCategories.unshift('news');
     }
 
     return new Response(

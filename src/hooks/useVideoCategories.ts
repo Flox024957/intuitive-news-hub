@@ -15,7 +15,12 @@ export function useVideoCategories(videos: Video[], selectedCategory: string) {
 
     if (!videos) return [];
 
-    // Pour la section News, vérifier si la vidéo a moins de 48h
+    // Pour la catégorie "All", retourner toutes les vidéos
+    if (selectedCategory.toLowerCase() === "all") {
+      return videos;
+    }
+
+    // Pour la section News, vérifier si la vidéo a moins de 48h ou le tag news
     if (selectedCategory.toLowerCase() === "news") {
       const now = new Date();
       const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
@@ -23,33 +28,53 @@ export function useVideoCategories(videos: Video[], selectedCategory: string) {
       return videos.filter(video => {
         const publishDate = new Date(video.published_date);
         const isRecent = publishDate >= fortyEightHoursAgo;
+        const hasNewsTag = video.categories?.some(cat => 
+          cat.toLowerCase() === 'news' || 
+          cat.toLowerCase() === 'actualités'
+        );
         
-        console.log("Checking if video is recent:", {
+        console.log("Checking if video is news:", {
           title: video.title,
           publishDate,
           isRecent,
+          hasNewsTag,
           categories: video.categories
         });
         
-        // Une vidéo est considérée comme "news" si elle a moins de 48h OU si elle est explicitement catégorisée comme "news"
-        return isRecent || (video.categories && video.categories.includes('news'));
+        return isRecent || hasNewsTag;
       });
     }
 
     // Pour les autres catégories
     return videos.filter(video => {
-      if (selectedCategory.toLowerCase() === "all") return true;
+      if (!video.categories) return false;
 
-      // Vérifier les catégories de la vidéo
-      const videoCategories = Array.isArray(video.categories) 
-        ? video.categories.map(cat => typeof cat === 'string' ? cat.toLowerCase() : '')
-        : [];
+      // Normaliser les catégories pour la comparaison
+      const normalizedCategories = video.categories.map(cat => 
+        typeof cat === 'string' ? cat.toLowerCase() : ''
+      );
 
-      const hasCategory = videoCategories.includes(selectedCategory.toLowerCase());
+      // Correspondances de catégories (français/anglais)
+      const categoryMappings: Record<string, string[]> = {
+        'politics': ['politics', 'politique'],
+        'economy': ['economy', 'économie'],
+        'science': ['science'],
+        'technology': ['technology', 'technologie'],
+        'culture': ['culture'],
+        'entertainment': ['entertainment', 'divertissement']
+      };
+
+      // Vérifier si la vidéo appartient à la catégorie sélectionnée
+      const matchingCategories = categoryMappings[selectedCategory.toLowerCase()] || 
+                               [selectedCategory.toLowerCase()];
+
+      const hasCategory = normalizedCategories.some(cat =>
+        matchingCategories.includes(cat)
+      );
 
       console.log("Video categorization:", {
         title: video.title,
-        categories: videoCategories,
+        normalizedCategories,
         selectedCategory: selectedCategory.toLowerCase(),
         matches: hasCategory
       });
