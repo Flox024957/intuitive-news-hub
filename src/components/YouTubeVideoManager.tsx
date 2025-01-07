@@ -29,10 +29,10 @@ export async function addNewYouTubeChannel(channelId: string) {
       return false;
     }
 
-    // Pour chaque vidéo, traiter le contenu (transcription, résumé, article)
+    // Pour chaque vidéo, traiter le contenu
     for (const video of data.videos) {
       try {
-        // Analyze video categories using AI
+        // Analyze video categories using Hugging Face
         const { data: categoryData, error: categoryError } = await supabase.functions.invoke('analyze-video-tags', {
           body: { 
             title: video.title,
@@ -93,7 +93,7 @@ export function useYouTubeVideos() {
     return {
       videos: data?.map(video => ({
         ...video,
-        categories: video.categories || ['News'] // Fallback category if none assigned
+        categories: video.categories || ['Actualités'] // Fallback category
       })) || [],
       isLoading
     };

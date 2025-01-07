@@ -1,89 +1,87 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { corsHeaders } from "../_shared/cors.ts"
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { pipeline } from "@huggingface/transformers";
 
-const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY')
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { title, description } = await req.json()
+    const { title, description } = await req.json();
 
     if (!title) {
-      throw new Error('Title is required')
+      throw new Error('Title is required');
     }
 
-    console.log('Analyzing video:', { title, description })
+    console.log('Analyzing video:', { title, description });
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: `You are a video content analyzer. Your task is to analyze video titles and descriptions to assign the most relevant categories (maximum 3) from this list:
-              - News (Actualités)
-              - Politics (Politique)
-              - Science
-              - Technology (Technologie)
-              - Economy (Économie)
-              - Culture
-              - Entertainment (Divertissement)
-              - Tutorials (Tutoriels)
-              - Humor (Humour)
-              - Music (Musique)
-              - Development (Développement)
-              
-              Respond ONLY with an array of categories in French, no other text.
-              Example response: ["Actualités", "Politique", "Économie"]`
-          },
-          {
-            role: "user",
-            content: `Title: ${title}\nDescription: ${description || ''}`
-          }
-        ],
-        temperature: 0.3,
-        max_tokens: 100
-      })
-    })
+    // Create a zero-shot-classification pipeline
+    const classifier = await pipeline(
+      "zero-shot-classification",
+      "facebook/bart-large-mnli",
+      { device: "cpu" }
+    );
 
-    const data = await response.json()
-    console.log('AI Response:', data)
+    // Define our categories
+    const categories = [
+      "Actualités",
+      "Politique",
+      "Science",
+      "Technologie",
+      "Économie",
+      "Culture",
+      "Divertissement",
+      "Tutoriels",
+      "Humour",
+      "Musique",
+      "Développement"
+    ];
 
-    let categories = []
-    try {
-      // Parse the AI response which should be a string representation of an array
-      categories = JSON.parse(data.choices[0].message.content)
-      
-      // Ensure we have valid categories and limit to 3
-      categories = categories
-        .filter(cat => typeof cat === 'string')
-        .slice(0, 3)
-    } catch (error) {
-      console.error('Error parsing AI response:', error)
-      categories = ['News'] // Fallback category
-    }
+    // Combine title and description for better context
+    const content = `${title} ${description || ''}`;
+
+    // Classify the content
+    const result = await classifier(content, categories, {
+      multi_label: true,
+    });
+
+    // Get top 3 categories based on scores
+    const topCategories = result.labels
+      .map((label, index) => ({
+        label,
+        score: result.scores[index]
+      }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3)
+      .map(item => item.label)
+      .filter(label => result.scores[result.labels.indexOf(label)] > 0.3); // Only keep categories with confidence > 30%
+
+    console.log('AI Analysis Result:', {
+      content,
+      categories: topCategories,
+      scores: result.scores
+    });
 
     return new Response(
-      JSON.stringify({ categories }),
+      JSON.stringify({ categories: topCategories }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    );
 
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Error:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
-    )
+    );
   }
-})
+});
