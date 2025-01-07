@@ -26,45 +26,39 @@ serve(async (req) => {
 
     // Définition des catégories et leurs mots-clés associés avec plus de précision
     const categories = {
-      'News': [
-        'actualité', 'information', 'dernière', 'récent', 'nouveau', 'breaking',
-        'reportage', 'journal', 'média', 'presse', 'événement', 'direct',
-        'débat', 'interview', 'analyse', 'chronique', 'édito'
-      ],
-      'Politique': [
+      'politics': [
         'politique', 'gouvernement', 'élection', 'président', 'ministre', 'loi',
         'réforme', 'assemblée', 'parlement', 'député', 'sénat', 'démocratie',
         'état', 'constitution', 'vote', 'campagne', 'parti', 'opposition'
       ],
-      'Économie': [
+      'economy': [
         'économie', 'finance', 'marché', 'entreprise', 'croissance', 'inflation',
         'investissement', 'bourse', 'commerce', 'business', 'startup', 'innovation',
         'entrepreneur', 'management', 'stratégie', 'emploi', 'budget', 'dette'
       ],
-      'Science': [
-        'science', 'recherche', 'découverte', 'étude', 'expérience', 'théorie',
-        'scientifique', 'laboratoire', 'cerveau', 'biologie', 'physique', 'chimie',
-        'neuroscience', 'cognition', 'intelligence', 'médecine', 'santé'
-      ],
-      'Technologie': [
+      'technology': [
         'technologie', 'innovation', 'numérique', 'intelligence artificielle',
         'digital', 'tech', 'ia', 'algorithme', 'données', 'informatique',
         'cybersécurité', 'blockchain', 'robot', 'internet', 'web', 'mobile'
       ],
-      'Culture': [
+      'culture': [
         'culture', 'art', 'musique', 'cinéma', 'littérature', 'société',
         'philosophie', 'histoire', 'civilisation', 'tradition', 'patrimoine',
         'identité', 'religion', 'spiritualité', 'livre', 'roman', 'poésie'
       ],
-      'Divertissement': [
-        'divertissement', 'spectacle', 'film', 'série', 'show', 'jeu', 'loisir',
-        'amusement', 'entertainment', 'fun', 'humour', 'comédie', 'festival',
-        'concert', 'exposition', 'événement', 'sortie', 'vacances'
+      'news': [
+        'actualité', 'information', 'dernière', 'récent', 'nouveau', 'breaking',
+        'reportage', 'journal', 'média', 'presse', 'événement', 'direct',
+        'débat', 'interview', 'analyse', 'chronique', 'édito'
       ],
-      'Humour': [
-        'humour', 'blague', 'rire', 'comédie', 'sketch', 'stand-up', 'gag',
-        'parodie', 'satire', 'comique', 'drôle', 'amusant', 'divertissant',
-        'humoriste', 'comédien', 'one-man-show', 'spectacle', 'show'
+      'personal_development': [
+        'développement personnel', 'croissance personnelle', 'motivation', 'productivité',
+        'bien-être', 'mindset', 'coaching', 'leadership', 'succès', 'objectifs',
+        'habitudes', 'psychologie', 'méditation'
+      ],
+      'entertainment': [
+        'divertissement', 'humour', 'comédie', 'blague', 'rire', 'sketch', 'stand-up',
+        'parodie', 'satire', 'comique', 'drôle', 'gag', 'amusant', 'humoriste'
       ]
     };
 
