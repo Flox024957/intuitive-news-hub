@@ -25,7 +25,7 @@ serve(async (req) => {
       throw new Error('HUGGINGFACE_API_KEY is not set');
     }
 
-    // Générer le résumé avec un prompt plus sophistiqué
+    // Générer le résumé
     console.log('Generating enhanced summary...');
     const summaryPrompt = `En tant qu'expert en analyse de contenu, crée un résumé structuré et informatif de cette transcription en français.
     Concentre-toi sur les points clés, les arguments principaux et les conclusions.
@@ -61,10 +61,11 @@ serve(async (req) => {
     }
 
     const summaryResult = await summaryResponse.json();
-    const summary = summaryResult[0].generated_text;
+    console.log('Raw summary response:', summaryResult);
+    const summary = summaryResult.generated_text; // Fixed: Access directly without array indexing
     console.log('Enhanced summary generated:', summary);
 
-    // Générer l'article avec un prompt plus sophistiqué
+    // Générer l'article
     console.log('Generating enhanced article...');
     const articlePrompt = `En tant qu'expert en rédaction journalistique, crée un article approfondi et structuré en français basé sur cette transcription.
     
@@ -102,7 +103,8 @@ serve(async (req) => {
     }
 
     const articleResult = await articleResponse.json();
-    const article = articleResult[0].generated_text;
+    console.log('Raw article response:', articleResult);
+    const article = articleResult.generated_text; // Fixed: Access directly without array indexing
     console.log('Enhanced article generated:', article);
 
     // Mise à jour de la base de données avec le client Supabase
