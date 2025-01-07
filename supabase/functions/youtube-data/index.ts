@@ -4,8 +4,9 @@ import { corsHeaders } from "../_shared/cors.ts"
 const YOUTUBE_API_KEY = Deno.env.get('YOUTUBE_API_KEY')
 
 serve(async (req) => {
+  // Always handle OPTIONS request first
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
@@ -13,11 +14,23 @@ serve(async (req) => {
     console.log('Processing request for YouTube channel:', username);
 
     if (!username) {
-      throw new Error('Username is required');
+      return new Response(
+        JSON.stringify({ error: 'Username is required' }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     if (!YOUTUBE_API_KEY) {
-      throw new Error('YouTube API key not configured');
+      return new Response(
+        JSON.stringify({ error: 'YouTube API key not configured' }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     // Get channel ID from username or handle
@@ -141,7 +154,10 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ videos }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json'
+        },
         status: 200,
       },
     );
@@ -153,7 +169,10 @@ serve(async (req) => {
         details: error.stack 
       }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json'
+        },
         status: error.status || 500,
       },
     );
