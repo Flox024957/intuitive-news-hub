@@ -28,40 +28,48 @@ serve(async (req) => {
     const categories = {
       'News': [
         'actualité', 'information', 'dernière', 'récent', 'nouveau', 'breaking',
-        'reportage', 'journal', 'média', 'presse', 'événement'
+        'reportage', 'journal', 'média', 'presse', 'événement', 'direct',
+        'débat', 'interview', 'analyse', 'chronique', 'édito'
       ],
       'Politique': [
         'politique', 'gouvernement', 'élection', 'président', 'ministre', 'loi',
         'réforme', 'assemblée', 'parlement', 'député', 'sénat', 'démocratie',
-        'état', 'constitution', 'vote'
+        'état', 'constitution', 'vote', 'campagne', 'parti', 'opposition',
+        'majorité', 'droite', 'gauche', 'centre', 'extrême'
       ],
       'Économie': [
         'économie', 'finance', 'marché', 'entreprise', 'croissance', 'inflation',
         'investissement', 'bourse', 'commerce', 'business', 'startup', 'innovation',
-        'entrepreneur', 'management', 'stratégie'
+        'entrepreneur', 'management', 'stratégie', 'emploi', 'chômage', 'salaire',
+        'budget', 'dette', 'déficit', 'impôt', 'taxe'
       ],
       'Science': [
         'science', 'recherche', 'découverte', 'étude', 'expérience', 'théorie',
         'scientifique', 'laboratoire', 'cerveau', 'biologie', 'physique', 'chimie',
-        'neuroscience', 'cognition', 'intelligence'
+        'neuroscience', 'cognition', 'intelligence', 'médecine', 'santé', 'maladie',
+        'traitement', 'vaccin', 'virus', 'bactérie'
       ],
       'Technologie': [
         'technologie', 'innovation', 'numérique', 'intelligence artificielle',
         'digital', 'tech', 'ia', 'algorithme', 'données', 'informatique',
-        'cybersécurité', 'blockchain', 'robot', 'internet'
+        'cybersécurité', 'blockchain', 'robot', 'internet', 'web', 'mobile',
+        'application', 'logiciel', 'programmation', 'code', 'développement'
       ],
       'Culture': [
         'culture', 'art', 'musique', 'cinéma', 'littérature', 'société',
         'philosophie', 'histoire', 'civilisation', 'tradition', 'patrimoine',
-        'identité', 'religion', 'spiritualité'
+        'identité', 'religion', 'spiritualité', 'livre', 'roman', 'poésie',
+        'théâtre', 'danse', 'peinture', 'sculpture'
       ],
       'Divertissement': [
         'divertissement', 'spectacle', 'film', 'série', 'show', 'jeu', 'loisir',
-        'amusement', 'entertainment', 'fun', 'humour', 'comédie'
+        'amusement', 'entertainment', 'fun', 'humour', 'comédie', 'festival',
+        'concert', 'exposition', 'événement', 'sortie', 'vacances', 'voyage'
       ],
       'Humour': [
         'humour', 'blague', 'rire', 'comédie', 'sketch', 'stand-up', 'gag',
-        'parodie', 'satire', 'comique', 'drôle', 'amusant', 'divertissant'
+        'parodie', 'satire', 'comique', 'drôle', 'amusant', 'divertissant',
+        'humoriste', 'comédien', 'one-man-show', 'spectacle', 'show'
       ]
     };
 
