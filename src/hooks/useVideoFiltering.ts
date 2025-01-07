@@ -50,18 +50,36 @@ export function useVideoFiltering({
         if (selectedCategory.toLowerCase() === "news") {
           matchesCategory = publishDate >= fortyEightHoursAgo;
         } else {
-          // S'assurer que video.categories est un tableau
-          const videoCategories = Array.isArray(video.categories) ? video.categories : [];
-          const normalizedCategories = videoCategories.map(cat => 
-            typeof cat === 'string' ? cat.toLowerCase() : ''
-          );
+          // Normaliser les catégories
+          const videoCategories = Array.isArray(video.categories) 
+            ? video.categories.map(cat => typeof cat === 'string' ? cat.toLowerCase() : '')
+            : [];
 
-          // Si pas de catégories, mettre dans "news" par défaut
-          if (normalizedCategories.length === 0) {
-            normalizedCategories.push("news");
+          // Si pas de catégories, analyser le contenu
+          if (videoCategories.length === 0) {
+            const content = `${video.title} ${video.summary}`.toLowerCase();
+            const categoryKeywords: Record<string, string[]> = {
+              'politics': ['politique', 'gouvernement', 'élection', 'président'],
+              'economy': ['économie', 'finance', 'marché', 'entreprise'],
+              'science': ['science', 'recherche', 'découverte', 'étude'],
+              'technology': ['technologie', 'numérique', 'digital', 'tech'],
+              'culture': ['culture', 'art', 'musique', 'cinéma'],
+              'entertainment': ['divertissement', 'spectacle', 'film', 'série']
+            };
+
+            for (const [category, keywords] of Object.entries(categoryKeywords)) {
+              if (keywords.some(keyword => content.includes(keyword))) {
+                videoCategories.push(category);
+                break;
+              }
+            }
+
+            if (videoCategories.length === 0) {
+              videoCategories.push("news");
+            }
           }
 
-          matchesCategory = normalizedCategories.includes(selectedCategory.toLowerCase());
+          matchesCategory = videoCategories.includes(selectedCategory.toLowerCase());
         }
       }
 
