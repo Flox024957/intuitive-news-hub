@@ -16,12 +16,17 @@ export interface Video {
   categories?: string[] | null;
   created_at: string;
   article_content?: string | null;
-  stats?: VideoStats | null;
   podcaster?: Podcaster | null;
+  stats?: VideoStats | null;
 }
 
-export interface NormalizedYouTubeVideo extends Video {
-  stats: {
-    view_count: number;
+export interface YouTubeVideo {
+  id: string;
+  title: string;
+  description?: string;
+  thumbnail?: string;
+  publishedAt: string;
+  statistics?: {
+    viewCount: string;
   };
 }

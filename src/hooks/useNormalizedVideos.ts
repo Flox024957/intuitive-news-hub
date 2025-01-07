@@ -1,7 +1,7 @@
 import { useMemo } from "react";
-import { type Video, type NormalizedYouTubeVideo } from "@/types/video";
+import { type Video, type YouTubeVideo } from "@/types/video";
 
-export function useNormalizedVideos(dbVideos: Video[], youtubeVideos: any[]) {
+export function useNormalizedVideos(dbVideos: Video[], youtubeVideos: YouTubeVideo[]) {
   return useMemo(() => {
     console.log("Normalizing videos from DB:", dbVideos);
     console.log("Normalizing videos from YouTube:", youtubeVideos);
@@ -11,11 +11,11 @@ export function useNormalizedVideos(dbVideos: Video[], youtubeVideos: any[]) {
       id: video.id,
       youtube_video_id: video.id,
       title: video.title,
-      summary: video.description,
-      thumbnail_url: video.thumbnail_url || video.thumbnail,
-      published_date: video.published_date || video.publishedAt,
+      summary: video.description || null,
+      thumbnail_url: video.thumbnail || null,
+      published_date: video.publishedAt,
       video_url: `https://www.youtube.com/watch?v=${video.id}`,
-      categories: video.categories?.map((cat: string) => cat.toLowerCase()) || ['news'],
+      categories: ['news'],
       created_at: new Date().toISOString(),
       custom_title: null,
       speakers_list: null,
@@ -23,15 +23,21 @@ export function useNormalizedVideos(dbVideos: Video[], youtubeVideos: any[]) {
       podcaster_id: null,
       article_content: null,
       podcaster: null,
-      stats: {
-        view_count: parseInt(video.statistics?.viewCount || "0", 10),
-      }
+      stats: video.statistics ? {
+        id: crypto.randomUUID(),
+        video_id: video.id,
+        view_count: parseInt(video.statistics.viewCount || "0", 10),
+        like_count: 0,
+        share_count: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      } : null
     }));
 
     // Normaliser les vidéos de la base de données
     const normalizedDbVideos = dbVideos.map((video) => ({
       ...video,
-      categories: video.categories?.map((cat) => cat.toLowerCase()) || [],
+      categories: video.categories || ['news']
     }));
 
     // Combiner les vidéos en évitant les doublons
