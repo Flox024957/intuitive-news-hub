@@ -1,17 +1,6 @@
 import { useMemo } from "react";
 import { type SortOption } from "@/components/SortOptions";
-
-interface Video {
-  id: string;
-  title: string;
-  custom_title?: string | null;
-  summary?: string;
-  categories?: string[];
-  published_date: string;
-  stats?: {
-    view_count?: number;
-  };
-}
+import { type Video } from "@/types/video";
 
 interface VideoFilteringProps {
   videos: Video[];
