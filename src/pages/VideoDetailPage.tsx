@@ -23,7 +23,7 @@ const VideoDetailPage = () => {
           podcaster:podcasters(*)
         `)
         .eq('youtube_video_id', id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error("Error fetching video:", error);
@@ -31,7 +31,7 @@ const VideoDetailPage = () => {
       }
       
       console.log("Fetched video data:", data);
-      return data as Video;
+      return data as Video | null;
     },
   });
 
