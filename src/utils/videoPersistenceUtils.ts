@@ -48,7 +48,10 @@ export async function saveVideoToDatabase(video: YouTubeVideo) {
       .select()
       .single();
 
-    if (insertError) throw insertError;
+    if (insertError) {
+      console.error('Error inserting video:', insertError);
+      throw insertError;
+    }
 
     await initializeVideoStats(newVideo.id, video.statistics);
     
@@ -63,7 +66,7 @@ export async function saveVideoToDatabase(video: YouTubeVideo) {
 
 async function initializeVideoStats(videoId: string, statistics?: { viewCount?: string; likeCount?: string }) {
   try {
-    await supabase
+    const { error } = await supabase
       .from('video_stats')
       .insert({
         video_id: videoId,
@@ -71,6 +74,10 @@ async function initializeVideoStats(videoId: string, statistics?: { viewCount?: 
         like_count: parseInt(statistics?.likeCount || '0', 10),
         share_count: 0
       });
+
+    if (error) {
+      console.error('Error initializing video stats:', error);
+    }
   } catch (error) {
     console.error('Error initializing video stats:', error);
   }
