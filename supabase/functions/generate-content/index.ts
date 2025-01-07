@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { pipeline } from "@huggingface/transformers";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -19,31 +18,11 @@ serve(async (req) => {
       throw new Error('Transcript is required for content generation');
     }
 
-    // Initialiser le pipeline de génération de texte
-    console.log('Initializing text generation pipeline...');
-    const generator = await pipeline(
-      'text-generation',
-      'facebook/opt-350m',
-      { device: "cpu" }
-    );
-
-    // Générer le résumé
-    console.log('Generating summary...');
-    const summaryPrompt = `Summarize this text in French: ${transcript.substring(0, 1000)}...`;
-    const summaryResult = await generator(summaryPrompt, {
-      max_length: 150,
-      num_return_sequences: 1
-    });
-    const summary = summaryResult[0].generated_text;
-
-    // Générer l'article
-    console.log('Generating article...');
-    const articlePrompt = `Write a detailed article in French based on this title and transcript: Title: ${title}, Transcript: ${transcript.substring(0, 2000)}...`;
-    const articleResult = await generator(articlePrompt, {
-      max_length: 500,
-      num_return_sequences: 1
-    });
-    const article = articleResult[0].generated_text;
+    // Simuler la génération de résumé (à remplacer par l'appel à l'API Hugging Face)
+    const summary = `Résumé automatique de : ${title}\n\n${transcript.substring(0, 200)}...`;
+    
+    // Simuler la génération d'article
+    const article = `Article généré à partir de : ${title}\n\n${transcript.substring(0, 500)}...`;
 
     console.log('Content generation completed');
 

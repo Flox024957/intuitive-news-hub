@@ -24,6 +24,3 @@ enabled = true
 
 [realtime]
 enabled = true
-
-[[functions]]
-verify_jwt = false
