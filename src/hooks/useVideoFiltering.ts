@@ -10,6 +10,48 @@ interface VideoFilteringProps {
   sortOption: SortOption;
 }
 
+function filterBySearch(video: Video, searchTerm: string): boolean {
+  if (!searchTerm) return true;
+  
+  const searchTermLower = searchTerm.toLowerCase();
+  return [
+    video.title,
+    video.summary,
+    ...(video.categories || [])
+  ].some(text => text?.toLowerCase().includes(searchTermLower));
+}
+
+function filterByCategory(video: Video, selectedCategory: VideoCategory): boolean {
+  if (selectedCategory.toLowerCase() === "all") return true;
+
+  const now = new Date();
+  const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
+  const publishDate = new Date(video.published_date);
+
+  if (selectedCategory === "news") {
+    return publishDate >= fortyEightHoursAgo;
+  }
+
+  return video.categories?.some(cat => cat === selectedCategory) || false;
+}
+
+function sortVideos(videos: Video[], sortOption: SortOption): Video[] {
+  return [...videos].sort((a, b) => {
+    switch (sortOption) {
+      case "recent":
+        return new Date(b.published_date).getTime() - new Date(a.published_date).getTime();
+      case "oldest":
+        return new Date(a.published_date).getTime() - new Date(b.published_date).getTime();
+      case "popular":
+        const aViews = a.stats?.view_count || 0;
+        const bViews = b.stats?.view_count || 0;
+        return bViews - aViews;
+      default:
+        return 0;
+    }
+  });
+}
+
 export function useVideoFiltering({
   videos,
   searchTerm,
@@ -26,64 +68,17 @@ export function useVideoFiltering({
 
     if (!videos) return [];
 
-    // Filtrage
-    const filteredVideos = videos.filter((video) => {
-      if (!video) return false;
-
-      // Filtre de recherche
-      const searchTermLower = searchTerm.toLowerCase();
-      const matchesSearch = !searchTerm || [
-        video.title,
-        video.summary,
-        ...(video.categories || [])
-      ].some(text => 
-        text?.toLowerCase().includes(searchTermLower)
-      );
-
-      // Filtre de catégorie
-      let matchesCategory = true;
-      if (selectedCategory.toLowerCase() !== "all") {
-        const now = new Date();
-        const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
-        const publishDate = new Date(video.published_date);
-
-        // Vérifier si c'est une news (moins de 48h)
-        if (selectedCategory === "news") {
-          matchesCategory = publishDate >= fortyEightHoursAgo;
-        } else {
-          // Vérifier la correspondance exacte de la catégorie
-          matchesCategory = video.categories?.some(cat => cat === selectedCategory);
-        }
-      }
-
-      return matchesSearch && matchesCategory;
-    });
+    const filteredVideos = videos.filter(video => 
+      video && 
+      filterBySearch(video, searchTerm) && 
+      filterByCategory(video, selectedCategory)
+    );
 
     console.log("Filtered videos count:", filteredVideos.length);
 
-    // Tri
-    const sortedVideos = [...filteredVideos].sort((a, b) => {
-      switch (sortOption) {
-        case "recent":
-          return (
-            new Date(b.published_date).getTime() -
-            new Date(a.published_date).getTime()
-          );
-        case "oldest":
-          return (
-            new Date(a.published_date).getTime() -
-            new Date(b.published_date).getTime()
-          );
-        case "popular":
-          const aViews = a.stats?.view_count || 0;
-          const bViews = b.stats?.view_count || 0;
-          return bViews - aViews;
-        default:
-          return 0;
-      }
-    });
-
+    const sortedVideos = sortVideos(filteredVideos, sortOption);
     console.log("Final sorted videos:", sortedVideos.length);
+
     return sortedVideos;
   }, [videos, searchTerm, selectedCategory, sortOption]);
 }
