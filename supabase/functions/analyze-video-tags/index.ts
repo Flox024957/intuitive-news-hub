@@ -17,57 +17,94 @@ serve(async (req) => {
   }
 
   try {
-    const { summary } = await req.json();
+    const { title, description, summary } = await req.json();
 
-    if (!summary) {
-      throw new Error('Summary is required');
+    if (!summary && !description) {
+      throw new Error('Either summary or description is required');
     }
 
-    console.log('Analyzing video summary:', summary);
+    console.log('Analyzing content:', { title, description, summary });
 
-    // Définition des catégories et leurs mots-clés associés
+    // Définition des catégories et leurs mots-clés associés avec plus de précision
     const categories = {
-      'News': ['actualité', 'information', 'dernière', 'récent', 'nouveau', 'breaking'],
-      'Politique': ['politique', 'gouvernement', 'élection', 'président', 'ministre', 'loi', 'réforme'],
-      'Économie': ['économie', 'finance', 'marché', 'entreprise', 'croissance', 'inflation', 'investissement'],
-      'Science': ['science', 'recherche', 'découverte', 'étude', 'expérience', 'théorie'],
-      'Technologie': ['technologie', 'innovation', 'numérique', 'intelligence artificielle', 'digital', 'tech'],
-      'Culture': ['culture', 'art', 'musique', 'cinéma', 'littérature', 'société'],
-      'Développement': ['développement personnel', 'croissance personnelle', 'motivation', 'productivité']
+      'News': [
+        'actualité', 'information', 'dernière', 'récent', 'nouveau', 'breaking',
+        'reportage', 'journal', 'média', 'presse', 'événement'
+      ],
+      'Politique': [
+        'politique', 'gouvernement', 'élection', 'président', 'ministre', 'loi',
+        'réforme', 'assemblée', 'parlement', 'député', 'sénat', 'démocratie',
+        'état', 'constitution', 'vote'
+      ],
+      'Économie': [
+        'économie', 'finance', 'marché', 'entreprise', 'croissance', 'inflation',
+        'investissement', 'bourse', 'commerce', 'business', 'startup', 'innovation',
+        'entrepreneur', 'management', 'stratégie'
+      ],
+      'Science': [
+        'science', 'recherche', 'découverte', 'étude', 'expérience', 'théorie',
+        'scientifique', 'laboratoire', 'cerveau', 'biologie', 'physique', 'chimie',
+        'neuroscience', 'cognition', 'intelligence'
+      ],
+      'Technologie': [
+        'technologie', 'innovation', 'numérique', 'intelligence artificielle',
+        'digital', 'tech', 'ia', 'algorithme', 'données', 'informatique',
+        'cybersécurité', 'blockchain', 'robot', 'internet'
+      ],
+      'Culture': [
+        'culture', 'art', 'musique', 'cinéma', 'littérature', 'société',
+        'philosophie', 'histoire', 'civilisation', 'tradition', 'patrimoine',
+        'identité', 'religion', 'spiritualité'
+      ],
+      'Development': [
+        'développement personnel', 'croissance personnelle', 'motivation',
+        'productivité', 'apprentissage', 'formation', 'éducation', 'coaching',
+        'mentorat', 'leadership', 'succès', 'objectif', 'potentiel'
+      ]
     };
 
     // Analyse du texte pour chaque catégorie
     const scores: CategoryScore[] = [];
-    const normalizedSummary = summary.toLowerCase();
+    const contentToAnalyze = [
+      title?.toLowerCase() || '',
+      description?.toLowerCase() || '',
+      summary?.toLowerCase() || ''
+    ].join(' ');
 
     for (const [category, keywords] of Object.entries(categories)) {
       let score = 0;
       for (const keyword of keywords) {
-        const regex = new RegExp(keyword, 'gi');
-        const matches = normalizedSummary.match(regex);
+        const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
+        const matches = contentToAnalyze.match(regex);
         if (matches) {
-          score += matches.length;
+          // Donner plus de poids aux mots trouvés dans le titre
+          const titleMatches = title?.toLowerCase().match(regex)?.length || 0;
+          score += matches.length + (titleMatches * 2);
         }
       }
       
-      // Normaliser le score en fonction du nombre de mots-clés
-      const normalizedScore = score / keywords.length;
-      if (normalizedScore > 0) {
+      // Normaliser le score en fonction du nombre de mots-clés et de la longueur du contenu
+      const normalizedScore = score / (keywords.length * Math.log(contentToAnalyze.length));
+      if (normalizedScore > 0.1) { // Seuil minimum de pertinence
         scores.push({ category, score: normalizedScore });
       }
     }
 
-    // Trier les scores et prendre les 3 catégories les plus pertinentes
+    // Trier les scores et prendre jusqu'à 3 catégories les plus pertinentes
     const topCategories = scores
       .sort((a, b) => b.score - a.score)
       .slice(0, 3)
-      .filter(item => item.score > 0.1) // Seuil minimum de pertinence
       .map(item => item.category);
 
     console.log('Analysis results:', {
       topCategories,
-      scores
+      scores: scores.sort((a, b) => b.score - a.score)
     });
+
+    // S'assurer qu'il y a au moins une catégorie
+    if (topCategories.length === 0) {
+      topCategories.push('News');
+    }
 
     return new Response(
       JSON.stringify({ categories: topCategories }),
