@@ -301,6 +301,12 @@ export type Database = {
         }
         Returns: boolean
       }
+      import_youtube_videos: {
+        Args: {
+          channel_id: string
+        }
+        Returns: undefined
+      }
       increment_view_count: {
         Args: {
           video_id_param: string
