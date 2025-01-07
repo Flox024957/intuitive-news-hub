@@ -1,5 +1,23 @@
 import { Link } from "react-router-dom";
-import { Home, TrendingUp, Users, User, Brain, Landmark, CircuitBoard, LineChart } from "lucide-react";
+import { 
+  Home, 
+  User, 
+  TrendingUp, 
+  Users,
+  Newspaper,
+  LineChart,
+  CircuitBoard,
+  Brain,
+  Building2,
+  Gamepad2,
+  Heart,
+  GraduationCap,
+  Palette,
+  Trophy,
+  Leaf,
+  Scale
+} from "lucide-react";
+
 import {
   Sidebar,
   SidebarContent,
@@ -36,9 +54,9 @@ const navigationItems = [
 
 const sectionItems = [
   {
-    title: "Politique",
-    url: "#politique",
-    icon: Landmark,
+    title: "Actualités",
+    url: "#actualites",
+    icon: Newspaper,
   },
   {
     title: "Économie",
@@ -54,6 +72,46 @@ const sectionItems = [
     title: "Développement personnel",
     url: "#developpement-personnel",
     icon: Brain,
+  },
+  {
+    title: "Business",
+    url: "#business",
+    icon: Building2,
+  },
+  {
+    title: "Gaming",
+    url: "#gaming",
+    icon: Gamepad2,
+  },
+  {
+    title: "Santé",
+    url: "#sante",
+    icon: Heart,
+  },
+  {
+    title: "Éducation",
+    url: "#education",
+    icon: GraduationCap,
+  },
+  {
+    title: "Art & Culture",
+    url: "#art-culture",
+    icon: Palette,
+  },
+  {
+    title: "Sport",
+    url: "#sport",
+    icon: Trophy,
+  },
+  {
+    title: "Environnement",
+    url: "#environnement",
+    icon: Leaf,
+  },
+  {
+    title: "Droit",
+    url: "#droit",
+    icon: Scale,
   },
 ];
 
