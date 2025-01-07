@@ -14,6 +14,7 @@ interface Video {
   stats?: {
     view_count?: number;
   };
+  youtube_video_id?: string;
 }
 
 interface VideoGridProps {
