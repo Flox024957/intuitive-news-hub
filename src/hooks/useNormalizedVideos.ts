@@ -2,13 +2,30 @@ import { useMemo } from "react";
 import { type Video, type YouTubeVideo } from "@/types/video";
 import { type VideoCategory } from "@/types/category";
 
+const isValidCategory = (category: string): category is VideoCategory => {
+  const validCategories = [
+    "all", "news", "politics", "economy", "technology", 
+    "culture", "personal_development", "humor", "music", 
+    "entertainment", "travel", "documentary", "sport", 
+    "finance", "tutorial", "kids", "movies"
+  ];
+  return validCategories.includes(category);
+};
+
+const sanitizeCategories = (categories: unknown): VideoCategory[] => {
+  if (!Array.isArray(categories)) return ["news"];
+  
+  const validCategories = categories
+    .filter((cat): cat is string => typeof cat === "string")
+    .filter(isValidCategory);
+  
+  return validCategories.length > 0 ? validCategories : ["news"];
+};
+
 export function useNormalizedVideos(dbVideos: Video[], youtubeVideos: YouTubeVideo[]) {
   return useMemo(() => {
     console.log("Normalizing videos from DB:", dbVideos);
     console.log("Normalizing videos from YouTube:", youtubeVideos);
-
-    // Ensure we have a valid VideoCategory array
-    const defaultCategories: VideoCategory[] = ["news"];
 
     // Normaliser les vidéos YouTube
     const normalizedYoutubeVideos: Video[] = youtubeVideos.map((video) => ({
@@ -20,7 +37,7 @@ export function useNormalizedVideos(dbVideos: Video[], youtubeVideos: YouTubeVid
       thumbnail_url: video.thumbnail || null,
       published_date: video.publishedAt,
       video_url: `https://www.youtube.com/watch?v=${video.id}`,
-      categories: defaultCategories,
+      categories: ["news"] as VideoCategory[],
       created_at: new Date().toISOString(),
       speakers_list: null,
       full_transcript: null,
@@ -41,9 +58,7 @@ export function useNormalizedVideos(dbVideos: Video[], youtubeVideos: YouTubeVid
     // Normaliser les vidéos de la base de données
     const normalizedDbVideos = dbVideos.map((video) => ({
       ...video,
-      categories: video.categories?.length ? 
-        (video.categories as VideoCategory[]) : 
-        defaultCategories
+      categories: sanitizeCategories(video.categories)
     }));
 
     // Combiner les vidéos en évitant les doublons
