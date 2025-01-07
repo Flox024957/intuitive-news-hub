@@ -31,9 +31,10 @@ export function useYouTubeVideos(username: string) {
         const videos = youtubeData.videos;
         console.log('YouTube videos fetched:', videos.length);
 
-        // Process each video sequentially to avoid race conditions
+        // Process each video
         for (const video of videos) {
           try {
+            // Check if video exists
             const { data: existingVideo } = await supabase
               .from('videos')
               .select('id')
@@ -59,7 +60,7 @@ export function useYouTubeVideos(username: string) {
               console.log('Categories detected:', categories);
 
               // Insert new video
-              const { data: newVideo, error: insertError } = await supabase
+              const { error: insertError } = await supabase
                 .from('videos')
                 .insert({
                   youtube_video_id: video.id,
@@ -69,26 +70,33 @@ export function useYouTubeVideos(username: string) {
                   thumbnail_url: video.thumbnail,
                   video_url: `https://www.youtube.com/watch?v=${video.id}`,
                   categories: categories.slice(0, 3)
-                })
-                .select()
-                .single();
+                });
 
               if (insertError) {
                 console.error('Error saving video:', insertError);
                 continue;
               }
 
-              // Initialize video stats
-              await supabase
-                .from('video_stats')
-                .insert({
-                  video_id: newVideo.id,
-                  view_count: parseInt(video.statistics?.viewCount || '0', 10),
-                  like_count: parseInt(video.statistics?.likeCount || '0', 10),
-                  share_count: 0
-                });
+              // Get the inserted video to get its ID
+              const { data: newVideo } = await supabase
+                .from('videos')
+                .select('id')
+                .eq('youtube_video_id', video.id)
+                .single();
 
-              console.log('Video saved successfully:', newVideo.id);
+              if (newVideo) {
+                // Initialize video stats
+                await supabase
+                  .from('video_stats')
+                  .insert({
+                    video_id: newVideo.id,
+                    view_count: parseInt(video.statistics?.viewCount || '0', 10),
+                    like_count: parseInt(video.statistics?.likeCount || '0', 10),
+                    share_count: 0
+                  });
+              }
+
+              console.log('Video saved successfully:', newVideo?.id);
             }
           } catch (error) {
             console.error('Error processing video:', error);
