@@ -8,6 +8,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
@@ -25,7 +26,7 @@ serve(async (req) => {
       throw new Error('HUGGINGFACE_API_KEY is not set');
     }
 
-    // Générer le résumé
+    // Generate summary
     console.log('Generating enhanced summary...');
     const summaryPrompt = `En tant qu'expert en analyse de contenu, crée un résumé structuré et informatif de cette transcription en français.
     Concentre-toi sur les points clés, les arguments principaux et les conclusions.
@@ -62,10 +63,10 @@ serve(async (req) => {
 
     const summaryResult = await summaryResponse.json();
     console.log('Raw summary response:', summaryResult);
-    const summary = summaryResult.generated_text; // Fixed: Access directly without array indexing
+    const summary = summaryResult.generated_text;
     console.log('Enhanced summary generated:', summary);
 
-    // Générer l'article
+    // Generate article
     console.log('Generating enhanced article...');
     const articlePrompt = `En tant qu'expert en rédaction journalistique, crée un article approfondi et structuré en français basé sur cette transcription.
     
@@ -104,10 +105,10 @@ serve(async (req) => {
 
     const articleResult = await articleResponse.json();
     console.log('Raw article response:', articleResult);
-    const article = articleResult.generated_text; // Fixed: Access directly without array indexing
+    const article = articleResult.generated_text;
     console.log('Enhanced article generated:', article);
 
-    // Mise à jour de la base de données avec le client Supabase
+    // Update database
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
