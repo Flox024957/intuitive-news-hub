@@ -6,11 +6,7 @@ import {
   Microscope, 
   Cpu, 
   Palette, 
-  Film, 
-  BookOpen, 
-  Laugh, 
-  Music,
-  Brain
+  Film
 } from "lucide-react";
 
 export interface Category {
@@ -28,9 +24,5 @@ export const categories: Category[] = [
   { id: "science", label: "Science", icon: Microscope, color: "text-purple-500" },
   { id: "technology", label: "Technologie", icon: Cpu, color: "text-cyan-500" },
   { id: "culture", label: "Culture", icon: Palette, color: "text-pink-500" },
-  { id: "entertainment", label: "Divertissement", icon: Film, color: "text-orange-500" },
-  { id: "tutorials", label: "Tutoriels", icon: BookOpen, color: "text-indigo-500" },
-  { id: "humor", label: "Humour", icon: Laugh, color: "text-amber-500" },
-  { id: "music", label: "Musique", icon: Music, color: "text-rose-500" },
-  { id: "development", label: "Développement personnel", icon: Brain, color: "text-violet-500" }
+  { id: "entertainment", label: "Divertissement", icon: Film, color: "text-orange-500" }
 ];

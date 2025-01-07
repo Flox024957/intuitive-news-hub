@@ -7,25 +7,18 @@ import {
   Microscope, 
   Palette, 
   Film, 
-  BookOpen, 
-  Laugh, 
-  Music,
-  Brain
+  BookOpen
 } from "lucide-react";
 
 const categories = [
-  { id: "All", label: "Toutes les vidéos", icon: Globe, color: "#9b87f5" },
-  { id: "News", label: "Actualités", icon: Newspaper, color: "#1EAEDB" },
-  { id: "Politics", label: "Politique", icon: Globe, color: "#7E69AB" },
-  { id: "Science", label: "Science", icon: Microscope, color: "#6E59A5" },
-  { id: "Technology", label: "Technologie", icon: Cpu, color: "#33C3F0" },
-  { id: "Economy", label: "Économie", icon: LineChart, color: "#0EA5E9" },
-  { id: "Culture", label: "Culture", icon: Palette, color: "#8B5CF6" },
-  { id: "Divertissement", label: "Divertissement", icon: Film, color: "#D3E4FD" },
-  { id: "Tutoriels", label: "Tutoriels", icon: BookOpen, color: "#FEC6A1" },
-  { id: "Humour", label: "Humour", icon: Laugh, color: "#FFDEE2" },
-  { id: "Musique", label: "Musique", icon: Music, color: "#FDE1D3" },
-  { id: "Development", label: "Développement", icon: Brain, color: "#F2FCE2" }
+  { id: "all", label: "Toutes les vidéos", icon: Globe, color: "#9b87f5" },
+  { id: "news", label: "Actualités", icon: Newspaper, color: "#1EAEDB" },
+  { id: "politics", label: "Politique", icon: Globe, color: "#7E69AB" },
+  { id: "science", label: "Science", icon: Microscope, color: "#6E59A5" },
+  { id: "technology", label: "Technologie", icon: Cpu, color: "#33C3F0" },
+  { id: "economy", label: "Économie", icon: LineChart, color: "#0EA5E9" },
+  { id: "culture", label: "Culture", icon: Palette, color: "#8B5CF6" },
+  { id: "entertainment", label: "Divertissement", icon: Film, color: "#D3E4FD" }
 ];
 
 interface CategoryFilterProps {
@@ -45,7 +38,7 @@ export function CategoryFilter({ selected, onSelect }: CategoryFilterProps) {
           className={`
             relative flex flex-col items-center justify-center gap-3 p-4 rounded-xl
             transition-all duration-300 hover:shadow-lg
-            ${selected === category.id 
+            ${selected.toLowerCase() === category.id 
               ? 'bg-primary/20 shadow-lg border border-primary/20' 
               : 'glass-morphism hover:bg-secondary/40'
             }
@@ -63,7 +56,7 @@ export function CategoryFilter({ selected, onSelect }: CategoryFilterProps) {
           <span className="text-sm font-medium text-center">
             {category.label}
           </span>
-          {selected === category.id && (
+          {selected.toLowerCase() === category.id && (
             <motion.div
               layoutId="activeCategory"
               className="absolute inset-0 rounded-xl ring-2 ring-primary/50"
