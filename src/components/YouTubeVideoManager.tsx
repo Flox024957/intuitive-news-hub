@@ -32,11 +32,28 @@ export async function addNewYouTubeChannel(channelId: string) {
     // Pour chaque vidéo, traiter le contenu
     for (const video of data.videos) {
       try {
-        // Analyze video categories using Hugging Face
+        // Get video summary first
+        const { data: transcriptionData } = await supabase.functions.invoke('transcribe-video', {
+          body: { videoId: video.id }
+        });
+
+        let summary = '';
+        if (transcriptionData?.transcript) {
+          const { data: summaryData } = await supabase.functions.invoke('generate-summary', {
+            body: { 
+              text: transcriptionData.transcript,
+              videoId: video.id
+            }
+          });
+          summary = summaryData?.summary || '';
+        }
+
+        // Analyze video categories using Hugging Face with summary
         const { data: categoryData, error: categoryError } = await supabase.functions.invoke('analyze-video-tags', {
           body: { 
             title: video.title,
-            description: video.description
+            description: video.description,
+            summary: summary
           }
         });
 
@@ -45,22 +62,12 @@ export async function addNewYouTubeChannel(channelId: string) {
           continue;
         }
 
-        const { data: transcriptionData } = await supabase.functions.invoke('transcribe-video', {
-          body: { videoId: video.id }
-        });
-
+        // Generate article if we have a transcript
         if (transcriptionData?.transcript) {
-          const { data: summaryData } = await supabase.functions.invoke('generate-summary', {
-            body: { 
-              text: transcriptionData.transcript,
-              videoId: video.id
-            }
-          });
-
           const { data: articleData } = await supabase.functions.invoke('generate-article', {
             body: {
               transcript: transcriptionData.transcript,
-              summary: summaryData?.summary,
+              summary: summary,
               videoId: video.id
             }
           });
@@ -68,7 +75,7 @@ export async function addNewYouTubeChannel(channelId: string) {
           console.log(`Content generated for video ${video.id}:`, {
             categories: categoryData?.categories,
             transcription: !!transcriptionData?.transcript,
-            summary: !!summaryData?.summary,
+            summary: !!summary,
             article: !!articleData?.article
           });
         }

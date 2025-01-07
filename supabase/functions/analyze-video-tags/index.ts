@@ -8,21 +8,20 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { title, description } = await req.json();
+    const { title, description, summary } = await req.json();
 
     if (!title) {
       throw new Error('Title is required');
     }
 
-    console.log('Analyzing video:', { title, description });
+    console.log('Analyzing video content:', { title, summary });
 
-    // Create a zero-shot-classification pipeline
+    // Create a zero-shot-classification pipeline with Meta's BART model
     const classifier = await pipeline(
       "zero-shot-classification",
       "facebook/bart-large-mnli",
@@ -44,15 +43,16 @@ serve(async (req) => {
       "Développement"
     ];
 
-    // Combine title and description for better context
-    const content = `${title} ${description || ''}`;
+    // Combine title and summary for better context
+    const content = `${title} ${summary || description || ''}`.trim();
 
     // Classify the content
     const result = await classifier(content, categories, {
       multi_label: true,
+      hypothesis_template: "Cette vidéo parle de {}."
     });
 
-    // Get top 3 categories based on scores
+    // Get top 3 categories based on scores with confidence > 30%
     const topCategories = result.labels
       .map((label, index) => ({
         label,
@@ -60,8 +60,8 @@ serve(async (req) => {
       }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 3)
-      .map(item => item.label)
-      .filter(label => result.scores[result.labels.indexOf(label)] > 0.3); // Only keep categories with confidence > 30%
+      .filter(item => item.score > 0.3)
+      .map(item => item.label);
 
     console.log('AI Analysis Result:', {
       content,
