@@ -22,17 +22,17 @@ function filterBySearch(video: Video, searchTerm: string): boolean {
 }
 
 function filterByCategory(video: Video, selectedCategory: VideoCategory): boolean {
-  if (selectedCategory.toLowerCase() === "all") return true;
+  if (selectedCategory === "all") return true;
 
   const now = new Date();
   const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
   const publishDate = new Date(video.published_date);
 
   if (selectedCategory === "news") {
-    return publishDate >= fortyEightHoursAgo;
+    return publishDate >= fortyEightHoursAgo || video.categories?.includes("news");
   }
 
-  return video.categories?.some(cat => cat === selectedCategory) || false;
+  return video.categories?.includes(selectedCategory) || false;
 }
 
 function sortVideos(videos: Video[], sortOption: SortOption): Video[] {
