@@ -46,37 +46,13 @@ export function useVideoFiltering({
         const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
         const publishDate = new Date(video.published_date);
 
-        // Vérifier si c'est une news (moins de 48h ou tag news)
+        // Vérifier si c'est une news (moins de 48h)
         if (selectedCategory.toLowerCase() === "news") {
-          matchesCategory = publishDate >= fortyEightHoursAgo || 
-                          (video.categories && video.categories.some(cat => 
-                            cat.toLowerCase() === 'news' || 
-                            cat.toLowerCase() === 'actualités'
-                          ));
+          matchesCategory = publishDate >= fortyEightHoursAgo;
         } else {
-          // Normaliser les catégories
-          const videoCategories = Array.isArray(video.categories) 
-            ? video.categories.map(cat => typeof cat === 'string' ? cat.toLowerCase() : '')
-            : [];
-
-          // Correspondances de catégories (français/anglais)
-          const categoryMappings: Record<string, string[]> = {
-            'politics': ['politics', 'politique'],
-            'economy': ['economy', 'économie'],
-            'science': ['science'],
-            'technology': ['technology', 'technologie'],
-            'culture': ['culture'],
-            'entertainment': ['entertainment', 'divertissement', 'humour'],
-            'humor': ['humor', 'humour', 'comedy', 'comédie'],
-            'news': ['news', 'actualités']
-          };
-
-          const selectedCategoryLower = selectedCategory.toLowerCase();
-          const matchingCategories = categoryMappings[selectedCategoryLower] || 
-                                   [selectedCategoryLower];
-
-          matchesCategory = videoCategories.some(cat =>
-            matchingCategories.includes(cat)
+          // Vérifier la correspondance exacte de la catégorie
+          matchesCategory = video.categories?.some(cat => 
+            cat.toLowerCase() === selectedCategory.toLowerCase()
           );
         }
       }

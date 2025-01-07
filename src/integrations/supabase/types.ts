@@ -136,7 +136,7 @@ export type Database = {
       videos: {
         Row: {
           article_content: string | null
-          categories: string[] | null
+          categories: Database["public"]["Enums"]["video_category"][] | null
           created_at: string
           custom_title: string | null
           full_transcript: string | null
@@ -152,7 +152,7 @@ export type Database = {
         }
         Insert: {
           article_content?: string | null
-          categories?: string[] | null
+          categories?: Database["public"]["Enums"]["video_category"][] | null
           created_at?: string
           custom_title?: string | null
           full_transcript?: string | null
@@ -168,7 +168,7 @@ export type Database = {
         }
         Update: {
           article_content?: string | null
-          categories?: string[] | null
+          categories?: Database["public"]["Enums"]["video_category"][] | null
           created_at?: string
           custom_title?: string | null
           full_transcript?: string | null
@@ -209,7 +209,24 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      video_category:
+        | "all"
+        | "news"
+        | "politics"
+        | "economy"
+        | "technology"
+        | "culture"
+        | "personal_development"
+        | "humor"
+        | "music"
+        | "entertainment"
+        | "travel"
+        | "documentary"
+        | "sport"
+        | "finance"
+        | "tutorial"
+        | "kids"
+        | "movies"
     }
     CompositeTypes: {
       [_ in never]: never

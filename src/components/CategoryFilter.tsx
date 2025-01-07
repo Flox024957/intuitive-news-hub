@@ -1,25 +1,5 @@
 import { motion } from "framer-motion";
-import { 
-  Newspaper, 
-  LineChart, 
-  Cpu, 
-  Globe, 
-  Microscope, 
-  Palette, 
-  Film, 
-  BookOpen
-} from "lucide-react";
-
-const categories = [
-  { id: "all", label: "Toutes les vidéos", icon: Globe, color: "#9b87f5" },
-  { id: "news", label: "Actualités", icon: Newspaper, color: "#1EAEDB" },
-  { id: "politics", label: "Politique", icon: Globe, color: "#7E69AB" },
-  { id: "science", label: "Science", icon: Microscope, color: "#6E59A5" },
-  { id: "technology", label: "Technologie", icon: Cpu, color: "#33C3F0" },
-  { id: "economy", label: "Économie", icon: LineChart, color: "#0EA5E9" },
-  { id: "culture", label: "Culture", icon: Palette, color: "#8B5CF6" },
-  { id: "entertainment", label: "Divertissement", icon: Film, color: "#D3E4FD" }
-];
+import { categories } from "@/constants/categories";
 
 interface CategoryFilterProps {
   selected: string;
