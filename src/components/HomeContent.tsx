@@ -47,7 +47,7 @@ export function HomeContent({
         videos={trendingVideos}
         isLoading={isLoadingDb}
         searchTerm=""
-        selectedCategory="All"
+        selectedCategory="all"
         sortOption="popular"
       />
     </motion.div>

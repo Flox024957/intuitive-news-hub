@@ -9,9 +9,10 @@ import { PersonalizedHeader } from "@/components/PersonalizedHeader";
 import { PersonalizedTabs } from "@/components/PersonalizedTabs";
 import { WelcomeMessage } from "@/components/WelcomeMessage";
 import { type Video } from "@/types/video";
+import { type VideoCategory } from "@/types/category";
 
 const PersonalizedHomePage = () => {
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCategory, setSelectedCategory] = useState<VideoCategory>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("recent");
 
