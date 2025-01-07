@@ -4,6 +4,7 @@ import { type SortOption } from "@/components/SortOptions";
 interface Video {
   id: string;
   title: string;
+  custom_title?: string | null;
   summary?: string;
   categories?: string[];
   published_date: string;
@@ -12,17 +13,19 @@ interface Video {
   };
 }
 
+interface VideoFilteringProps {
+  videos: Video[];
+  searchTerm: string;
+  selectedCategory: string;
+  sortOption: SortOption;
+}
+
 export function useVideoFiltering({
   videos,
   searchTerm,
   selectedCategory,
   sortOption,
-}: {
-  videos: Video[];
-  searchTerm: string;
-  selectedCategory: string;
-  sortOption: SortOption;
-}) {
+}: VideoFilteringProps) {
   return useMemo(() => {
     console.log("Starting video filtering with:", {
       totalVideos: videos.length,

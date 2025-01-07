@@ -3,8 +3,21 @@ import { type SortOption } from "@/components/SortOptions";
 import { motion } from "framer-motion";
 import { useVideoFiltering } from "@/hooks/useVideoFiltering";
 
+interface Video {
+  id: string;
+  title: string;
+  custom_title?: string | null;
+  summary?: string;
+  thumbnail_url?: string | null;
+  categories?: string[];
+  published_date: string;
+  stats?: {
+    view_count?: number;
+  };
+}
+
 interface VideoGridProps {
-  videos: any[] | null;
+  videos: Video[] | null;
   isLoading: boolean;
   searchTerm: string;
   selectedCategory: string;
