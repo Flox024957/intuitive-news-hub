@@ -1,16 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { type Video } from "@/types/video";
 
-export const useYouTubeVideos = (username: string) => {
+export const useYouTubeVideos = (channelId: string) => {
   return useQuery({
-    queryKey: ['youtube-videos', username],
+    queryKey: ['youtube-videos', channelId],
     queryFn: async () => {
       try {
-        console.log('Fetching YouTube data for username:', username);
+        console.log('Fetching YouTube data for channel:', channelId);
         
         const { data, error } = await supabase.functions.invoke('youtube-data', {
-          body: { username }
+          body: { username: channelId }
         });
 
         if (error) {
@@ -21,10 +22,21 @@ export const useYouTubeVideos = (username: string) => {
 
         console.log('YouTube data received:', data);
         
-        // Sauvegarder chaque vidéo dans la base de données
+        // Save each video to the database
         const savedVideos = await Promise.all(
           data.videos.map(async (video: any) => {
             try {
+              const { data: existingVideo } = await supabase
+                .from('videos')
+                .select('*')
+                .eq('youtube_video_id', video.id)
+                .single();
+
+              if (existingVideo) {
+                console.log('Video already exists:', existingVideo);
+                return existingVideo;
+              }
+
               const { data: savedVideo, error: saveError } = await supabase
                 .from('videos')
                 .insert({
@@ -34,7 +46,7 @@ export const useYouTubeVideos = (username: string) => {
                   published_date: video.publishedAt,
                   thumbnail_url: video.thumbnail,
                   video_url: `https://www.youtube.com/watch?v=${video.id}`,
-                  categories: ['news'] // Sera mis à jour par le trigger analyze_video_categories
+                  categories: ['news']
                 })
                 .select()
                 .single();
@@ -53,7 +65,7 @@ export const useYouTubeVideos = (username: string) => {
           })
         );
 
-        return savedVideos.filter(Boolean);
+        return savedVideos.filter(Boolean) as Video[];
       } catch (error) {
         console.error('Error:', error);
         toast.error("Erreur lors de la récupération des vidéos");

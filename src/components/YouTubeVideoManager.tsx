@@ -18,10 +18,10 @@ async function saveVideoToDatabase(video: any) {
   try {
     console.log('Saving video to database:', video.id);
     
-    // Vérifier si la vidéo existe déjà
+    // Check if video already exists
     const { data: existingVideo, error: checkError } = await supabase
       .from('videos')
-      .select('id, summary, article_content')
+      .select('id')
       .eq('youtube_video_id', video.id)
       .maybeSingle();
 
@@ -35,7 +35,7 @@ async function saveVideoToDatabase(video: any) {
       return existingVideo.id;
     }
 
-    // Insérer la nouvelle vidéo
+    // Insert new video
     const { data: newVideo, error: videoError } = await supabase
       .from('videos')
       .insert({
@@ -57,7 +57,7 @@ async function saveVideoToDatabase(video: any) {
 
     console.log('Video saved successfully:', newVideo.id);
 
-    // Initialiser les statistiques de la vidéo
+    // Initialize video stats
     const { error: statsError } = await supabase
       .from('video_stats')
       .insert({
@@ -92,7 +92,7 @@ export async function addNewYouTubeChannel(channelId: string) {
       return false;
     }
 
-    // Pour chaque vidéo, sauvegarder dans la base de données
+    // Save each video to the database
     for (const video of data.videos) {
       try {
         await saveVideoToDatabase(video);
@@ -111,7 +111,7 @@ export async function addNewYouTubeChannel(channelId: string) {
   }
 }
 
-export function useYouTubeVideos() {
+export function useYouTubeChannelsVideos() {
   const channelsData = YOUTUBE_CHANNELS.map(channel => {
     const { data, isLoading } = useYouTubeVideos(channel.id);
     return {

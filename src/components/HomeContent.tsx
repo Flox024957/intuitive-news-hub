@@ -6,7 +6,7 @@ import { VideoGrid } from "@/components/VideoGrid";
 import { PodcasterGrid } from "@/components/PodcasterGrid";
 import { HomeTabs } from "@/components/HomeTabs";
 import { VideosContent } from "@/components/VideosContent";
-import { useYouTubeVideos } from "@/components/YouTubeVideoManager";
+import { useYouTubeChannelsVideos } from "@/components/YouTubeVideoManager";
 import { useNormalizedVideos } from "@/hooks/useNormalizedVideos";
 import { type Video } from "@/types/video";
 
@@ -25,7 +25,7 @@ export function HomeContent({
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("recent");
 
-  const { videos: youtubeVideos, isLoading: isLoadingYoutube } = useYouTubeVideos();
+  const { videos: youtubeVideos, isLoading: isLoadingYoutube } = useYouTubeChannelsVideos();
   const allVideos = useNormalizedVideos(videos, youtubeVideos);
 
   const TrendingContent = (
