@@ -20,15 +20,8 @@ export interface Video {
   podcaster?: Podcaster | null;
 }
 
-export interface NormalizedYouTubeVideo {
-  id: string;
-  youtube_video_id: string;
-  title: string;
-  summary?: string | null;
-  thumbnail_url: string;
-  published_date: string;
-  categories?: string[];
-  stats?: {
+export interface NormalizedYouTubeVideo extends Video {
+  stats: {
     view_count: number;
   };
 }

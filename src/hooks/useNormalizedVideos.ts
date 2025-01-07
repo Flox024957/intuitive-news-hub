@@ -7,17 +7,25 @@ export function useNormalizedVideos(dbVideos: Video[], youtubeVideos: any[]) {
     console.log("Normalizing videos from YouTube:", youtubeVideos);
 
     // Normaliser les vidéos YouTube
-    const normalizedYoutubeVideos: NormalizedYouTubeVideo[] = youtubeVideos.map((video) => ({
+    const normalizedYoutubeVideos: Video[] = youtubeVideos.map((video) => ({
       id: video.id,
       youtube_video_id: video.id,
       title: video.title,
       summary: video.description,
       thumbnail_url: video.thumbnail_url || video.thumbnail,
       published_date: video.published_date || video.publishedAt,
-      categories: video.categories?.map((cat: string) => cat.toLowerCase()) || [],
+      video_url: `https://www.youtube.com/watch?v=${video.id}`,
+      categories: video.categories?.map((cat: string) => cat.toLowerCase()) || ['news'],
+      created_at: new Date().toISOString(),
+      custom_title: null,
+      speakers_list: null,
+      full_transcript: null,
+      podcaster_id: null,
+      article_content: null,
+      podcaster: null,
       stats: {
         view_count: parseInt(video.statistics?.viewCount || "0", 10),
-      },
+      }
     }));
 
     // Normaliser les vidéos de la base de données
