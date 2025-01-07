@@ -29,18 +29,7 @@ export function useVideoCategories(videos: Video[], selectedCategory: VideoCateg
         const isRecent = publishDate >= fortyEightHoursAgo;
         const hasNewsTag = Array.isArray(video.categories) && video.categories.includes("news");
         
-        const shouldInclude = isRecent || hasNewsTag;
-        console.log("News category check:", {
-          videoId: video.id,
-          title: video.title,
-          publishDate,
-          isRecent,
-          hasNewsTag,
-          categories: video.categories,
-          included: shouldInclude
-        });
-        
-        return shouldInclude;
+        return isRecent || hasNewsTag;
       });
     }
 
@@ -55,16 +44,7 @@ export function useVideoCategories(videos: Video[], selectedCategory: VideoCateg
         return false;
       }
 
-      const hasCategory = video.categories.includes(selectedCategory);
-      console.log("Category filtering:", {
-        videoId: video.id,
-        title: video.title,
-        categories: video.categories,
-        selectedCategory,
-        matches: hasCategory
-      });
-
-      return hasCategory;
+      return video.categories.includes(selectedCategory);
     });
   }, [videos, selectedCategory]);
 }

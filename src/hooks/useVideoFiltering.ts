@@ -20,18 +20,9 @@ function filterBySearch(video: Video, searchTerm: string): boolean {
     ...(Array.isArray(video.categories) ? video.categories : [])
   ].filter(Boolean);
 
-  const matches = searchableContent.some(text => 
+  return searchableContent.some(text => 
     text?.toLowerCase().includes(searchTermLower)
   );
-
-  console.log("Search filtering:", {
-    videoId: video.id,
-    title: video.title,
-    searchTerm,
-    matches
-  });
-
-  return matches;
 }
 
 function filterByCategory(video: Video, selectedCategory: VideoCategory): boolean {
@@ -57,16 +48,7 @@ function filterByCategory(video: Video, selectedCategory: VideoCategory): boolea
     return isRecent || hasNewsTag;
   }
 
-  const hasCategory = video.categories.includes(selectedCategory);
-  console.log("Category filtering:", {
-    videoId: video.id,
-    title: video.title,
-    categories: video.categories,
-    selectedCategory,
-    matches: hasCategory
-  });
-
-  return hasCategory;
+  return video.categories.includes(selectedCategory);
 }
 
 function sortVideos(videos: Video[], sortOption: SortOption): Video[] {
