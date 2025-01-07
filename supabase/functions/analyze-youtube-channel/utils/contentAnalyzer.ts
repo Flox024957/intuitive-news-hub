@@ -1,80 +1,44 @@
-export const categoryKeywords = {
-  Politics: [
-    "politique", "gouvernement", "élection", "président", "ministre", "assemblée",
-    "parlement", "démocratie", "loi", "réforme", "état", "constitution",
-    "député", "sénat", "vote", "électeur", "campagne", "parti", "pouvoir",
-    "idéologie", "géopolitique", "diplomatie", "nation", "souveraineté",
-    "citoyen", "droits", "libertés", "justice", "institution"
-  ],
-  Economy: [
-    "économie", "finance", "marché", "entreprise", "croissance", "inflation",
-    "investissement", "bourse", "budget", "commerce", "emploi", "pib",
-    "dette", "banque", "monnaie", "euro", "dollar", "crise", "richesse",
-    "capital", "profit", "business", "entrepreneur", "startup", "innovation",
-    "management", "industrie", "production", "consommation", "développement"
-  ],
-  Science: [
-    "science", "recherche", "découverte", "étude", "laboratoire", "expérience",
-    "scientifique", "biologie", "physique", "chimie", "théorie", "cerveau",
-    "neuroscience", "cognition", "intelligence", "évolution", "nature",
-    "méthode", "hypothèse", "preuve", "démonstration", "observation",
-    "expérimentation", "innovation", "progrès", "connaissance"
-  ],
-  Technology: [
-    "technologie", "innovation", "numérique", "intelligence artificielle", "ia",
-    "robot", "internet", "digital", "informatique", "tech", "application",
-    "algorithme", "données", "cybersécurité", "blockchain", "startup",
-    "machine learning", "deep learning", "big data", "cloud", "réseau",
-    "programmation", "logiciel", "hardware", "software", "automation"
-  ],
-  Culture: [
-    "culture", "art", "musique", "cinéma", "littérature", "théâtre",
-    "exposition", "spectacle", "festival", "patrimoine", "histoire",
-    "philosophie", "société", "civilisation", "tradition", "éducation",
-    "savoir", "connaissance", "apprentissage", "enseignement", "formation"
-  ],
-  News: [
-    "actualité", "information", "news", "journal", "média", "reportage",
-    "événement", "direct", "breaking", "dernière minute", "analyse",
-    "débat", "interview", "chronique", "édito"
-  ],
-  Humour: [
-    "humour", "comédie", "blague", "rire", "sketch", "stand-up",
-    "parodie", "satire", "comique", "drôle", "gag", "amusant",
-    "divertissement", "humoriste"
-  ],
-  Musique: [
-    "musique", "chanson", "concert", "album", "artiste", "groupe",
-    "clip", "son", "mélodie", "rythme", "instrument", "musicien",
-    "compositeur", "production", "live", "performance"
-  ]
-};
+import { createClient } from '@supabase/supabase-js';
 
-export function analyzeContent(title: string, description: string): string[] {
-  const content = (title + " " + description).toLowerCase();
-  const categories = new Set<string>();
-  let categoryScores: { [key: string]: number } = {};
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-  // Initialiser les scores
-  for (const category of Object.keys(categoryKeywords)) {
-    categoryScores[category] = 0;
-  }
-
-  // Calculer les scores pour chaque catégorie
-  for (const [category, keywords] of Object.entries(categoryKeywords)) {
-    for (const keyword of keywords) {
-      if (content.includes(keyword)) {
-        categoryScores[category]++;
+export async function analyzeContent(title: string, description: string, videoId: string) {
+  try {
+    // Appeler la fonction d'analyse de contenu
+    const { data: analysisResult, error: analysisError } = await supabase.functions.invoke(
+      'analyze-content',
+      {
+        body: { title, summary: description }
       }
-    }
-  }
+    );
 
-  // Sélectionner les catégories avec un score significatif (au moins 2 mots-clés)
-  for (const [category, score] of Object.entries(categoryScores)) {
-    if (score >= 2) {
-      categories.add(category);
+    if (analysisError) {
+      console.error('Error analyzing content:', analysisError);
+      return ['news'];
     }
-  }
 
-  return categories.size > 0 ? Array.from(categories) : ["News"];
+    // Vérifier si la vidéo a moins de 48h
+    const publishDate = new Date();
+    const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
+    
+    let categories = analysisResult.categories;
+    
+    // Ajouter automatiquement le tag "news" pour les vidéos récentes
+    if (publishDate >= fortyEightHoursAgo && !categories.includes('news')) {
+      categories = ['news', ...categories].slice(0, 3);
+    }
+
+    console.log('Content analysis complete:', {
+      videoId,
+      categories,
+      scores: analysisResult.scores
+    });
+
+    return categories;
+  } catch (error) {
+    console.error('Error in analyzeContent:', error);
+    return ['news'];
+  }
 }
