@@ -8,6 +8,7 @@ import { type SortOption } from "@/components/SortOptions";
 import { PersonalizedHeader } from "@/components/PersonalizedHeader";
 import { PersonalizedTabs } from "@/components/PersonalizedTabs";
 import { WelcomeMessage } from "@/components/WelcomeMessage";
+import { type Video } from "@/types/video";
 
 const PersonalizedHomePage = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -51,7 +52,8 @@ const PersonalizedHomePage = () => {
         .from('videos')
         .select(`
           *,
-          podcaster:podcasters(*)
+          podcaster:podcasters(*),
+          stats:video_stats(*)
         `)
         .in('podcaster_id', profile.favorite_podcasters)
         .order('published_date', { ascending: false });
@@ -61,7 +63,19 @@ const PersonalizedHomePage = () => {
         throw error;
       }
 
-      return videos;
+      return videos.map(video => ({
+        ...video,
+        categories: video.categories || ['news'],
+        stats: video.stats || {
+          id: crypto.randomUUID(),
+          video_id: video.id,
+          view_count: 0,
+          like_count: 0,
+          share_count: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      })) as Video[];
     },
     enabled: !!profile?.favorite_podcasters?.length,
   });

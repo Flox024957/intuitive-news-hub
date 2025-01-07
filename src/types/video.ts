@@ -13,11 +13,11 @@ export interface Video {
   thumbnail_url: string | null;
   podcaster_id: string | null;
   video_url: string;
-  categories: string[];  // Maintenant requis, plus optionnel
+  categories: string[];
   created_at: string;
   article_content: string | null;
   podcaster: Podcaster | null;
-  stats: VideoStats | null;
+  stats: VideoStats;
 }
 
 export interface YouTubeVideo {

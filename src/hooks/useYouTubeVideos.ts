@@ -10,7 +10,6 @@ export function useYouTubeVideos(username: string) {
       try {
         console.log('Fetching YouTube data for:', username);
         
-        // Appeler l'edge function youtube-data
         const { data: youtubeData, error: youtubeError } = await supabase.functions.invoke(
           'youtube-data',
           {
@@ -38,7 +37,7 @@ export function useYouTubeVideos(username: string) {
             .maybeSingle();
 
           if (!existingVideo) {
-            const { error: insertError } = await supabase
+            const { data: newVideo, error: insertError } = await supabase
               .from('videos')
               .insert({
                 youtube_video_id: video.id,
@@ -47,11 +46,28 @@ export function useYouTubeVideos(username: string) {
                 published_date: video.publishedAt,
                 thumbnail_url: video.thumbnail,
                 video_url: `https://www.youtube.com/watch?v=${video.id}`,
-                categories: ['news']  // Le trigger analyze_video_categories mettra à jour les catégories
-              });
+                categories: ['news']
+              })
+              .select()
+              .single();
 
             if (insertError) {
               console.error('Error saving video:', insertError);
+              continue;
+            }
+
+            // Initialiser les statistiques de la vidéo
+            const { error: statsError } = await supabase
+              .from('video_stats')
+              .insert({
+                video_id: newVideo.id,
+                view_count: parseInt(video.statistics?.viewCount || '0', 10),
+                like_count: parseInt(video.statistics?.likeCount || '0', 10),
+                share_count: 0
+              });
+
+            if (statsError) {
+              console.error('Error saving video stats:', statsError);
             }
           }
         }
@@ -65,7 +81,7 @@ export function useYouTubeVideos(username: string) {
         return [];
       }
     },
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false
   });
 }
