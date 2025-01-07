@@ -4,60 +4,103 @@ import { corsHeaders } from "../_shared/cors.ts"
 const YOUTUBE_API_KEY = Deno.env.get('YOUTUBE_API_KEY')
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const { username } = await req.json();
-    console.log('Requête reçue pour username:', username);
+    console.log('Processing request for YouTube channel:', username);
 
     if (!username) {
-      throw new Error('Username requis');
+      throw new Error('Username is required');
     }
 
-    // Récupérer l'ID de la chaîne à partir du nom d'utilisateur
+    if (!YOUTUBE_API_KEY) {
+      throw new Error('YouTube API key not configured');
+    }
+
+    // Get channel ID from username
     const channelResponse = await fetch(
-      `https://youtube.googleapis.com/youtube/v3/channels?part=contentDetails&forUsername=${username.replace('@', '')}&key=${YOUTUBE_API_KEY}`
+      `https://youtube.googleapis.com/youtube/v3/channels?part=contentDetails,snippet&forUsername=${username.replace('@', '')}&key=${YOUTUBE_API_KEY}`
     );
+
+    if (!channelResponse.ok) {
+      console.error('Error fetching channel:', await channelResponse.text());
+      throw new Error('Failed to fetch channel data');
+    }
+
     const channelData = await channelResponse.json();
+    console.log('Channel data received:', channelData);
     
     if (!channelData.items?.[0]?.contentDetails?.relatedPlaylists?.uploads) {
-      throw new Error(`Impossible de trouver la chaîne pour ${username}`);
+      throw new Error(`Channel not found for ${username}`);
     }
 
     const uploadsPlaylistId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
+    const channelTitle = channelData.items[0].snippet.title;
 
-    // Récupérer les vidéos de la playlist
+    // Get videos from uploads playlist
     const videosResponse = await fetch(
       `https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${uploadsPlaylistId}&key=${YOUTUBE_API_KEY}`
     );
-    const videosData = await videosResponse.json();
 
-    if (!videosData.items) {
-      throw new Error('Aucune vidéo trouvée');
+    if (!videosResponse.ok) {
+      console.error('Error fetching videos:', await videosResponse.text());
+      throw new Error('Failed to fetch videos');
     }
 
-    // Récupérer les statistiques des vidéos
-    const videoIds = videosData.items.map((item: any) => item.snippet.resourceId.videoId).join(',');
-    const statsResponse = await fetch(
-      `https://youtube.googleapis.com/youtube/v3/videos?part=statistics&id=${videoIds}&key=${YOUTUBE_API_KEY}`
-    );
-    const statsData = await statsResponse.json();
+    const videosData = await videosResponse.json();
+    console.log(`Found ${videosData.items?.length || 0} videos`);
 
-    // Combiner les données
+    if (!videosData.items?.length) {
+      return new Response(
+        JSON.stringify({ videos: [], message: 'No videos found' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Get video statistics
+    const videoIds = videosData.items
+      .map((item: any) => item.snippet.resourceId.videoId)
+      .join(',');
+
+    const statsResponse = await fetch(
+      `https://youtube.googleapis.com/youtube/v3/videos?part=statistics,contentDetails&id=${videoIds}&key=${YOUTUBE_API_KEY}`
+    );
+
+    if (!statsResponse.ok) {
+      console.error('Error fetching stats:', await statsResponse.text());
+      throw new Error('Failed to fetch video statistics');
+    }
+
+    const statsData = await statsResponse.json();
+    console.log('Statistics received for', statsData.items?.length || 0, 'videos');
+
+    // Combine video data with statistics
     const videos = videosData.items.map((item: any) => {
       const stats = statsData.items?.find((stat: any) => stat.id === item.snippet.resourceId.videoId);
+      const snippet = item.snippet;
+      
       return {
-        id: item.snippet.resourceId.videoId,
-        title: item.snippet.title,
-        description: item.snippet.description,
-        thumbnail: item.snippet.thumbnails.maxres?.url || item.snippet.thumbnails.high?.url,
-        publishedAt: item.snippet.publishedAt,
-        statistics: stats?.statistics || {}
+        id: snippet.resourceId.videoId,
+        title: snippet.title,
+        description: snippet.description,
+        thumbnail: snippet.thumbnails.maxres?.url || 
+                  snippet.thumbnails.standard?.url || 
+                  snippet.thumbnails.high?.url,
+        publishedAt: snippet.publishedAt,
+        channelTitle: channelTitle,
+        statistics: {
+          viewCount: stats?.statistics?.viewCount || '0',
+          likeCount: stats?.statistics?.likeCount || '0',
+          commentCount: stats?.statistics?.commentCount || '0'
+        },
+        duration: stats?.contentDetails?.duration || 'PT0S'
       };
     });
+
+    console.log('Successfully processed', videos.length, 'videos');
 
     return new Response(
       JSON.stringify({ videos }),
@@ -67,12 +110,15 @@ serve(async (req) => {
       },
     );
   } catch (error) {
-    console.error('Erreur:', error);
+    console.error('Error processing request:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: error.stack 
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
+        status: error.status || 500,
       },
     );
   }
