@@ -9,7 +9,7 @@ const corsHeaders = {
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
@@ -38,7 +38,7 @@ serve(async (req) => {
     - Mentionner les conclusions importantes
     - Utiliser un langage clair et précis`;
     
-    const summaryResponse = await fetch("https://api-inference.huggingface.co/models/meta-llama/Llama-2-70b-chat-hf", {
+    const summaryResponse = await fetch("https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1", {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${HF_API_KEY}`,
@@ -55,7 +55,9 @@ serve(async (req) => {
     });
 
     if (!summaryResponse.ok) {
-      throw new Error(`Error generating summary: ${await summaryResponse.text()}`);
+      const errorText = await summaryResponse.text();
+      console.error('Summary generation error:', errorText);
+      throw new Error(`Error generating summary: ${errorText}`);
     }
 
     const summaryResult = await summaryResponse.json();
@@ -77,7 +79,7 @@ serve(async (req) => {
     5. Conclusion synthétique
     6. Style journalistique professionnel`;
 
-    const articleResponse = await fetch("https://api-inference.huggingface.co/models/meta-llama/Llama-2-70b-chat-hf", {
+    const articleResponse = await fetch("https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1", {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${HF_API_KEY}`,
@@ -94,7 +96,9 @@ serve(async (req) => {
     });
 
     if (!articleResponse.ok) {
-      throw new Error(`Error generating article: ${await articleResponse.text()}`);
+      const errorText = await articleResponse.text();
+      console.error('Article generation error:', errorText);
+      throw new Error(`Error generating article: ${errorText}`);
     }
 
     const articleResult = await articleResponse.json();
@@ -116,28 +120,11 @@ serve(async (req) => {
       .eq('id', videoId);
 
     if (updateError) {
+      console.error('Database update error:', updateError);
       throw updateError;
     }
 
-    // Mise en cache du contenu généré
-    const { error: cacheError } = await supabaseClient
-      .from('content_cache')
-      .upsert([
-        {
-          video_id: videoId,
-          content_type: 'summary',
-          content: summary
-        },
-        {
-          video_id: videoId,
-          content_type: 'article',
-          content: article
-        }
-      ]);
-
-    if (cacheError) {
-      console.error('Error caching content:', cacheError);
-    }
+    console.log('Content successfully generated and stored for video:', videoId);
 
     return new Response(
       JSON.stringify({ 
