@@ -14,6 +14,52 @@ const YOUTUBE_CHANNELS: YouTubeChannel[] = [
   }
 ];
 
+async function saveVideoToDatabase(video: any) {
+  try {
+    // Vérifier si la vidéo existe déjà
+    const { data: existingVideo } = await supabase
+      .from('videos')
+      .select('id')
+      .eq('youtube_video_id', video.id)
+      .maybeSingle();
+
+    if (existingVideo) {
+      console.log(`Video ${video.id} already exists, skipping`);
+      return;
+    }
+
+    // Insérer la nouvelle vidéo
+    const { data: newVideo, error: videoError } = await supabase
+      .from('videos')
+      .insert({
+        youtube_video_id: video.id,
+        title: video.title,
+        summary: video.description,
+        published_date: video.publishedAt,
+        thumbnail_url: video.thumbnail,
+        video_url: `https://www.youtube.com/watch?v=${video.id}`,
+        categories: ['news'] // Sera mis à jour par le trigger analyze_video_categories
+      })
+      .select()
+      .single();
+
+    if (videoError) throw videoError;
+
+    // Initialiser les statistiques de la vidéo
+    await supabase
+      .from('video_stats')
+      .insert({
+        video_id: newVideo.id,
+        view_count: parseInt(video.statistics?.viewCount || '0', 10),
+      });
+
+    console.log(`Video ${video.id} saved successfully`);
+  } catch (error) {
+    console.error(`Error saving video ${video.id}:`, error);
+    throw error;
+  }
+}
+
 export async function addNewYouTubeChannel(channelId: string) {
   try {
     const { data, error } = await supabase.functions.invoke('analyze-youtube-channel', {
@@ -29,58 +75,12 @@ export async function addNewYouTubeChannel(channelId: string) {
       return false;
     }
 
-    // Pour chaque vidéo, traiter le contenu
+    // Pour chaque vidéo, sauvegarder dans la base de données
     for (const video of data.videos) {
       try {
-        // Get video summary first
-        const { data: transcriptionData } = await supabase.functions.invoke('transcribe-video', {
-          body: { videoId: video.id }
-        });
-
-        let summary = '';
-        if (transcriptionData?.transcript) {
-          const { data: summaryData } = await supabase.functions.invoke('generate-summary', {
-            body: { 
-              text: transcriptionData.transcript,
-              videoId: video.id
-            }
-          });
-          summary = summaryData?.summary || '';
-        }
-
-        // Analyze video categories using Hugging Face with summary
-        const { data: categoryData, error: categoryError } = await supabase.functions.invoke('analyze-video-tags', {
-          body: { 
-            title: video.title,
-            description: video.description,
-            summary: summary
-          }
-        });
-
-        if (categoryError) {
-          console.error('Error analyzing categories:', categoryError);
-          continue;
-        }
-
-        // Generate article if we have a transcript
-        if (transcriptionData?.transcript) {
-          const { data: articleData } = await supabase.functions.invoke('generate-article', {
-            body: {
-              transcript: transcriptionData.transcript,
-              summary: summary,
-              videoId: video.id
-            }
-          });
-
-          console.log(`Content generated for video ${video.id}:`, {
-            categories: categoryData?.categories,
-            transcription: !!transcriptionData?.transcript,
-            summary: !!summary,
-            article: !!articleData?.article
-          });
-        }
-      } catch (processError) {
-        console.error(`Error processing video ${video.id}:`, processError);
+        await saveVideoToDatabase(video);
+      } catch (error) {
+        console.error(`Error processing video ${video.id}:`, error);
         toast.error(`Erreur lors du traitement de la vidéo ${video.title}`);
       }
     }
@@ -97,10 +97,22 @@ export async function addNewYouTubeChannel(channelId: string) {
 export function useYouTubeVideos() {
   const channelsData = YOUTUBE_CHANNELS.map(channel => {
     const { data, isLoading } = useYoutubeVideos(channel.id);
+    
+    // Sauvegarder automatiquement les nouvelles vidéos
+    if (data && !isLoading) {
+      data.forEach(async (video) => {
+        try {
+          await saveVideoToDatabase(video);
+        } catch (error) {
+          console.error(`Error auto-saving video ${video.id}:`, error);
+        }
+      });
+    }
+
     return {
       videos: data?.map(video => ({
         ...video,
-        categories: video.categories || ['Actualités'] // Fallback category
+        categories: video.categories || ['Actualités']
       })) || [],
       isLoading
     };

@@ -20,13 +20,11 @@ export const useYoutubeVideos = (username: string) => {
         return data.videos.map((video: any) => ({
           id: video.id,
           title: video.title,
-          summary: video.description,
-          thumbnail_url: video.thumbnail,
-          published_date: video.publishedAt,
-          categories: [],  // Will be set by the parent component
-          stats: {
-            view_count: video.statistics.viewCount || 0
-          }
+          description: video.description,
+          thumbnail: video.thumbnail,
+          publishedAt: video.publishedAt,
+          statistics: video.statistics || { viewCount: '0' },
+          categories: [] // Sera défini par le trigger de la base de données
         }));
       } catch (error) {
         console.error('Error:', error);
