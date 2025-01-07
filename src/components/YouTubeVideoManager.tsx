@@ -18,7 +18,7 @@ async function saveVideoToDatabase(video: any) {
   try {
     console.log('Saving video to database:', video.id);
     
-    // Check if video already exists
+    // Check if video already exists using maybeSingle()
     const { data: existingVideo, error: checkError } = await supabase
       .from('videos')
       .select('id')

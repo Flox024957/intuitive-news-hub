@@ -26,17 +26,19 @@ export const useYouTubeVideos = (channelId: string) => {
         const savedVideos = await Promise.all(
           data.videos.map(async (video: any) => {
             try {
+              // Use maybeSingle() instead of single() to handle no results
               const { data: existingVideo } = await supabase
                 .from('videos')
                 .select('*')
                 .eq('youtube_video_id', video.id)
-                .single();
+                .maybeSingle();
 
               if (existingVideo) {
                 console.log('Video already exists:', existingVideo);
                 return existingVideo;
               }
 
+              // Insert new video
               const { data: savedVideo, error: saveError } = await supabase
                 .from('videos')
                 .insert({
