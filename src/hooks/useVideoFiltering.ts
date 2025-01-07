@@ -20,15 +20,29 @@ function filterBySearch(video: Video, searchTerm: string): boolean {
     ...(Array.isArray(video.categories) ? video.categories : [])
   ].filter(Boolean);
 
-  return searchableContent.some(text => 
+  const matches = searchableContent.some(text => 
     text?.toLowerCase().includes(searchTermLower)
   );
+
+  console.log("Search filtering:", {
+    videoId: video.id,
+    title: video.title,
+    searchTerm,
+    matches
+  });
+
+  return matches;
 }
 
 function filterByCategory(video: Video, selectedCategory: VideoCategory): boolean {
   if (selectedCategory === "all") return true;
+  
   if (!Array.isArray(video.categories)) {
-    console.log(`Invalid categories for video ${video.title}:`, video.categories);
+    console.log("Invalid categories:", {
+      videoId: video.id,
+      title: video.title,
+      categories: video.categories
+    });
     return false;
   }
 
@@ -36,11 +50,23 @@ function filterByCategory(video: Video, selectedCategory: VideoCategory): boolea
   const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
   const publishDate = new Date(video.published_date);
 
+  // Pour la section News
   if (selectedCategory === "news") {
-    return publishDate >= fortyEightHoursAgo || video.categories.includes("news");
+    const isRecent = publishDate >= fortyEightHoursAgo;
+    const hasNewsTag = video.categories.includes("news");
+    return isRecent || hasNewsTag;
   }
 
-  return video.categories.includes(selectedCategory);
+  const hasCategory = video.categories.includes(selectedCategory);
+  console.log("Category filtering:", {
+    videoId: video.id,
+    title: video.title,
+    categories: video.categories,
+    selectedCategory,
+    matches: hasCategory
+  });
+
+  return hasCategory;
 }
 
 function sortVideos(videos: Video[], sortOption: SortOption): Video[] {
@@ -72,15 +98,11 @@ export function useVideoFiltering({
       return [];
     }
 
-    console.log("Starting video filtering with:", {
+    console.log("Starting video filtering:", {
       totalVideos: videos.length,
       searchTerm,
       selectedCategory,
-      sortOption,
-      videosWithCategories: videos.map(v => ({
-        title: v.title,
-        categories: v.categories
-      }))
+      sortOption
     });
 
     const filteredVideos = videos.filter(video => 

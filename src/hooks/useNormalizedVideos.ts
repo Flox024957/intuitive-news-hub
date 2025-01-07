@@ -13,53 +13,87 @@ const isValidCategory = (category: string): category is VideoCategory => {
 };
 
 const sanitizeCategories = (categories: unknown): VideoCategory[] => {
-  if (!Array.isArray(categories)) return ["news"];
-  
+  // Si categories est null ou undefined, retourner ["news"]
+  if (!categories) {
+    console.log("Categories is null or undefined, defaulting to ['news']");
+    return ["news"];
+  }
+
+  // Si categories n'est pas un tableau, retourner ["news"]
+  if (!Array.isArray(categories)) {
+    console.log("Categories is not an array, defaulting to ['news']:", categories);
+    return ["news"];
+  }
+
+  // Filtrer les catégories valides
   const validCategories = categories
     .filter((cat): cat is string => typeof cat === "string")
     .filter(isValidCategory);
-  
+
+  console.log("Sanitized categories:", {
+    original: categories,
+    valid: validCategories
+  });
+
   return validCategories.length > 0 ? validCategories : ["news"];
 };
 
 export function useNormalizedVideos(dbVideos: Video[], youtubeVideos: YouTubeVideo[]) {
   return useMemo(() => {
-    console.log("Normalizing videos from DB:", dbVideos);
-    console.log("Normalizing videos from YouTube:", youtubeVideos);
+    console.log("Normalizing videos:", {
+      dbVideosCount: dbVideos?.length || 0,
+      youtubeVideosCount: youtubeVideos?.length || 0
+    });
+
+    if (!dbVideos?.length && !youtubeVideos?.length) {
+      console.log("No videos to normalize");
+      return [];
+    }
 
     // Normaliser les vidéos YouTube
-    const normalizedYoutubeVideos: Video[] = youtubeVideos.map((video) => ({
-      id: video.id,
-      youtube_video_id: video.id,
-      title: video.title,
-      custom_title: null,
-      summary: video.description || null,
-      thumbnail_url: video.thumbnail || null,
-      published_date: video.publishedAt,
-      video_url: `https://www.youtube.com/watch?v=${video.id}`,
-      categories: ["news"] as VideoCategory[],
-      created_at: new Date().toISOString(),
-      speakers_list: null,
-      full_transcript: null,
-      podcaster_id: null,
-      article_content: null,
-      podcaster: null,
-      stats: video.statistics ? {
-        id: crypto.randomUUID(),
-        video_id: video.id,
-        view_count: parseInt(video.statistics.viewCount || "0", 10),
-        like_count: parseInt(video.statistics.likeCount || "0", 10),
-        share_count: 0,
+    const normalizedYoutubeVideos: Video[] = (youtubeVideos || []).map((video) => {
+      console.log("Normalizing YouTube video:", video.id);
+      
+      return {
+        id: video.id,
+        youtube_video_id: video.id,
+        title: video.title,
+        custom_title: null,
+        summary: video.description || null,
+        thumbnail_url: video.thumbnail || null,
+        published_date: video.publishedAt,
+        video_url: `https://www.youtube.com/watch?v=${video.id}`,
+        categories: ["news"] as VideoCategory[],
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      } : null
-    }));
+        speakers_list: null,
+        full_transcript: null,
+        podcaster_id: null,
+        article_content: null,
+        podcaster: null,
+        stats: video.statistics ? {
+          id: crypto.randomUUID(),
+          video_id: video.id,
+          view_count: parseInt(video.statistics.viewCount || "0", 10),
+          like_count: parseInt(video.statistics.likeCount || "0", 10),
+          share_count: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        } : null
+      };
+    });
 
     // Normaliser les vidéos de la base de données
-    const normalizedDbVideos = dbVideos.map((video) => ({
-      ...video,
-      categories: sanitizeCategories(video.categories)
-    }));
+    const normalizedDbVideos = (dbVideos || []).map((video) => {
+      console.log("Normalizing DB video:", {
+        id: video.id,
+        categories: video.categories
+      });
+      
+      return {
+        ...video,
+        categories: sanitizeCategories(video.categories)
+      };
+    });
 
     // Combiner les vidéos en évitant les doublons
     const allVideos = [...normalizedDbVideos];
@@ -74,7 +108,7 @@ export function useNormalizedVideos(dbVideos: Video[], youtubeVideos: YouTubeVid
       }
     });
 
-    console.log("Combined normalized videos:", allVideos);
+    console.log("Final normalized videos count:", allVideos.length);
     return allVideos;
   }, [dbVideos, youtubeVideos]);
 }

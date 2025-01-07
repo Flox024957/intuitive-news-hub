@@ -29,28 +29,35 @@ export function useVideoCategories(videos: Video[], selectedCategory: VideoCateg
         const isRecent = publishDate >= fortyEightHoursAgo;
         const hasNewsTag = Array.isArray(video.categories) && video.categories.includes("news");
         
-        console.log("Checking if video is news:", {
+        const shouldInclude = isRecent || hasNewsTag;
+        console.log("News category check:", {
+          videoId: video.id,
           title: video.title,
           publishDate,
           isRecent,
           hasNewsTag,
-          categories: video.categories
+          categories: video.categories,
+          included: shouldInclude
         });
         
-        return isRecent || hasNewsTag;
+        return shouldInclude;
       });
     }
 
     // Pour les autres catégories
     return videos.filter(video => {
       if (!Array.isArray(video.categories)) {
-        console.log(`Invalid categories for video ${video.title}:`, video.categories);
+        console.log("Invalid categories:", {
+          videoId: video.id,
+          title: video.title,
+          categories: video.categories
+        });
         return false;
       }
 
       const hasCategory = video.categories.includes(selectedCategory);
-
-      console.log("Video categorization:", {
+      console.log("Category filtering:", {
+        videoId: video.id,
         title: video.title,
         categories: video.categories,
         selectedCategory,
