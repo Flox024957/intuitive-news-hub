@@ -8,7 +8,7 @@ interface Video {
   title: string;
   custom_title?: string | null;
   summary?: string;
-  thumbnail_url?: string | null;
+  thumbnail_url: string | null;
   categories?: string[];
   published_date: string;
   stats?: {
