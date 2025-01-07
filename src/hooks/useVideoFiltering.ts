@@ -21,6 +21,10 @@ export function useVideoFiltering({
       searchTerm,
       selectedCategory,
       sortOption,
+      videosWithCategories: videos?.map(v => ({
+        title: v.title,
+        categories: v.categories
+      }))
     });
 
     if (!videos) return [];
@@ -41,7 +45,20 @@ export function useVideoFiltering({
         const normalizedCategories = video.categories?.map((cat) =>
           cat.toLowerCase()
         ) || [];
+        
+        // Si pas de catégories, mettre par défaut dans "news"
+        if (normalizedCategories.length === 0) {
+          normalizedCategories.push("news");
+        }
+        
         matchesCategory = normalizedCategories.includes(selectedCategory.toLowerCase());
+        
+        console.log("Category matching for video:", {
+          title: video.title,
+          videoCategories: normalizedCategories,
+          selectedCategory: selectedCategory.toLowerCase(),
+          matches: matchesCategory
+        });
       }
 
       return matchesSearch && matchesCategory;
