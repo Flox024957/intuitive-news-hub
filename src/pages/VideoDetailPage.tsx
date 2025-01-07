@@ -15,16 +15,22 @@ const VideoDetailPage = () => {
   const { data: video, isLoading } = useQuery({
     queryKey: ['video', id],
     queryFn: async () => {
+      console.log("Fetching video with YouTube ID:", id);
       const { data, error } = await supabase
         .from('videos')
         .select(`
           *,
           podcaster:podcasters(*)
         `)
-        .eq('id', id)
+        .eq('youtube_video_id', id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching video:", error);
+        throw error;
+      }
+      
+      console.log("Fetched video data:", data);
       return data as Video;
     },
   });
