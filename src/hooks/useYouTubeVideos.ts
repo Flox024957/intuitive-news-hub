@@ -35,7 +35,7 @@ export function useYouTubeVideos(username: string) {
             .from('videos')
             .select('id')
             .eq('youtube_video_id', video.id)
-            .single();
+            .maybeSingle();
 
           if (!existingVideo) {
             const { error: insertError } = await supabase

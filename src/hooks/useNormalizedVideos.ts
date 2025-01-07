@@ -37,7 +37,16 @@ export function useNormalizedVideos(dbVideos: Video[], youtubeVideos: YouTubeVid
     // Normaliser les vidéos de la base de données
     const normalizedDbVideos = dbVideos.map((video) => ({
       ...video,
-      categories: video.categories || ['news']  // S'assurer que categories n'est jamais null
+      categories: video.categories || ['news'],  // S'assurer que categories n'est jamais null
+      stats: video.stats || {
+        id: crypto.randomUUID(),
+        video_id: video.id,
+        view_count: 0,
+        like_count: 0,
+        share_count: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
     }));
 
     // Combiner les vidéos en évitant les doublons

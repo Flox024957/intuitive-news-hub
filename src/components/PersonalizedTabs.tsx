@@ -4,14 +4,9 @@ import { SearchBar } from "@/components/SearchBar";
 import { CategoryFilter } from "@/components/CategoryFilter";
 import { SortOptions, type SortOption } from "@/components/SortOptions";
 import { VideoGrid } from "@/components/VideoGrid";
-import { type Database } from "@/integrations/supabase/types";
+import { type Video } from "@/types/video";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-
-type Video = Database['public']['Tables']['videos']['Row'] & {
-  podcaster: Database['public']['Tables']['podcasters']['Row'];
-  stats?: Database['public']['Tables']['video_stats']['Row'];
-};
 
 interface PersonalizedTabsProps {
   videos: Video[] | null;
@@ -51,14 +46,26 @@ export function PersonalizedTabs({
         .from('videos')
         .select(`
           *,
-          podcaster:podcasters(*)
+          podcaster:podcasters(*),
+          stats:video_stats(*)
         `)
         .in('id', videoIds);
 
-      return videos?.map(video => ({
+      if (!videos) return [];
+
+      return videos.map(video => ({
         ...video,
-        stats: videoStats.find(stat => stat.video_id === video.id),
-      })) || [];
+        categories: video.categories || ['news'],
+        stats: videoStats.find(stat => stat.video_id === video.id) || {
+          id: crypto.randomUUID(),
+          video_id: video.id,
+          view_count: 0,
+          like_count: 0,
+          share_count: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      })) as Video[];
     },
     enabled: true,
   });
@@ -104,7 +111,7 @@ export function PersonalizedTabs({
           </div>
           
           <VideoGrid
-            videos={tab === 'trending' ? trendingVideos : videos}
+            videos={tab === 'trending' ? (trendingVideos || []) : (videos || [])}
             isLoading={tab === 'trending' ? isTrendingLoading : isLoading}
             searchTerm={searchTerm}
             selectedCategory={selectedCategory}
