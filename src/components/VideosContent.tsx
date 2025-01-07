@@ -5,14 +5,15 @@ import { VideoGrid } from "@/components/VideoGrid";
 import { VideosHeader } from "@/components/VideosHeader";
 import { CategoryTabs } from "@/components/CategoryTabs";
 import { categories } from "@/constants/categories";
+import { type VideoCategory } from "@/types/category";
 
 interface VideosContentProps {
   videos: any[];
   isLoading: boolean;
   searchTerm: string;
   onSearchChange: (term: string) => void;
-  selectedCategory: string;
-  onCategorySelect: (category: string) => void;
+  selectedCategory: VideoCategory;
+  onCategorySelect: (category: VideoCategory) => void;
   sortOption: SortOption;
   onSortChange: (option: SortOption) => void;
 }
@@ -27,11 +28,11 @@ export function VideosContent({
   sortOption,
   onSortChange
 }: VideosContentProps) {
-  const filterVideosByCategory = (category: string) => {
+  const filterVideosByCategory = (category: VideoCategory) => {
     if (!videos) return [];
     
     return videos.filter(video => {
-      if (category.toLowerCase() === "all") return true;
+      if (category === "all") return true;
       if (!video.categories) return false;
       
       const normalizedCategories = video.categories.map((cat: string) => cat.toLowerCase());

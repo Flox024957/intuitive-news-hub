@@ -5,6 +5,7 @@ import { CategoryFilter } from "@/components/CategoryFilter";
 import { SortOptions, type SortOption } from "@/components/SortOptions";
 import { VideoGrid } from "@/components/VideoGrid";
 import { type Video } from "@/types/video";
+import { type VideoCategory } from "@/types/category";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -13,8 +14,8 @@ interface PersonalizedTabsProps {
   isLoading: boolean;
   searchTerm: string;
   setSearchTerm: (term: string) => void;
-  selectedCategory: string;
-  setSelectedCategory: (category: string) => void;
+  selectedCategory: VideoCategory;
+  setSelectedCategory: (category: VideoCategory) => void;
   sortOption: SortOption;
   setSortOption: (option: SortOption) => void;
 }

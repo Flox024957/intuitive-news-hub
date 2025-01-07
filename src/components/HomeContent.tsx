@@ -9,6 +9,7 @@ import { VideosContent } from "@/components/VideosContent";
 import { useYouTubeChannelsVideos } from "@/components/YouTubeVideoManager";
 import { useNormalizedVideos } from "@/hooks/useNormalizedVideos";
 import { type Video } from "@/types/video";
+import { type VideoCategory } from "@/types/category";
 
 interface HomeContentProps {
   videos: Video[];
@@ -21,7 +22,7 @@ export function HomeContent({
   isLoading: isLoadingDb,
   trendingVideos,
 }: HomeContentProps) {
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCategory, setSelectedCategory] = useState<VideoCategory>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("recent");
 
