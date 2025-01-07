@@ -28,12 +28,21 @@ export function VideosContent({
   onSortChange
 }: VideosContentProps) {
   const filterVideosByCategory = (category: string) => {
+    if (!videos) return [];
+    
     return videos.filter(video => {
-      if (category === "all") return true;
+      if (category.toLowerCase() === "all") return true;
       if (!video.categories) return false;
       
       const normalizedCategories = video.categories.map((cat: string) => cat.toLowerCase());
       const normalizedCategory = category.toLowerCase();
+      
+      console.log("Filtering video:", {
+        title: video.title,
+        categories: normalizedCategories,
+        searchingFor: normalizedCategory,
+        matches: normalizedCategories.includes(normalizedCategory)
+      });
       
       return normalizedCategories.includes(normalizedCategory);
     });
