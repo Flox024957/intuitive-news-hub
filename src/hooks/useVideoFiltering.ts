@@ -46,22 +46,12 @@ export function useVideoFiltering({
 
       // Filtre de catégorie
       let matchesCategory = true;
-      if (selectedCategory !== "All") {
+      if (selectedCategory !== "all") {
         const normalizedCategories = video.categories?.map((cat) =>
           cat.toLowerCase()
         ) || [];
         const normalizedCategory = selectedCategory.toLowerCase();
-
-        if (normalizedCategory === "politique") {
-          matchesCategory = normalizedCategories.some(
-            (cat) =>
-              cat === "politique" ||
-              cat === "politics" ||
-              cat === "political"
-          );
-        } else {
-          matchesCategory = normalizedCategories.includes(normalizedCategory);
-        }
+        matchesCategory = normalizedCategories.includes(normalizedCategory);
       }
 
       return matchesSearch && matchesCategory;

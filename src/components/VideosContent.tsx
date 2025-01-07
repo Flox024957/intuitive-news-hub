@@ -42,7 +42,7 @@ export function VideosContent({
 }: VideosContentProps) {
   const filterVideosByCategory = (category: string) => {
     return videos.filter(video => {
-      if (category === "All") return true;
+      if (category === "all") return true;
       
       // Vérifier si la vidéo a des catégories
       if (!video.categories) return false;
@@ -50,15 +50,6 @@ export function VideosContent({
       // Convertir les catégories en minuscules pour la comparaison
       const normalizedCategories = video.categories.map((cat: string) => cat.toLowerCase());
       const normalizedCategory = category.toLowerCase();
-      
-      // Vérifier les différentes variations possibles de "Politique"
-      if (normalizedCategory === "politique") {
-        return normalizedCategories.some((cat: string) => 
-          cat === "politique" || 
-          cat === "politics" || 
-          cat === "political"
-        );
-      }
       
       return normalizedCategories.includes(normalizedCategory);
     });
@@ -68,16 +59,16 @@ export function VideosContent({
     { id: "all", label: "Toutes les vidéos", icon: Grid, color: "text-blue-500" },
     { id: "news", label: "News", icon: Newspaper, color: "text-red-500" },
     { id: "politique", label: "Politique", icon: Globe, color: "text-green-500" },
-    { id: "economy", label: "Économie", icon: LineChart, color: "text-yellow-500" },
+    { id: "economie", label: "Économie", icon: LineChart, color: "text-yellow-500" },
     { id: "science", label: "Science", icon: Microscope, color: "text-purple-500" },
-    { id: "technology", label: "Technologie", icon: Cpu, color: "text-cyan-500" },
+    { id: "technologie", label: "Technologie", icon: Cpu, color: "text-cyan-500" },
     { id: "culture", label: "Culture", icon: Palette, color: "text-pink-500" },
     { id: "divertissement", label: "Divertissement", icon: Film, color: "text-orange-500" },
     { id: "tutoriels", label: "Tutoriels", icon: BookOpen, color: "text-indigo-500" },
     { id: "reportages", label: "Reportages", icon: Film, color: "text-emerald-500" },
     { id: "humour", label: "Humour", icon: Laugh, color: "text-amber-500" },
     { id: "musique", label: "Musique", icon: Music, color: "text-rose-500" },
-    { id: "development", label: "Développement personnel", icon: Brain, color: "text-violet-500" }
+    { id: "developpement", label: "Développement personnel", icon: Brain, color: "text-violet-500" }
   ];
 
   return (
@@ -114,7 +105,7 @@ export function VideosContent({
                 key={id}
                 value={id} 
                 className="group relative flex flex-col items-center justify-center gap-3 py-4 px-3 transition-all duration-500 hover:bg-white/5 rounded-xl w-full h-full"
-                onClick={() => onCategorySelect(label)}
+                onClick={() => onCategorySelect(id)}
               >
                 <Icon className={`w-6 h-6 ${color} transition-transform group-hover:scale-110`} />
                 <span className="text-sm font-medium opacity-80 group-hover:opacity-100 transition-opacity">
@@ -142,10 +133,10 @@ export function VideosContent({
                 transition={{ duration: 0.5 }}
               >
                 <VideoGrid
-                  videos={id === "all" ? videos : filterVideosByCategory(label)}
+                  videos={filterVideosByCategory(id)}
                   isLoading={isLoading}
                   searchTerm={searchTerm}
-                  selectedCategory={id === "all" ? selectedCategory : label}
+                  selectedCategory={id}
                   sortOption={sortOption}
                 />
               </motion.div>
