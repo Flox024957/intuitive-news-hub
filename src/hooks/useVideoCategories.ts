@@ -54,6 +54,8 @@ export function useVideoCategories(videos: Video[], selectedCategory: string) {
         typeof cat === 'string' ? cat.toLowerCase() : ''
       );
 
+      const selectedCategoryLower = selectedCategory.toLowerCase();
+
       // Correspondances de catégories (français/anglais)
       const categoryMappings: Record<string, string[]> = {
         'politics': ['politics', 'politique'],
@@ -65,8 +67,8 @@ export function useVideoCategories(videos: Video[], selectedCategory: string) {
       };
 
       // Vérifier si la vidéo appartient à la catégorie sélectionnée
-      const matchingCategories = categoryMappings[selectedCategory.toLowerCase()] || 
-                               [selectedCategory.toLowerCase()];
+      const matchingCategories = categoryMappings[selectedCategoryLower] || 
+                               [selectedCategoryLower];
 
       const hasCategory = normalizedCategories.some(cat =>
         matchingCategories.includes(cat)
@@ -75,7 +77,7 @@ export function useVideoCategories(videos: Video[], selectedCategory: string) {
       console.log("Video categorization:", {
         title: video.title,
         normalizedCategories,
-        selectedCategory: selectedCategory.toLowerCase(),
+        selectedCategory: selectedCategoryLower,
         matches: hasCategory
       });
 

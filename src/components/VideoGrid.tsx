@@ -35,7 +35,7 @@ export function VideoGrid({
   selectedCategory,
   sortOption,
 }: VideoGridProps) {
-  // Filtrer d'abord par catégorie (incluant la logique des News)
+  // Filtrer d'abord par catégorie
   const categorizedVideos = useVideoCategories(videos, selectedCategory);
   
   // Ensuite appliquer les autres filtres (recherche et tri)
@@ -44,6 +44,15 @@ export function VideoGrid({
     searchTerm,
     selectedCategory,
     sortOption,
+  });
+
+  console.log("VideoGrid rendering with:", {
+    totalVideos: videos?.length,
+    categorizedCount: categorizedVideos?.length,
+    filteredCount: filteredVideos?.length,
+    selectedCategory,
+    searchTerm,
+    sortOption
   });
 
   if (isLoading) {

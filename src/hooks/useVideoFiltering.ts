@@ -57,7 +57,23 @@ export function useVideoFiltering({
             ? video.categories.map(cat => typeof cat === 'string' ? cat.toLowerCase() : '')
             : [];
 
-          matchesCategory = videoCategories.includes(selectedCategory.toLowerCase());
+          // Correspondances de catégories (français/anglais)
+          const categoryMappings: Record<string, string[]> = {
+            'politics': ['politics', 'politique'],
+            'economy': ['economy', 'économie'],
+            'science': ['science'],
+            'technology': ['technology', 'technologie'],
+            'culture': ['culture'],
+            'entertainment': ['entertainment', 'divertissement']
+          };
+
+          const selectedCategoryLower = selectedCategory.toLowerCase();
+          const matchingCategories = categoryMappings[selectedCategoryLower] || 
+                                   [selectedCategoryLower];
+
+          matchesCategory = videoCategories.some(cat =>
+            matchingCategories.includes(cat)
+          );
         }
       }
 
