@@ -4,7 +4,6 @@ import { Play, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ShareButtons } from "@/components/ShareButtons";
 import { motion } from "framer-motion";
-import { useVideoStore } from "./HomeSidebar";
 
 interface VideoCardProps {
   id: string;
@@ -26,15 +25,12 @@ export function VideoCard({
   viewCount 
 }: VideoCardProps) {
   const videoUrl = `${window.location.origin}/video/${id}`;
-  const setHoveredVideo = useVideoStore((state) => state.setHoveredVideo);
   
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
       transition={{ duration: 0.3 }}
       className="relative"
-      onMouseEnter={() => setHoveredVideo({ title, description: summary })}
-      onMouseLeave={() => setHoveredVideo(null)}
     >
       <Card className="group relative overflow-hidden glass-morphism border-0 rounded-2xl">
         <Link to={`/video/${id}`}>
