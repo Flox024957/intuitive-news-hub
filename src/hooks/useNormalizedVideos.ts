@@ -11,13 +11,13 @@ export function useNormalizedVideos(dbVideos: Video[], youtubeVideos: YouTubeVid
       id: video.id,
       youtube_video_id: video.id,
       title: video.title,
+      custom_title: null,
       summary: video.description || null,
       thumbnail_url: video.thumbnail || null,
       published_date: video.publishedAt,
       video_url: `https://www.youtube.com/watch?v=${video.id}`,
-      categories: ['news'],
+      categories: ['news'],  // Catégorie par défaut, sera mise à jour par le trigger
       created_at: new Date().toISOString(),
-      custom_title: null,
       speakers_list: null,
       full_transcript: null,
       podcaster_id: null,
@@ -27,7 +27,7 @@ export function useNormalizedVideos(dbVideos: Video[], youtubeVideos: YouTubeVid
         id: crypto.randomUUID(),
         video_id: video.id,
         view_count: parseInt(video.statistics.viewCount || "0", 10),
-        like_count: 0,
+        like_count: parseInt(video.statistics.likeCount || "0", 10),
         share_count: 0,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -37,7 +37,7 @@ export function useNormalizedVideos(dbVideos: Video[], youtubeVideos: YouTubeVid
     // Normaliser les vidéos de la base de données
     const normalizedDbVideos = dbVideos.map((video) => ({
       ...video,
-      categories: video.categories || ['news']
+      categories: video.categories || ['news']  // S'assurer que categories n'est jamais null
     }));
 
     // Combiner les vidéos en évitant les doublons

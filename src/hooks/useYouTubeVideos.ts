@@ -29,6 +29,33 @@ export function useYouTubeVideos(username: string) {
           return [];
         }
 
+        // Sauvegarder les nouvelles vidéos dans la base de données
+        for (const video of youtubeData.videos) {
+          const { data: existingVideo } = await supabase
+            .from('videos')
+            .select('id')
+            .eq('youtube_video_id', video.id)
+            .single();
+
+          if (!existingVideo) {
+            const { error: insertError } = await supabase
+              .from('videos')
+              .insert({
+                youtube_video_id: video.id,
+                title: video.title,
+                summary: video.description,
+                published_date: video.publishedAt,
+                thumbnail_url: video.thumbnail,
+                video_url: `https://www.youtube.com/watch?v=${video.id}`,
+                categories: ['news']  // Le trigger analyze_video_categories mettra à jour les catégories
+              });
+
+            if (insertError) {
+              console.error('Error saving video:', insertError);
+            }
+          }
+        }
+
         console.log('YouTube videos fetched:', youtubeData.videos.length);
         return youtubeData.videos as YouTubeVideo[];
 
