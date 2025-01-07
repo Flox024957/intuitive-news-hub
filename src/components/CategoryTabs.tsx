@@ -1,10 +1,11 @@
 import { motion } from "framer-motion";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { categories, type Category } from "@/constants/categories";
+import { categories } from "@/constants/categories";
+import { type VideoCategory } from "@/types/category";
 
 interface CategoryTabsProps {
-  selectedCategory: string;
-  onCategorySelect: (category: string) => void;
+  selectedCategory: VideoCategory;
+  onCategorySelect: (category: VideoCategory) => void;
 }
 
 export function CategoryTabs({ selectedCategory, onCategorySelect }: CategoryTabsProps) {

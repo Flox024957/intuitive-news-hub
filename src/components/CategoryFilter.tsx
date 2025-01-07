@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
 import { categories } from "@/constants/categories";
+import { type VideoCategory } from "@/types/category";
 
 interface CategoryFilterProps {
-  selected: string;
-  onSelect: (category: string) => void;
+  selected: VideoCategory;
+  onSelect: (category: VideoCategory) => void;
 }
 
 export function CategoryFilter({ selected, onSelect }: CategoryFilterProps) {
@@ -18,7 +19,7 @@ export function CategoryFilter({ selected, onSelect }: CategoryFilterProps) {
           className={`
             relative flex flex-col items-center justify-center gap-3 p-4 rounded-xl
             transition-all duration-300 hover:shadow-lg
-            ${selected.toLowerCase() === category.id 
+            ${selected === category.id 
               ? 'bg-primary/20 shadow-lg border border-primary/20' 
               : 'glass-morphism hover:bg-secondary/40'
             }
@@ -36,7 +37,7 @@ export function CategoryFilter({ selected, onSelect }: CategoryFilterProps) {
           <span className="text-sm font-medium text-center">
             {category.label}
           </span>
-          {selected.toLowerCase() === category.id && (
+          {selected === category.id && (
             <motion.div
               layoutId="activeCategory"
               className="absolute inset-0 rounded-xl ring-2 ring-primary/50"

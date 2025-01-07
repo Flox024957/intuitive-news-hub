@@ -4,13 +4,14 @@ import { motion } from "framer-motion";
 import { useVideoFiltering } from "@/hooks/useVideoFiltering";
 import { useVideoCategories } from "@/hooks/useVideoCategories";
 import { type Video } from "@/types/video";
+import { type VideoCategory } from "@/types/category";
 import { Loader2 } from "lucide-react";
 
 interface VideoGridProps {
   videos: Video[];
   isLoading: boolean;
   searchTerm: string;
-  selectedCategory: string;
+  selectedCategory: VideoCategory;
   sortOption: SortOption;
 }
 
@@ -108,7 +109,7 @@ export function VideoGrid({
             title={video.custom_title || video.title}
             summary={video.summary || ""}
             thumbnail={video.thumbnail_url || ""}
-            category={video.categories?.[0] || "Actualités"}
+            category={video.categories?.[0] || "all"}
             date={new Date(video.published_date).toLocaleDateString('fr-FR', {
               day: 'numeric',
               month: 'long',
