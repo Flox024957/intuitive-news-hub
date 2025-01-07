@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useVideoFiltering } from "@/hooks/useVideoFiltering";
 import { useVideoCategories } from "@/hooks/useVideoCategories";
 import { type Video } from "@/types/video";
+import { Loader2 } from "lucide-react";
 
 interface VideoGridProps {
   videos: Video[];
@@ -57,23 +58,15 @@ export function VideoGrid({
 
   if (isLoading) {
     return (
-      <div className="content-grid">
-        {Array.from({ length: 8 }).map((_, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: index * 0.1 }}
-            className="glass-card animate-pulse rounded-lg overflow-hidden"
-          >
-            <div className="aspect-video bg-secondary/50" />
-            <div className="p-4 space-y-3">
-              <div className="h-4 bg-secondary/50 rounded w-1/4" />
-              <div className="h-6 bg-secondary/50 rounded w-3/4" />
-              <div className="h-4 bg-secondary/50 rounded w-2/3" />
-            </div>
-          </motion.div>
-        ))}
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center gap-4"
+        >
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+          <p className="text-muted-foreground">Chargement des vidéos...</p>
+        </motion.div>
       </div>
     );
   }
@@ -83,16 +76,23 @@ export function VideoGrid({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center py-8 text-muted-foreground"
+        className="min-h-[50vh] flex items-center justify-center"
       >
-        Aucune vidéo ne correspond à votre recherche
+        <div className="text-center space-y-4">
+          <p className="text-xl font-medium text-muted-foreground">
+            Aucune vidéo ne correspond à votre recherche
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Essayez de modifier vos critères de recherche
+          </p>
+        </div>
       </motion.div>
     );
   }
 
   return (
     <motion.div
-      className="content-grid"
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
       variants={container}
       initial="hidden"
       animate="show"
@@ -109,7 +109,11 @@ export function VideoGrid({
             summary={video.summary || ""}
             thumbnail={video.thumbnail_url || ""}
             category={video.categories?.[0] || "Actualités"}
-            date={new Date(video.published_date).toLocaleDateString()}
+            date={new Date(video.published_date).toLocaleDateString('fr-FR', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric'
+            })}
             viewCount={video.stats?.view_count}
           />
         </motion.div>

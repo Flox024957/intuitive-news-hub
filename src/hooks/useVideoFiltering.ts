@@ -64,7 +64,8 @@ export function useVideoFiltering({
             'technology': ['technology', 'technologie'],
             'culture': ['culture'],
             'entertainment': ['entertainment', 'divertissement', 'humour'],
-            'humor': ['humor', 'humour', 'comedy', 'comédie']
+            'humor': ['humor', 'humour', 'comedy', 'comédie'],
+            'news': ['news', 'actualités']
           };
 
           const selectedCategoryLower = selectedCategory.toLowerCase();

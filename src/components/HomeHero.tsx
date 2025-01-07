@@ -2,16 +2,33 @@ import { motion } from "framer-motion";
 import { FeaturedVideo } from "@/components/FeaturedVideo";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface HomeHeroProps {
   featuredVideo: any;
 }
 
 export function HomeHero({ featuredVideo }: HomeHeroProps) {
-  if (!featuredVideo) return null;
+  if (!featuredVideo) {
+    console.warn("No featured video available");
+    return null;
+  }
+
+  const handleScroll = () => {
+    try {
+      window.scrollTo({ 
+        top: window.innerHeight * 0.7, 
+        behavior: 'smooth' 
+      });
+      console.log("Scrolled to content section");
+    } catch (error) {
+      console.error("Error scrolling:", error);
+      toast.error("Une erreur est survenue lors du défilement");
+    }
+  };
 
   return (
-    <div className="relative w-full min-h-[70vh] flex items-center justify-center overflow-hidden">
+    <div className="relative w-full min-h-[80vh] flex items-center justify-center overflow-hidden">
       <motion.div
         initial={{ scale: 1.1, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -23,6 +40,7 @@ export function HomeHero({ featuredVideo }: HomeHeroProps) {
           src={featuredVideo.thumbnail_url}
           alt={featuredVideo.title}
           className="w-full h-full object-cover transform scale-105"
+          loading="lazy"
         />
       </motion.div>
       
@@ -52,7 +70,7 @@ export function HomeHero({ featuredVideo }: HomeHeroProps) {
           variant="ghost"
           size="icon"
           className="rounded-full bg-white/10 backdrop-blur-lg hover:bg-white/20 transition-all duration-300"
-          onClick={() => window.scrollTo({ top: window.innerHeight * 0.7, behavior: 'smooth' })}
+          onClick={handleScroll}
         >
           <ChevronDown className="w-6 h-6 animate-bounce" />
         </Button>
