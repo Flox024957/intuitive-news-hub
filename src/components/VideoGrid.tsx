@@ -2,6 +2,7 @@ import { VideoCard } from "@/components/VideoCard";
 import { type SortOption } from "@/components/SortOptions";
 import { motion } from "framer-motion";
 import { useVideoFiltering } from "@/hooks/useVideoFiltering";
+import { useVideoCategories } from "@/hooks/useVideoCategories";
 import { type Video } from "@/types/video";
 
 interface VideoGridProps {
@@ -34,6 +35,17 @@ export function VideoGrid({
   selectedCategory,
   sortOption,
 }: VideoGridProps) {
+  // Filtrer d'abord par catégorie (incluant la logique des News)
+  const categorizedVideos = useVideoCategories(videos, selectedCategory);
+  
+  // Ensuite appliquer les autres filtres (recherche et tri)
+  const filteredVideos = useVideoFiltering({
+    videos: categorizedVideos,
+    searchTerm,
+    selectedCategory,
+    sortOption,
+  });
+
   if (isLoading) {
     return (
       <div className="content-grid">
@@ -57,14 +69,7 @@ export function VideoGrid({
     );
   }
 
-  const sortedVideos = useVideoFiltering({
-    videos,
-    searchTerm,
-    selectedCategory,
-    sortOption,
-  });
-
-  if (!sortedVideos?.length) {
+  if (!filteredVideos?.length) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -83,7 +88,7 @@ export function VideoGrid({
       initial="hidden"
       animate="show"
     >
-      {sortedVideos.map((video) => (
+      {filteredVideos.map((video) => (
         <motion.div
           key={video.id}
           variants={item}

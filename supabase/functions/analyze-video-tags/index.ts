@@ -1,11 +1,15 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { pipeline } from "https://esm.sh/@huggingface/transformers@3.2.4";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+interface CategoryScore {
+  category: string;
+  score: number;
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -13,60 +17,56 @@ serve(async (req) => {
   }
 
   try {
-    const { title, description, summary } = await req.json();
+    const { summary } = await req.json();
 
-    if (!title) {
-      throw new Error('Title is required');
+    if (!summary) {
+      throw new Error('Summary is required');
     }
 
-    console.log('Analyzing video content:', { title, summary });
+    console.log('Analyzing video summary:', summary);
 
-    // Create a zero-shot-classification pipeline with Meta's BART model
-    const classifier = await pipeline(
-      "zero-shot-classification",
-      "facebook/bart-large-mnli",
-      { device: "cpu" }
-    );
+    // Définition des catégories et leurs mots-clés associés
+    const categories = {
+      'News': ['actualité', 'information', 'dernière', 'récent', 'nouveau', 'breaking'],
+      'Politique': ['politique', 'gouvernement', 'élection', 'président', 'ministre', 'loi', 'réforme'],
+      'Économie': ['économie', 'finance', 'marché', 'entreprise', 'croissance', 'inflation', 'investissement'],
+      'Science': ['science', 'recherche', 'découverte', 'étude', 'expérience', 'théorie'],
+      'Technologie': ['technologie', 'innovation', 'numérique', 'intelligence artificielle', 'digital', 'tech'],
+      'Culture': ['culture', 'art', 'musique', 'cinéma', 'littérature', 'société'],
+      'Développement': ['développement personnel', 'croissance personnelle', 'motivation', 'productivité']
+    };
 
-    // Define our categories
-    const categories = [
-      "Actualités",
-      "Politique",
-      "Science",
-      "Technologie",
-      "Économie",
-      "Culture",
-      "Divertissement",
-      "Tutoriels",
-      "Humour",
-      "Musique",
-      "Développement"
-    ];
+    // Analyse du texte pour chaque catégorie
+    const scores: CategoryScore[] = [];
+    const normalizedSummary = summary.toLowerCase();
 
-    // Combine title and summary for better context
-    const content = `${title} ${summary || description || ''}`.trim();
+    for (const [category, keywords] of Object.entries(categories)) {
+      let score = 0;
+      for (const keyword of keywords) {
+        const regex = new RegExp(keyword, 'gi');
+        const matches = normalizedSummary.match(regex);
+        if (matches) {
+          score += matches.length;
+        }
+      }
+      
+      // Normaliser le score en fonction du nombre de mots-clés
+      const normalizedScore = score / keywords.length;
+      if (normalizedScore > 0) {
+        scores.push({ category, score: normalizedScore });
+      }
+    }
 
-    // Classify the content
-    const result = await classifier(content, categories, {
-      multi_label: true,
-      hypothesis_template: "Cette vidéo parle de {}."
-    });
-
-    // Get top 3 categories based on scores with confidence > 30%
-    const topCategories = result.labels
-      .map((label, index) => ({
-        label,
-        score: result.scores[index]
-      }))
+    // Trier les scores et prendre les 3 catégories les plus pertinentes
+    const topCategories = scores
       .sort((a, b) => b.score - a.score)
       .slice(0, 3)
-      .filter(item => item.score > 0.3)
-      .map(item => item.label);
+      .filter(item => item.score > 0.1) // Seuil minimum de pertinence
+      .map(item => item.category);
 
-    console.log('AI Analysis Result:', {
-      content,
-      categories: topCategories,
-      scores: result.scores
+    console.log('Analysis results:', {
+      topCategories,
+      scores
     });
 
     return new Response(
