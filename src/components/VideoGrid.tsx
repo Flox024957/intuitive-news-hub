@@ -55,7 +55,13 @@ export function VideoGrid({ videos, isLoading, searchTerm, selectedCategory, sor
     );
   }
 
-  const filteredVideos = videos?.filter(video => {
+  // S'assurer que videos est un tableau
+  const safeVideos = videos || [];
+  console.log("Safe videos before filtering:", safeVideos);
+
+  const filteredVideos = safeVideos.filter(video => {
+    if (!video) return false;
+
     const matchesSearch = searchTerm === '' || 
       video.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       video.summary?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -79,7 +85,9 @@ export function VideoGrid({ videos, isLoading, searchTerm, selectedCategory, sor
     return matchesSearch && matchesCategory;
   });
 
-  const sortedVideos = [...(filteredVideos || [])].sort((a, b) => {
+  console.log("Filtered videos:", filteredVideos);
+
+  const sortedVideos = [...filteredVideos].sort((a, b) => {
     switch (sortOption) {
       case "recent":
         return new Date(b.published_date).getTime() - new Date(a.published_date).getTime();
@@ -93,6 +101,8 @@ export function VideoGrid({ videos, isLoading, searchTerm, selectedCategory, sor
         return 0;
     }
   });
+
+  console.log("Sorted videos:", sortedVideos);
 
   if (!sortedVideos?.length) {
     return (

@@ -20,7 +20,21 @@ export function HomeContent({ videos, isLoading: isLoadingDb, trendingVideos }: 
   const [sortOption, setSortOption] = useState<SortOption>("recent");
 
   const { videos: youtubeVideos, isLoading: isLoadingYoutube } = useYouTubeVideos();
-  const allVideos = [...(videos || []), ...youtubeVideos];
+
+  // Normaliser les vidéos YouTube pour correspondre au format de la base de données
+  const normalizedYoutubeVideos = youtubeVideos.map(video => ({
+    ...video,
+    categories: video.categories?.map(cat => cat.toLowerCase()) || [],
+    stats: {
+      view_count: video.statistics?.viewCount || 0
+    }
+  }));
+
+  console.log("Videos from DB:", videos);
+  console.log("Videos from YouTube:", normalizedYoutubeVideos);
+
+  const allVideos = [...(videos || []), ...normalizedYoutubeVideos];
+  console.log("Combined videos:", allVideos);
 
   // Trier les vidéos par nombre de vues pour la section Tendances
   const sortedTrendingVideos = [...trendingVideos].sort((a, b) => {
