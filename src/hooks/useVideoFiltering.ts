@@ -20,12 +20,7 @@ export function useVideoFiltering({
       totalVideos: videos?.length,
       searchTerm,
       selectedCategory,
-      sortOption,
-      videosWithCategories: videos?.map(v => ({
-        title: v.title,
-        categories: v.categories,
-        publishDate: v.published_date
-      }))
+      sortOption
     });
 
     if (!videos) return [];
@@ -35,10 +30,14 @@ export function useVideoFiltering({
       if (!video) return false;
 
       // Filtre de recherche
-      const matchesSearch =
-        !searchTerm ||
-        video.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        video.summary?.toLowerCase().includes(searchTerm.toLowerCase());
+      const searchTermLower = searchTerm.toLowerCase();
+      const matchesSearch = !searchTerm || [
+        video.title,
+        video.summary,
+        ...(video.categories || [])
+      ].some(text => 
+        text?.toLowerCase().includes(searchTermLower)
+      );
 
       // Filtre de catégorie
       let matchesCategory = true;
@@ -64,7 +63,8 @@ export function useVideoFiltering({
             'science': ['science'],
             'technology': ['technology', 'technologie'],
             'culture': ['culture'],
-            'entertainment': ['entertainment', 'divertissement']
+            'entertainment': ['entertainment', 'divertissement', 'humour'],
+            'humor': ['humor', 'humour', 'comedy', 'comédie']
           };
 
           const selectedCategoryLower = selectedCategory.toLowerCase();
@@ -80,7 +80,7 @@ export function useVideoFiltering({
       return matchesSearch && matchesCategory;
     });
 
-    console.log("Filtered videos:", filteredVideos);
+    console.log("Filtered videos count:", filteredVideos.length);
 
     // Tri
     const sortedVideos = [...filteredVideos].sort((a, b) => {
@@ -104,7 +104,7 @@ export function useVideoFiltering({
       }
     });
 
-    console.log("Final sorted videos:", sortedVideos);
+    console.log("Final sorted videos:", sortedVideos.length);
     return sortedVideos;
   }, [videos, searchTerm, selectedCategory, sortOption]);
 }

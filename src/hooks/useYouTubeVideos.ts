@@ -28,67 +28,75 @@ export function useYouTubeVideos(username: string) {
           return [];
         }
 
-        // Sauvegarder les nouvelles vidéos dans la base de données
-        for (const video of youtubeData.videos) {
-          const { data: existingVideo } = await supabase
-            .from('videos')
-            .select('id')
-            .eq('youtube_video_id', video.id)
-            .maybeSingle();
+        const videos = youtubeData.videos;
+        console.log('YouTube videos fetched:', videos.length);
 
-          if (!existingVideo) {
-            // Analyser le contenu pour déterminer les catégories
-            const { data: analysisData } = await supabase.functions.invoke(
-              'analyze-video-tags',
-              {
-                body: {
-                  title: video.title,
-                  description: video.description,
-                  summary: null
-                }
-              }
-            );
-
-            const categories = analysisData?.categories || ['news'];
-
-            const { data: newVideo, error: insertError } = await supabase
+        // Process each video sequentially to avoid race conditions
+        for (const video of videos) {
+          try {
+            const { data: existingVideo } = await supabase
               .from('videos')
-              .insert({
-                youtube_video_id: video.id,
-                title: video.title,
-                summary: video.description,
-                published_date: video.publishedAt,
-                thumbnail_url: video.thumbnail,
-                video_url: `https://www.youtube.com/watch?v=${video.id}`,
-                categories: categories.slice(0, 3) // Maximum 3 catégories
-              })
-              .select()
-              .single();
+              .select('id')
+              .eq('youtube_video_id', video.id)
+              .maybeSingle();
 
-            if (insertError) {
-              console.error('Error saving video:', insertError);
-              continue;
+            if (!existingVideo) {
+              console.log('Processing new video:', video.id);
+              
+              // Analyze content for categories
+              const { data: analysisData } = await supabase.functions.invoke(
+                'analyze-video-tags',
+                {
+                  body: {
+                    title: video.title,
+                    description: video.description,
+                    summary: null
+                  }
+                }
+              );
+
+              const categories = analysisData?.categories || ['news'];
+              console.log('Categories detected:', categories);
+
+              // Insert new video
+              const { data: newVideo, error: insertError } = await supabase
+                .from('videos')
+                .insert({
+                  youtube_video_id: video.id,
+                  title: video.title,
+                  summary: video.description,
+                  published_date: video.publishedAt,
+                  thumbnail_url: video.thumbnail,
+                  video_url: `https://www.youtube.com/watch?v=${video.id}`,
+                  categories: categories.slice(0, 3)
+                })
+                .select()
+                .single();
+
+              if (insertError) {
+                console.error('Error saving video:', insertError);
+                continue;
+              }
+
+              // Initialize video stats
+              await supabase
+                .from('video_stats')
+                .insert({
+                  video_id: newVideo.id,
+                  view_count: parseInt(video.statistics?.viewCount || '0', 10),
+                  like_count: parseInt(video.statistics?.likeCount || '0', 10),
+                  share_count: 0
+                });
+
+              console.log('Video saved successfully:', newVideo.id);
             }
-
-            // Initialiser les statistiques de la vidéo
-            const { error: statsError } = await supabase
-              .from('video_stats')
-              .insert({
-                video_id: newVideo.id,
-                view_count: parseInt(video.statistics?.viewCount || '0', 10),
-                like_count: parseInt(video.statistics?.likeCount || '0', 10),
-                share_count: 0
-              });
-
-            if (statsError) {
-              console.error('Error saving video stats:', statsError);
-            }
+          } catch (error) {
+            console.error('Error processing video:', error);
+            continue;
           }
         }
 
-        console.log('YouTube videos fetched:', youtubeData.videos.length);
-        return youtubeData.videos as YouTubeVideo[];
-
+        return videos as YouTubeVideo[];
       } catch (error) {
         console.error('Error in useYouTubeVideos:', error);
         toast.error("Erreur lors du traitement des vidéos");
@@ -96,6 +104,7 @@ export function useYouTubeVideos(username: string) {
       }
     },
     staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
+    retry: 1
   });
 }
