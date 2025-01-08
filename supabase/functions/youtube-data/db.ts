@@ -1,11 +1,11 @@
-import { createClient } from '@supabase/supabase-js';
-import { VideoData } from './types';
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
+import { VideoData } from "./types.ts"
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-export async function getCachedVideos(channelId: string): Promise<VideoData[]> {
+export async function getCachedVideos(): Promise<VideoData[]> {
   const { data: videos, error } = await supabase
     .from('videos')
     .select(`
@@ -36,4 +36,24 @@ export async function getCachedVideos(channelId: string): Promise<VideoData[]> {
       likeCount: video.stats[0].like_count?.toString()
     } : undefined
   }));
+}
+
+export async function saveVideosToCache(videos: VideoData[]): Promise<void> {
+  for (const video of videos) {
+    const { error } = await supabase
+      .from('videos')
+      .upsert({
+        youtube_video_id: video.id,
+        title: video.title,
+        summary: video.description,
+        published_date: video.publishedAt,
+        thumbnail_url: video.thumbnail,
+        video_url: `https://www.youtube.com/watch?v=${video.id}`
+      })
+      .single();
+
+    if (error) {
+      console.error('Error caching video:', error);
+    }
+  }
 }

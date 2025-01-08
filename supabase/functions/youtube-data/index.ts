@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { getCachedVideos } from "./db.ts"
+import { getCachedVideos, saveVideosToCache } from "./db.ts"
 import { fetchYouTubeVideos } from "./youtube.ts"
 
 const corsHeaders = {
@@ -27,19 +27,23 @@ serve(async (req) => {
     }
 
     // First try to get cached videos
-    const cachedVideos = await getCachedVideos(username);
+    const cachedVideos = await getCachedVideos();
+    console.log('Found cached videos:', cachedVideos.length);
     
     try {
       // Try to fetch fresh data
       const freshVideos = await fetchYouTubeVideos(username);
       console.log('Successfully fetched', freshVideos.length, 'videos from YouTube');
       
+      // Save the fresh videos to cache
+      await saveVideosToCache(freshVideos);
+      
       return new Response(
         JSON.stringify({ videos: freshVideos }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     } catch (error) {
-      if (error.message === 'quotaExceeded') {
+      if (error.message === 'quotaExceeded' || error.status === 429) {
         console.log('YouTube quota exceeded, using cached data');
         if (cachedVideos.length > 0) {
           return new Response(

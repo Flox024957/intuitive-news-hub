@@ -1,4 +1,4 @@
-import { YouTubeResponse, VideoData } from './types';
+import { VideoData } from "./types.ts";
 
 const YOUTUBE_API_KEY = Deno.env.get('YOUTUBE_API_KEY')!;
 
@@ -17,7 +17,7 @@ export async function fetchYouTubeVideos(channelId: string): Promise<VideoData[]
       throw new Error(`Channel fetch failed: ${await channelResponse.text()}`);
     }
 
-    const channelData: YouTubeResponse = await channelResponse.json();
+    const channelData = await channelResponse.json();
     const uploadsPlaylistId = channelData.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
     
     if (!uploadsPlaylistId) {
@@ -37,9 +37,9 @@ export async function fetchYouTubeVideos(channelId: string): Promise<VideoData[]
       throw new Error(`Videos fetch failed: ${await videosResponse.text()}`);
     }
 
-    const videosData: YouTubeResponse = await videosResponse.json();
+    const videosData = await videosResponse.json();
     
-    return videosData.items?.map(item => ({
+    return videosData.items?.map((item: any) => ({
       id: item.snippet?.resourceId?.videoId || '',
       title: item.snippet?.title || '',
       description: item.snippet?.description || '',
@@ -48,7 +48,7 @@ export async function fetchYouTubeVideos(channelId: string): Promise<VideoData[]
                 item.snippet?.thumbnails?.high?.url || '',
       publishedAt: item.snippet?.publishedAt || '',
       statistics: item.statistics
-    })).filter(video => video.id && video.title) || [];
+    })).filter((video: VideoData) => video.id && video.title) || [];
 
   } catch (error) {
     if (error.message === 'quotaExceeded') {
