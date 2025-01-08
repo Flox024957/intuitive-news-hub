@@ -32,9 +32,11 @@ export function useYouTubeVideos(username: string) {
         return [];
       } catch (error: any) {
         // Check for quota exceeded error
-        if (error.message?.includes('quotaExceeded')) {
+        if (error.message?.includes('quotaExceeded') || error.status === 429) {
           console.warn('YouTube API quota exceeded, using cached data only');
-          toast.warning("Limite d'API YouTube atteinte, utilisation des données en cache");
+          toast.warning("Limite d'API YouTube atteinte, utilisation des données en cache", {
+            duration: 5000,
+          });
           return []; // Return empty array to fallback to database cache
         }
         
@@ -47,7 +49,7 @@ export function useYouTubeVideos(username: string) {
     refetchOnWindowFocus: false,
     retry: (failureCount, error: any) => {
       // Don't retry if quota is exceeded
-      if (error.message?.includes('quotaExceeded')) {
+      if (error.message?.includes('quotaExceeded') || error.status === 429) {
         return false;
       }
       return failureCount < 2;

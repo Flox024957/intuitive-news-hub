@@ -87,6 +87,15 @@ export async function addNewYouTubeChannel(channelId: string) {
     });
 
     if (error) {
+      // Check for quota exceeded error
+      if (error.message?.includes('quotaExceeded') || error.status === 429) {
+        console.warn('YouTube API quota exceeded');
+        toast.warning("Limite d'API YouTube atteinte, réessayez plus tard", {
+          duration: 5000,
+        });
+        return false;
+      }
+
       console.error('Error analyzing channel:', error);
       toast.error("Erreur lors de l'analyse de la chaîne YouTube");
       return false;
@@ -104,7 +113,16 @@ export async function addNewYouTubeChannel(channelId: string) {
 
     toast.success("Chaîne YouTube ajoutée avec succès !");
     return true;
-  } catch (error) {
+  } catch (error: any) {
+    // Check for quota exceeded error
+    if (error.message?.includes('quotaExceeded') || error.status === 429) {
+      console.warn('YouTube API quota exceeded');
+      toast.warning("Limite d'API YouTube atteinte, réessayez plus tard", {
+        duration: 5000,
+      });
+      return false;
+    }
+
     console.error('Error:', error);
     toast.error("Erreur lors de l'ajout de la chaîne");
     return false;
