@@ -20,10 +20,11 @@ export function ContentGenerationTest() {
     try {
       setIsLoading(true);
       setError(null);
+      setResult(null); // Reset result before new test
       
       console.log("Starting HuggingFace API test...");
       
-      const { data, error } = await supabase.functions.invoke('enhanced-content-generation', {
+      const { data, error: apiError } = await supabase.functions.invoke('enhanced-content-generation', {
         body: {
           videoId: 'test',
           transcript: 'Ceci est un test simple de l\'API HuggingFace. Nous voulons vérifier si l\'API fonctionne correctement et peut générer du contenu cohérent.',
@@ -31,9 +32,9 @@ export function ContentGenerationTest() {
         }
       });
 
-      if (error) {
-        console.error('Error response from Edge Function:', error);
-        throw new Error(`Erreur Edge Function: ${error.message}`);
+      if (apiError) {
+        console.error('Error response from Edge Function:', apiError);
+        throw new Error(`Erreur Edge Function: ${apiError.message}`);
       }
 
       if (!data) {
@@ -54,10 +55,10 @@ export function ContentGenerationTest() {
     }
   };
 
-  // Lancer le test automatiquement au chargement du composant
+  // Exécuter le test une seule fois au montage du composant
   useEffect(() => {
     testHuggingFaceAPI();
-  }, []); // Le tableau vide signifie que l'effet ne s'exécute qu'une fois au montage
+  }, []); // Tableau de dépendances vide pour n'exécuter qu'au montage
 
   return (
     <Card className="p-6 space-y-6">
