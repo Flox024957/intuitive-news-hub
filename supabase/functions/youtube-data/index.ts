@@ -6,7 +6,7 @@ const YOUTUBE_API_KEY = Deno.env.get('YOUTUBE_API_KEY')
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
@@ -42,15 +42,29 @@ serve(async (req) => {
       `https://youtube.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(searchQuery)}&key=${YOUTUBE_API_KEY}`
     )
 
+    const channelData = await channelResponse.json()
+    
+    // Check for quota exceeded error
+    if (channelData.error?.errors?.some((e: any) => e.reason === 'quotaExceeded')) {
+      console.error('YouTube API quota exceeded');
+      return new Response(
+        JSON.stringify({ 
+          error: 'YouTube API quota exceeded',
+          details: channelData.error 
+        }),
+        { 
+          status: 429, // Too Many Requests
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
     if (!channelResponse.ok) {
       const errorText = await channelResponse.text()
       console.error('Error fetching channel:', errorText)
       throw new Error(`Failed to fetch channel data: ${errorText}`)
     }
 
-    const channelData = await channelResponse.json()
-    console.log('Channel search results:', channelData)
-    
     const channelId = channelData.items?.[0]?.id?.channelId
     if (!channelId) {
       console.error('No channel found for:', username)
@@ -174,11 +188,8 @@ serve(async (req) => {
         details: error.stack 
       }),
       {
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json'
-        },
-        status: 500
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: error.message?.includes('quota') ? 429 : 500
       }
     )
   }

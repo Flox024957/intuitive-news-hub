@@ -12,26 +12,32 @@ export function useYouTubeVideos(username: string) {
         const videos = await fetchYouTubeData(username);
         console.log('YouTube videos fetched:', videos.length);
 
-        const savedVideos = await Promise.all(
-          videos.map(async (video) => {
-            try {
-              const savedVideoId = await saveVideoToDatabase(video);
-              console.log('Video processed successfully:', savedVideoId);
-              return video;
-            } catch (error) {
-              console.error('Error processing video:', video.id, error);
-              // On continue avec la vidéo même si elle n'a pas pu être sauvegardée
-              return video;
-            }
-          })
-        );
-
-        if (savedVideos.length === 0) {
-          toast.warning("Aucune vidéo trouvée pour cette chaîne");
+        // If we got videos, try to save them
+        if (videos && videos.length > 0) {
+          const savedVideos = await Promise.all(
+            videos.map(async (video) => {
+              try {
+                const savedVideoId = await saveVideoToDatabase(video);
+                console.log('Video processed successfully:', savedVideoId);
+                return video;
+              } catch (error) {
+                console.error('Error processing video:', video.id, error);
+                return video;
+              }
+            })
+          );
+          return savedVideos;
         }
-
-        return savedVideos;
-      } catch (error) {
+        
+        return [];
+      } catch (error: any) {
+        // Check for quota exceeded error
+        if (error.message?.includes('quotaExceeded')) {
+          console.warn('YouTube API quota exceeded, using cached data only');
+          toast.warning("Limite d'API YouTube atteinte, utilisation des données en cache");
+          return []; // Return empty array to fallback to database cache
+        }
+        
         console.error('Error in useYouTubeVideos:', error);
         toast.error("Erreur lors de la récupération des vidéos YouTube");
         return [];
@@ -39,6 +45,12 @@ export function useYouTubeVideos(username: string) {
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
-    retry: 1
+    retry: (failureCount, error: any) => {
+      // Don't retry if quota is exceeded
+      if (error.message?.includes('quotaExceeded')) {
+        return false;
+      }
+      return failureCount < 2;
+    }
   });
 }
