@@ -2,42 +2,78 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchYouTubeData } from "@/utils/youtubeDataUtils";
 import { saveVideoToDatabase } from "@/utils/videoPersistenceUtils";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useYouTubeVideos(username: string) {
   return useQuery({
     queryKey: ['youtube-videos', username],
     queryFn: async () => {
       try {
-        console.log('Fetching videos for channel:', username);
-        const videos = await fetchYouTubeData(username);
-        console.log('YouTube videos fetched:', videos.length);
+        // First, try to get cached videos from the database
+        const { data: cachedVideos } = await supabase
+          .from('videos')
+          .select(`
+            *,
+            podcaster:podcasters(*),
+            stats:video_stats(*)
+          `)
+          .order('published_date', { ascending: false });
 
-        // If we got videos, try to save them
+        console.log('Cached videos found:', cachedVideos?.length || 0);
+
+        // If we have cached videos, return them immediately
+        if (cachedVideos?.length) {
+          // Try to fetch fresh data in the background
+          fetchYouTubeData(username).catch((error) => {
+            if (error.message?.includes('quotaExceeded') || error.status === 429) {
+              console.log('Using cached data due to quota limits');
+            } else {
+              console.error('Background fetch error:', error);
+            }
+          });
+
+          return cachedVideos;
+        }
+
+        // If no cached data, try to fetch fresh data
+        console.log('Fetching fresh YouTube data for:', username);
+        const videos = await fetchYouTubeData(username);
+
         if (videos && videos.length > 0) {
-          const savedVideos = await Promise.all(
+          // Save to database in the background
+          Promise.all(
             videos.map(async (video) => {
               try {
-                const savedVideoId = await saveVideoToDatabase(video);
-                console.log('Video processed successfully:', savedVideoId);
-                return video;
+                await saveVideoToDatabase(video);
               } catch (error) {
-                console.error('Error processing video:', video.id, error);
-                return video;
+                console.error('Error saving video:', video.id, error);
               }
             })
-          );
-          return savedVideos;
+          ).catch(console.error);
+
+          return videos;
         }
-        
+
         return [];
       } catch (error: any) {
-        // Check for quota exceeded error
+        // Handle quota exceeded error gracefully
         if (error.message?.includes('quotaExceeded') || error.status === 429) {
           console.warn('YouTube API quota exceeded, using cached data only');
           toast.warning("Limite d'API YouTube atteinte, utilisation des données en cache", {
             duration: 5000,
           });
-          return []; // Return empty array to fallback to database cache
+          
+          // Return cached data if available
+          const { data: cachedVideos } = await supabase
+            .from('videos')
+            .select(`
+              *,
+              podcaster:podcasters(*),
+              stats:video_stats(*)
+            `)
+            .order('published_date', { ascending: false });
+
+          return cachedVideos || [];
         }
         
         console.error('Error in useYouTubeVideos:', error);

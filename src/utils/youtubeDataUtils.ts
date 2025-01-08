@@ -14,7 +14,8 @@ export async function fetchYouTubeData(username: string): Promise<YouTubeVideo[]
 
     if (youtubeError) {
       // Check if the error is due to quota
-      if (youtubeError.message?.includes('quotaExceeded')) {
+      if (youtubeError.message?.includes('quotaExceeded') || youtubeError.status === 429) {
+        console.warn('YouTube API quota exceeded');
         throw new Error('quotaExceeded');
       }
       console.error('Error fetching YouTube data:', youtubeError);
@@ -29,7 +30,7 @@ export async function fetchYouTubeData(username: string): Promise<YouTubeVideo[]
     return youtubeData.videos;
   } catch (error: any) {
     // Propagate quota error
-    if (error.message === 'quotaExceeded') {
+    if (error.message === 'quotaExceeded' || error.status === 429) {
       throw error;
     }
     console.error('Error in fetchYouTubeData:', error);
