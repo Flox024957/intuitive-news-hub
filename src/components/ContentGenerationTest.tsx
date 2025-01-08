@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -55,9 +55,9 @@ export function ContentGenerationTest() {
   };
 
   // Lancer le test automatiquement au chargement du composant
-  useState(() => {
+  useEffect(() => {
     testHuggingFaceAPI();
-  });
+  }, []); // Le tableau vide signifie que l'effet ne s'exécute qu'une fois au montage
 
   return (
     <Card className="p-6 space-y-6">
