@@ -3,8 +3,8 @@ import { toast } from "sonner";
 
 export const useVideoStats = (videoId: string) => {
   const updateStats = async (
-    type: 'like' | 'share',
-    currentStats: { like_count?: number; share_count?: number } | null
+    type: 'like' | 'share' | 'view',
+    currentStats: { like_count?: number; share_count?: number; view_count?: number } | null
   ) => {
     try {
       if (!currentStats) {
@@ -15,19 +15,23 @@ export const useVideoStats = (videoId: string) => {
             video_id: videoId,
             like_count: type === 'like' ? 1 : 0,
             share_count: type === 'share' ? 1 : 0,
-            view_count: 0
+            view_count: type === 'view' ? 1 : 0
           });
 
         if (insertError) throw insertError;
       } else {
         // Update existing stats
+        const updateData = {
+          [type === 'like' ? 'like_count' : type === 'share' ? 'share_count' : 'view_count']: 
+            ((type === 'like' ? currentStats.like_count : 
+              type === 'share' ? currentStats.share_count : 
+              currentStats.view_count) || 0) + 1,
+          updated_at: new Date().toISOString()
+        };
+
         const { error: updateError } = await supabase
           .from('video_stats')
-          .update({
-            [type === 'like' ? 'like_count' : 'share_count']: 
-              ((type === 'like' ? currentStats.like_count : currentStats.share_count) || 0) + 1,
-            updated_at: new Date().toISOString()
-          })
+          .update(updateData)
           .eq('video_id', videoId);
 
         if (updateError) throw updateError;
