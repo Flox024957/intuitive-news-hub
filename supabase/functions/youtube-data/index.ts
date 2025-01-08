@@ -17,6 +17,7 @@ serve(async (req) => {
     console.log('Processing request for YouTube channel:', username);
 
     if (!username) {
+      console.error('Username is required but was not provided');
       return new Response(
         JSON.stringify({ error: 'Username is required' }),
         { 
@@ -43,6 +44,8 @@ serve(async (req) => {
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     } catch (error) {
+      console.error('Error fetching fresh videos:', error);
+      
       if (error.message === 'quotaExceeded' || error.status === 429) {
         console.log('YouTube quota exceeded, using cached data');
         if (cachedVideos.length > 0) {

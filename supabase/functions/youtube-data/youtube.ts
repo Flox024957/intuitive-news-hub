@@ -4,6 +4,8 @@ const YOUTUBE_API_KEY = Deno.env.get('YOUTUBE_API_KEY')!;
 
 export async function fetchYouTubeVideos(channelId: string): Promise<VideoData[]> {
   try {
+    console.log('Fetching YouTube data for channel:', channelId);
+    
     // Get channel details
     const channelResponse = await fetch(
       `https://youtube.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${YOUTUBE_API_KEY}`
@@ -11,18 +13,23 @@ export async function fetchYouTubeVideos(channelId: string): Promise<VideoData[]
     
     if (!channelResponse.ok) {
       const error = await channelResponse.json();
+      console.error('Channel fetch error:', error);
+      
       if (error.error?.errors?.some((e: any) => e.reason === 'quotaExceeded')) {
         throw new Error('quotaExceeded');
       }
-      throw new Error(`Channel fetch failed: ${await channelResponse.text()}`);
+      throw new Error(`Channel fetch failed: ${JSON.stringify(error)}`);
     }
 
     const channelData = await channelResponse.json();
     const uploadsPlaylistId = channelData.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
     
     if (!uploadsPlaylistId) {
+      console.error('No uploads playlist found for channel:', channelId);
       throw new Error('No uploads playlist found');
     }
+
+    console.log('Found uploads playlist:', uploadsPlaylistId);
 
     // Get videos from playlist
     const videosResponse = await fetch(
@@ -31,15 +38,18 @@ export async function fetchYouTubeVideos(channelId: string): Promise<VideoData[]
 
     if (!videosResponse.ok) {
       const error = await videosResponse.json();
+      console.error('Videos fetch error:', error);
+      
       if (error.error?.errors?.some((e: any) => e.reason === 'quotaExceeded')) {
         throw new Error('quotaExceeded');
       }
-      throw new Error(`Videos fetch failed: ${await videosResponse.text()}`);
+      throw new Error(`Videos fetch failed: ${JSON.stringify(error)}`);
     }
 
     const videosData = await videosResponse.json();
+    console.log(`Fetched ${videosData.items?.length || 0} videos from YouTube`);
     
-    return videosData.items?.map((item: any) => ({
+    const videos = videosData.items?.map((item: any) => ({
       id: item.snippet?.resourceId?.videoId || '',
       title: item.snippet?.title || '',
       description: item.snippet?.description || '',
@@ -50,11 +60,14 @@ export async function fetchYouTubeVideos(channelId: string): Promise<VideoData[]
       statistics: item.statistics
     })).filter((video: VideoData) => video.id && video.title) || [];
 
+    console.log(`Processed ${videos.length} valid videos`);
+    return videos;
+
   } catch (error) {
+    console.error('Error in fetchYouTubeVideos:', error);
     if (error.message === 'quotaExceeded') {
       throw error;
     }
-    console.error('Error fetching YouTube data:', error);
-    throw new Error('Failed to fetch YouTube data');
+    throw new Error(`Failed to fetch YouTube data: ${error.message}`);
   }
 }

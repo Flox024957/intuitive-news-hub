@@ -5,7 +5,7 @@ export interface VideoData {
   thumbnail: string;
   publishedAt: string;
   statistics?: {
-    viewCount: string;
+    viewCount?: string;
     likeCount?: string;
   };
 }
