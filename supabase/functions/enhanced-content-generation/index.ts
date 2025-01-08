@@ -8,9 +8,8 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
@@ -26,7 +25,7 @@ serve(async (req) => {
       throw new Error('HUGGINGFACE_API_KEY is not set');
     }
 
-    // Generate summary
+    // Générer le résumé
     console.log('Generating enhanced summary...');
     const summaryPrompt = `En tant qu'expert en analyse de contenu, crée un résumé structuré et informatif de cette transcription en français.
     Concentre-toi sur les points clés, les arguments principaux et les conclusions.
@@ -63,10 +62,10 @@ serve(async (req) => {
 
     const summaryResult = await summaryResponse.json();
     console.log('Raw summary response:', summaryResult);
-    const summary = summaryResult.generated_text;
+    const summary = summaryResult[0].generated_text;
     console.log('Enhanced summary generated:', summary);
 
-    // Generate article
+    // Générer l'article
     console.log('Generating enhanced article...');
     const articlePrompt = `En tant qu'expert en rédaction journalistique, crée un article approfondi et structuré en français basé sur cette transcription.
     
@@ -105,10 +104,10 @@ serve(async (req) => {
 
     const articleResult = await articleResponse.json();
     console.log('Raw article response:', articleResult);
-    const article = articleResult.generated_text;
+    const article = articleResult[0].generated_text;
     console.log('Enhanced article generated:', article);
 
-    // Update database
+    // Mettre à jour la base de données
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
