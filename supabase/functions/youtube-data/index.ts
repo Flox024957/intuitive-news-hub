@@ -7,24 +7,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface YouTubeResponse {
-  items: Array<{
-    id: string;
-    snippet: {
-      title: string;
-      description: string;
-      publishedAt: string;
-      thumbnails: {
-        high: { url: string };
-      };
-    };
-    statistics?: {
-      viewCount: string;
-      likeCount: string;
-    };
-  }>;
-}
-
 serve(async (req) => {
   // Gérer les requêtes OPTIONS pour CORS
   if (req.method === 'OPTIONS') {
@@ -42,6 +24,7 @@ serve(async (req) => {
     // D'abord obtenir l'ID de la chaîne si on a un nom d'utilisateur
     let finalChannelId = channelId;
     if (!channelId && username) {
+      console.log('Fetching channel ID for username:', username);
       const channelResponse = await fetch(
         `https://youtube.googleapis.com/youtube/v3/channels?part=id&forUsername=${username}&key=${YOUTUBE_API_KEY}`
       );
@@ -53,14 +36,42 @@ serve(async (req) => {
       }
 
       const channelData = await channelResponse.json();
-      finalChannelId = channelData.items?.[0]?.id;
+      console.log('Channel data received:', channelData);
       
-      if (!finalChannelId) {
-        throw new Error('Channel not found');
+      if (!channelData.items?.length) {
+        // Essayer avec la recherche de chaîne si le forUsername ne fonctionne pas
+        console.log('Channel not found with forUsername, trying search...');
+        const searchResponse = await fetch(
+          `https://youtube.googleapis.com/youtube/v3/search?part=snippet&q=${username}&type=channel&key=${YOUTUBE_API_KEY}`
+        );
+
+        if (!searchResponse.ok) {
+          const error = await searchResponse.json();
+          console.error('Channel search error:', error);
+          throw new Error(`Failed to search channel: ${error.error?.message || 'Unknown error'}`);
+        }
+
+        const searchData = await searchResponse.json();
+        console.log('Search results:', searchData);
+
+        if (!searchData.items?.length) {
+          throw new Error('Channel not found');
+        }
+
+        finalChannelId = searchData.items[0].id.channelId;
+        console.log('Found channel ID from search:', finalChannelId);
+      } else {
+        finalChannelId = channelData.items[0].id;
+        console.log('Found channel ID from username:', finalChannelId);
       }
     }
 
+    if (!finalChannelId) {
+      throw new Error('Could not determine channel ID');
+    }
+
     // Obtenir les vidéos de la chaîne
+    console.log('Fetching videos for channel:', finalChannelId);
     const videosResponse = await fetch(
       `https://youtube.googleapis.com/youtube/v3/search?part=snippet&channelId=${finalChannelId}&maxResults=50&order=date&type=video&key=${YOUTUBE_API_KEY}`
     );
@@ -72,9 +83,24 @@ serve(async (req) => {
     }
 
     const videosData = await videosResponse.json();
+    console.log(`Found ${videosData.items?.length || 0} videos`);
+    
+    if (!videosData.items?.length) {
+      return new Response(
+        JSON.stringify({ videos: [] }),
+        { 
+          headers: { 
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          } 
+        }
+      );
+    }
     
     // Obtenir les statistiques pour chaque vidéo
     const videoIds = videosData.items.map((item: any) => item.id.videoId).join(',');
+    console.log('Fetching stats for videos:', videoIds);
+    
     const statsResponse = await fetch(
       `https://youtube.googleapis.com/youtube/v3/videos?part=statistics&id=${videoIds}&key=${YOUTUBE_API_KEY}`
     );
@@ -86,6 +112,7 @@ serve(async (req) => {
     }
 
     const statsData = await statsResponse.json();
+    console.log('Stats received for', statsData.items?.length || 0, 'videos');
 
     // Combiner les données
     const videos = videosData.items.map((item: any) => {
@@ -120,7 +147,7 @@ serve(async (req) => {
         error: error instanceof Error ? error.message : 'An unexpected error occurred'
       }),
       { 
-        status: 500,
+        status: error instanceof Error && error.message === 'Channel not found' ? 404 : 500,
         headers: {
           ...corsHeaders,
           'Content-Type': 'application/json'
