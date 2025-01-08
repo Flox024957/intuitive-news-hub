@@ -27,6 +27,7 @@ export interface YouTubeVideo {
   description: string;
   thumbnail: string;
   publishedAt: string;
+  categories?: VideoCategory[];
   statistics?: {
     viewCount: string;
     likeCount?: string;
@@ -34,5 +35,4 @@ export interface YouTubeVideo {
   };
 }
 
-// Helper type for normalized videos
 export type NormalizedVideo = Video | YouTubeVideo;

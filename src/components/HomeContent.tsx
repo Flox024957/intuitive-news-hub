@@ -29,7 +29,7 @@ export function HomeContent({
   } = useVideoState();
 
   const { videos: youtubeVideos, isLoading: isLoadingYoutube } = useYouTubeChannelsVideos();
-  const allVideos = useNormalizedVideos(videos, youtubeVideos as NormalizedVideo[]);
+  const allVideos = useNormalizedVideos(videos, youtubeVideos);
 
   return (
     <div className="min-h-screen pb-16">
