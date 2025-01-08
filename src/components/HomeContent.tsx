@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { type Video } from "@/types/video";
+import { type Video, type NormalizedVideo } from "@/types/video";
 import { HomeTabs } from "@/components/HomeTabs";
 import { VideosContent } from "@/components/VideosContent";
 import { TrendingContent } from "@/components/TrendingContent";
@@ -29,7 +29,7 @@ export function HomeContent({
   } = useVideoState();
 
   const { videos: youtubeVideos, isLoading: isLoadingYoutube } = useYouTubeChannelsVideos();
-  const allVideos = useNormalizedVideos(videos, youtubeVideos);
+  const allVideos = useNormalizedVideos(videos, youtubeVideos as NormalizedVideo[]);
 
   return (
     <div className="min-h-screen pb-16">

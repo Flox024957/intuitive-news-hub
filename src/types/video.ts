@@ -33,3 +33,6 @@ export interface YouTubeVideo {
     commentCount?: string;
   };
 }
+
+// Helper type for normalized videos
+export type NormalizedVideo = Video | YouTubeVideo;

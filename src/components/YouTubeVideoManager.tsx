@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useYouTubeVideos } from "@/hooks/useYouTubeVideos";
+import { type Video, type YouTubeVideo, type NormalizedVideo } from "@/types/video";
 
 type YouTubeChannel = {
   id: string;
@@ -14,11 +15,10 @@ const YOUTUBE_CHANNELS: YouTubeChannel[] = [
   }
 ];
 
-async function saveVideoToDatabase(video: any) {
+async function saveVideoToDatabase(video: YouTubeVideo): Promise<string> {
   try {
     console.log('Saving video to database:', video.id);
     
-    // Check if video already exists using maybeSingle()
     const { data: existingVideo, error: checkError } = await supabase
       .from('videos')
       .select('id')
@@ -35,7 +35,6 @@ async function saveVideoToDatabase(video: any) {
       return existingVideo.id;
     }
 
-    // Insert new video
     const { data: newVideo, error: videoError } = await supabase
       .from('videos')
       .insert({
@@ -57,7 +56,6 @@ async function saveVideoToDatabase(video: any) {
 
     console.log('Video saved successfully:', newVideo.id);
 
-    // Initialize video stats
     const { error: statsError } = await supabase
       .from('video_stats')
       .insert({
@@ -87,7 +85,6 @@ export async function addNewYouTubeChannel(channelId: string) {
     });
 
     if (error) {
-      // Check for quota exceeded error
       if (error.message?.includes('quotaExceeded') || error.status === 429) {
         console.warn('YouTube API quota exceeded');
         toast.warning("Limite d'API YouTube atteinte, réessayez plus tard", {
@@ -101,7 +98,6 @@ export async function addNewYouTubeChannel(channelId: string) {
       return false;
     }
 
-    // Save each video to the database
     for (const video of data.videos) {
       try {
         await saveVideoToDatabase(video);
@@ -114,7 +110,6 @@ export async function addNewYouTubeChannel(channelId: string) {
     toast.success("Chaîne YouTube ajoutée avec succès !");
     return true;
   } catch (error: any) {
-    // Check for quota exceeded error
     if (error.message?.includes('quotaExceeded') || error.status === 429) {
       console.warn('YouTube API quota exceeded');
       toast.warning("Limite d'API YouTube atteinte, réessayez plus tard", {
@@ -133,13 +128,13 @@ export function useYouTubeChannelsVideos() {
   const channelsData = YOUTUBE_CHANNELS.map(channel => {
     const { data, isLoading } = useYouTubeVideos(channel.id);
     return {
-      videos: data || [],
+      videos: data as NormalizedVideo[],
       isLoading
     };
   });
 
-  const allVideos = channelsData.flatMap(channel => channel.videos);
+  const allVideos = channelsData.flatMap(channel => channel.videos || []);
   const isLoading = channelsData.some(channel => channel.isLoading);
 
-  return { videos: allVideos, isLoading };
+  return { videos: allVideos as NormalizedVideo[], isLoading };
 }
