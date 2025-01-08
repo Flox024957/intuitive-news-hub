@@ -46,7 +46,7 @@ serve(async (req) => {
     
     // Check for quota exceeded error
     if (channelData.error?.errors?.some((e: any) => e.reason === 'quotaExceeded')) {
-      console.error('YouTube API quota exceeded');
+      console.error('YouTube API quota exceeded:', channelData.error);
       return new Response(
         JSON.stringify({ 
           error: 'YouTube API quota exceeded',
@@ -90,7 +90,21 @@ serve(async (req) => {
     }
 
     const channelDetails = await channelDetailsResponse.json()
-    console.log('Channel details received:', channelDetails)
+    
+    // Check for quota exceeded error again
+    if (channelDetails.error?.errors?.some((e: any) => e.reason === 'quotaExceeded')) {
+      console.error('YouTube API quota exceeded:', channelDetails.error);
+      return new Response(
+        JSON.stringify({ 
+          error: 'YouTube API quota exceeded',
+          details: channelDetails.error 
+        }),
+        { 
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
     
     const uploadsPlaylistId = channelDetails.items?.[0]?.contentDetails?.relatedPlaylists?.uploads
     const channelTitle = channelDetails.items?.[0]?.snippet?.title
@@ -119,6 +133,22 @@ serve(async (req) => {
     }
 
     const videosData = await videosResponse.json()
+    
+    // Check for quota exceeded error again
+    if (videosData.error?.errors?.some((e: any) => e.reason === 'quotaExceeded')) {
+      console.error('YouTube API quota exceeded:', videosData.error);
+      return new Response(
+        JSON.stringify({ 
+          error: 'YouTube API quota exceeded',
+          details: videosData.error 
+        }),
+        { 
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
     console.log(`Found ${videosData.items?.length || 0} videos`)
 
     if (!videosData.items?.length) {
@@ -145,6 +175,22 @@ serve(async (req) => {
     }
 
     const statsData = await statsResponse.json()
+    
+    // Check for quota exceeded error one last time
+    if (statsData.error?.errors?.some((e: any) => e.reason === 'quotaExceeded')) {
+      console.error('YouTube API quota exceeded:', statsData.error);
+      return new Response(
+        JSON.stringify({ 
+          error: 'YouTube API quota exceeded',
+          details: statsData.error 
+        }),
+        { 
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
     console.log('Statistics received for', statsData.items?.length || 0, 'videos')
 
     // Combine video data
@@ -182,6 +228,21 @@ serve(async (req) => {
     )
   } catch (error) {
     console.error('Error processing request:', error)
+    
+    // Check if the error is related to quota
+    if (error.message?.includes('quota')) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'YouTube API quota exceeded',
+          details: error.message
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 429
+        }
+      )
+    }
+    
     return new Response(
       JSON.stringify({ 
         error: error.message,
