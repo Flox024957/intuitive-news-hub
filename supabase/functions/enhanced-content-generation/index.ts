@@ -20,9 +20,9 @@ serve(async (req) => {
       throw new Error('Transcript is required for content generation');
     }
 
-    const HF_API_KEY = Deno.env.get('HUGGINGFACE_API_KEY');
-    if (!HF_API_KEY) {
-      throw new Error('HUGGINGFACE_API_KEY is not set');
+    const DEEPSEEK_API_KEY = Deno.env.get('DEEPSEEK_API_KEY');
+    if (!DEEPSEEK_API_KEY) {
+      throw new Error('DEEPSEEK_API_KEY is not set');
     }
 
     // Générer le résumé
@@ -38,19 +38,20 @@ serve(async (req) => {
     - Mentionner les conclusions importantes
     - Utiliser un langage clair et précis`;
     
-    const summaryResponse = await fetch("https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1", {
+    const summaryResponse = await fetch("https://api.deepseek.com/v1/chat/completions", {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${HF_API_KEY}`,
+        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        inputs: summaryPrompt,
-        parameters: {
-          max_length: 250,
-          temperature: 0.7,
-          top_p: 0.9,
-        }
+        model: "deepseek-chat",
+        messages: [
+          { role: "system", content: "Tu es un expert en analyse de contenu vidéo." },
+          { role: "user", content: summaryPrompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 500
       })
     });
 
@@ -62,7 +63,7 @@ serve(async (req) => {
 
     const summaryResult = await summaryResponse.json();
     console.log('Raw summary response:', summaryResult);
-    const summary = summaryResult[0].generated_text;
+    const summary = summaryResult.choices[0].message.content;
     console.log('Enhanced summary generated:', summary);
 
     // Générer l'article
@@ -80,19 +81,20 @@ serve(async (req) => {
     5. Conclusion synthétique
     6. Style journalistique professionnel`;
 
-    const articleResponse = await fetch("https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1", {
+    const articleResponse = await fetch("https://api.deepseek.com/v1/chat/completions", {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${HF_API_KEY}`,
+        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        inputs: articlePrompt,
-        parameters: {
-          max_length: 1000,
-          temperature: 0.8,
-          top_p: 0.9,
-        }
+        model: "deepseek-chat",
+        messages: [
+          { role: "system", content: "Tu es un journaliste professionnel expert en rédaction d'articles." },
+          { role: "user", content: articlePrompt }
+        ],
+        temperature: 0.8,
+        max_tokens: 2000
       })
     });
 
@@ -104,8 +106,49 @@ serve(async (req) => {
 
     const articleResult = await articleResponse.json();
     console.log('Raw article response:', articleResult);
-    const article = articleResult[0].generated_text;
+    const article = articleResult.choices[0].message.content;
     console.log('Enhanced article generated:', article);
+
+    // Générer un titre personnalisé
+    console.log('Generating custom title...');
+    const titlePrompt = `En tant qu'expert en rédaction de titres accrocheurs, crée un titre personnalisé pour cette vidéo basé sur son contenu.
+    
+    Contenu:
+    ${summary}
+    
+    Format souhaité:
+    - Titre accrocheur et informatif
+    - Maximum 100 caractères
+    - En français
+    - Inclure les mots-clés importants`;
+
+    const titleResponse = await fetch("https://api.deepseek.com/v1/chat/completions", {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: "deepseek-chat",
+        messages: [
+          { role: "system", content: "Tu es un expert en rédaction de titres accrocheurs." },
+          { role: "user", content: titlePrompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 100
+      })
+    });
+
+    if (!titleResponse.ok) {
+      const errorText = await titleResponse.text();
+      console.error('Custom title generation error:', errorText);
+      throw new Error(`Error generating custom title: ${errorText}`);
+    }
+
+    const titleResult = await titleResponse.json();
+    console.log('Raw title response:', titleResult);
+    const customTitle = titleResult.choices[0].message.content;
+    console.log('Custom title generated:', customTitle);
 
     // Mettre à jour la base de données
     const supabaseClient = createClient(
@@ -117,7 +160,9 @@ serve(async (req) => {
       .from('videos')
       .update({
         summary,
-        article_content: article
+        article_content: article,
+        custom_title: customTitle,
+        full_transcript: transcript
       })
       .eq('id', videoId);
 
@@ -132,7 +177,8 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         summary,
-        article
+        article,
+        customTitle
       }),
       { 
         headers: { 
