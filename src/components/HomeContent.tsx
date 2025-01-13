@@ -4,7 +4,7 @@ import { HomeTabs } from "@/components/HomeTabs";
 import { VideosContent } from "@/components/VideosContent";
 import { TrendingContent } from "@/components/TrendingContent";
 import { PodcastersContent } from "@/components/PodcastersContent";
-import { useYouTubeChannelsVideos } from "@/components/YouTubeVideoManager";
+import { useYouTubeChannelsVideos, BatchProcessButton } from "@/components/YouTubeVideoManager";
 import { useNormalizedVideos } from "@/hooks/useNormalizedVideos";
 import { useVideoState } from "@/hooks/useVideoState";
 
@@ -34,6 +34,9 @@ export function HomeContent({
   return (
     <div className="min-h-screen pb-16">
       <div className="container max-w-6xl mx-auto space-y-16">
+        <div className="px-6">
+          <BatchProcessButton />
+        </div>
         <HomeTabs>
           {{
             videos: (

@@ -2,6 +2,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useYouTubeVideos } from "@/hooks/useYouTubeVideos";
 import { type Video, type YouTubeVideo, type NormalizedVideo } from "@/types/video";
+import { Button } from "./ui/button";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
 
 type YouTubeChannel = {
   id: string;
@@ -137,4 +140,49 @@ export function useYouTubeChannelsVideos() {
   const isLoading = channelsData.some(channel => channel.isLoading);
 
   return { videos: allVideos as NormalizedVideo[], isLoading };
+}
+
+export function BatchProcessButton() {
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleBatchProcess = async () => {
+    try {
+      setIsProcessing(true);
+      toast.info("Démarrage du traitement des vidéos...");
+
+      const { data, error } = await supabase.functions.invoke('batch-process-videos');
+
+      if (error) {
+        console.error('Error processing videos:', error);
+        toast.error("Erreur lors du traitement des vidéos");
+        return;
+      }
+
+      console.log('Batch processing results:', data);
+      toast.success(`${data.processed} vidéos ont été traitées avec succès !`);
+
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error("Une erreur est survenue");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <Button 
+      onClick={handleBatchProcess}
+      disabled={isProcessing}
+      className="w-full"
+    >
+      {isProcessing ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Traitement en cours...
+        </>
+      ) : (
+        "Traiter toutes les vidéos avec l'IA"
+      )}
+    </Button>
+  );
 }
